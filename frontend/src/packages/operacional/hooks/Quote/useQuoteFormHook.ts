@@ -27,7 +27,7 @@ export function useQuoteCreateFormHook(patientId?: string) {
       professionalId: '',
       validUntil: '',
       notes: '',
-      discountCents: 0,
+      discountReais: '0',
       items: [emptyItem],
     },
   });
@@ -39,7 +39,7 @@ export function useQuoteUpdateFormHook() {
     defaultValues: {
       validUntil: '',
       notes: '',
-      discountCents: 0,
+      discountReais: '0',
     },
   });
 }

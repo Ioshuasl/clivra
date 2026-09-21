@@ -1,7 +1,8 @@
 'use client';
 
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { FilePlusIcon } from 'lucide-react';
 import type { QuoteStatus } from '@/packages/operacional/enum/Quote/QuoteStatusEnum';
 import { QuoteFilter } from '@/packages/operacional/components/Quote/QuoteFilter';
 import { QuoteTable } from '@/packages/operacional/components/Quote/QuoteTable';
@@ -10,10 +11,10 @@ import { usePatientListHook } from '@/packages/operacional/hooks/Patient/usePati
 import { useQuoteDuplicateHook } from '@/packages/operacional/hooks/Quote/useQuoteDuplicateHook';
 import { useQuoteListHook } from '@/packages/operacional/hooks/Quote/useQuoteListHook';
 import { useQuotePdfHook } from '@/packages/operacional/hooks/Quote/useQuotePdfHook';
+import type { QuoteSummary } from '@/packages/operacional/types/Quote/QuoteTypes';
 import { Can } from '@/shared/auth/Can';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { ClivraPageHeader, ClivraSurface } from '@/shared/layout/ClivraPage';
 import { Button } from '@/shared/ui/button';
-import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 
 const QuoteFormDialog = dynamic(
   () =>
@@ -44,13 +45,15 @@ export function QuoteIndex() {
   const deferredSearch = useDeferredValue(patientSearch);
   const [status, setStatus] = useState<QuoteStatus | ''>('');
   const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [selectedPatientLabel, setSelectedPatientLabel] = useState('');
   const [formQuoteId, setFormQuoteId] = useState<string | undefined>();
   const [formPatientId, setFormPatientId] = useState<string | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sendQuoteId, setSendQuoteId] = useState<string | null>(null);
   const [decideQuoteId, setDecideQuoteId] = useState<string | null>(null);
+  const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
 
-  const patientsQuery = usePatientListHook(deferredSearch);
+  const patientsQuery = usePatientListHook(deferredSearch, { active: 'true', limit: 30 });
   const namesQuery = usePatientListHook('');
   const listQuery = useQuoteListHook({
     patientId: selectedPatientId || undefined,
@@ -59,94 +62,134 @@ export function QuoteIndex() {
   const duplicate = useQuoteDuplicateHook();
   const pdf = useQuotePdfHook();
 
-  const patientNames: Record<string, string> = {};
-  for (const patient of [...(namesQuery.data?.items ?? []), ...(patientsQuery.data?.items ?? [])]) {
-    patientNames[patient.id] = patient.socialName || patient.name;
-  }
+  const patientNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const patient of [
+      ...(namesQuery.data?.items ?? []),
+      ...(patientsQuery.data?.items ?? []),
+    ]) {
+      map[patient.id] = patient.socialName || patient.name;
+    }
+    if (selectedPatientId && selectedPatientLabel) {
+      map[selectedPatientId] = selectedPatientLabel.replace(/\s*\(#\d+\)$/, '');
+    }
+    return map;
+  }, [
+    namesQuery.data?.items,
+    patientsQuery.data?.items,
+    selectedPatientId,
+    selectedPatientLabel,
+  ]);
 
-  if (listQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Carregando orçamentos…</p>;
-  }
-
-  if (listQuery.isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>{operacionalErrorMessage(listQuery.error)}</AlertDescription>
-      </Alert>
-    );
-  }
+  const openQuote = (quote: QuoteSummary) => {
+    setFormQuoteId(quote.id);
+    setFormPatientId(quote.patientId);
+    setFormOpen(true);
+  };
 
   return (
-    <div className="grid gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Orçamentos</h1>
-        <Can permission="quotes.write">
-          <Button
-            type="button"
-            onClick={() => {
-              setFormQuoteId(undefined);
-              setFormPatientId(selectedPatientId || undefined);
-              setFormOpen(true);
+    <div className="grid min-w-0 gap-4">
+      <ClivraPageHeader
+        title="Orçamentos"
+        description="Crie, envie e acompanhe propostas por paciente."
+        action={
+          <Can permission="quotes.write">
+            <Button
+              type="button"
+              className="cursor-pointer"
+              onClick={() => {
+                setFormQuoteId(undefined);
+                setFormPatientId(selectedPatientId || undefined);
+                setFormOpen(true);
+              }}
+            >
+              <FilePlusIcon className="size-4" strokeWidth={1.7} />
+              Novo orçamento
+            </Button>
+          </Can>
+        }
+      />
+
+      <ClivraSurface
+        toolbar={
+          <QuoteFilter
+            patientId={selectedPatientId}
+            onPatientIdChange={(id) => {
+              setSelectedPatientId(id);
+              if (!id) {
+                setSelectedPatientLabel('');
+                return;
+              }
+              const match = patientsQuery.data?.items.find((item) => item.id === id);
+              setSelectedPatientLabel(
+                match
+                  ? `${match.socialName || match.name} (#${match.code})`
+                  : patientNames[id] || '',
+              );
             }}
-          >
-            Novo orçamento
-          </Button>
-        </Can>
-      </div>
-
-      <QuoteFilter
-        patientSearch={patientSearch}
-        onPatientSearchChange={setPatientSearch}
-        status={status}
-        onStatusChange={setStatus}
-      />
-
-      {deferredSearch && (patientsQuery.data?.items.length ?? 0) > 0 ? (
-        <NativeSelect
-          aria-label="Paciente do filtro"
-          className="max-w-md"
-          value={selectedPatientId}
-          onChange={(event) => setSelectedPatientId(event.target.value)}
-        >
-          <NativeSelectOption value="">Todos os pacientes</NativeSelectOption>
-          {patientsQuery.data!.items.map((item) => (
-            <NativeSelectOption key={item.id} value={item.id}>
-              {item.socialName || item.name} (#{item.code})
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-      ) : null}
-
-      {duplicate.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{operacionalErrorMessage(duplicate.error)}</AlertDescription>
-        </Alert>
-      ) : null}
-      {pdf.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{operacionalErrorMessage(pdf.error)}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <QuoteTable
-        quotes={listQuery.data?.items ?? []}
-        patientNames={patientNames}
-        onEdit={(quote) => {
-          setFormQuoteId(quote.id);
-          setFormPatientId(quote.patientId);
-          setFormOpen(true);
-        }}
-        onSend={(quote) => setSendQuoteId(quote.id)}
-        onDecide={(quote) => setDecideQuoteId(quote.id)}
-        onDuplicate={(quote) => {
-          void duplicate.mutateAsync(quote.id);
-        }}
-        onPdf={(quote) => {
-          void pdf.mutateAsync(quote.id).then((result) => {
-            window.open(result.url, '_blank', 'noopener,noreferrer');
-          });
-        }}
-      />
+            onPatientSearchChange={setPatientSearch}
+            patients={patientsQuery.data?.items ?? []}
+            patientsLoading={patientsQuery.isFetching}
+            patientLabelById={(id) => {
+              if (id === selectedPatientId && selectedPatientLabel) return selectedPatientLabel;
+              const match = patientsQuery.data?.items.find((item) => item.id === id);
+              if (match) return `${match.socialName || match.name} (#${match.code})`;
+              return patientNames[id] ?? id;
+            }}
+            status={status}
+            onStatusChange={setStatus}
+          />
+        }
+      >
+        {listQuery.isError ? (
+          <div className="px-4 py-6">
+            <p className="text-sm text-destructive" role="alert">
+              {operacionalErrorMessage(listQuery.error)}
+            </p>
+            <Button
+              type="button"
+              variant="link"
+              className="mt-2 h-auto cursor-pointer px-0"
+              onClick={() => void listQuery.refetch()}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : (
+          <>
+            {duplicate.isError || pdf.isError ? (
+              <div className="border-b border-border/80 px-4 py-3">
+                <p className="text-sm text-destructive" role="alert">
+                  {operacionalErrorMessage(duplicate.error ?? pdf.error)}
+                </p>
+              </div>
+            ) : null}
+            <QuoteTable
+              quotes={listQuery.data?.items ?? []}
+              patientNames={patientNames}
+              loading={listQuery.isLoading}
+              onRowClick={openQuote}
+              onEdit={openQuote}
+              onSend={(quote) => setSendQuoteId(quote.id)}
+              onDecide={(quote) => setDecideQuoteId(quote.id)}
+              onDuplicate={(quote) => {
+                void duplicate.mutateAsync(quote.id);
+              }}
+              onPdf={(quote) => {
+                setPdfLoadingId(quote.id);
+                void pdf
+                  .mutateAsync(quote.id)
+                  .then((result) => {
+                    window.open(result.url, '_blank', 'noopener,noreferrer');
+                  })
+                  .finally(() => setPdfLoadingId(null));
+              }}
+              duplicatingId={duplicate.isPending ? duplicate.variables ?? null : null}
+              pdfLoadingId={pdfLoadingId}
+            />
+          </>
+        )}
+      </ClivraSurface>
 
       {formOpen ? (
         <QuoteFormDialog

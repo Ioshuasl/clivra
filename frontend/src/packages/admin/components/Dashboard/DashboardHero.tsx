@@ -3,26 +3,27 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ClipboardListIcon, XIcon } from 'lucide-react';
+import { ListChecksIcon, XIcon } from 'lucide-react';
 import { CLIVRA } from '@/shared/brand/ClivraBrand';
 import { cn } from '@/shared/helpers/utils';
 
 type DashboardHeroProps = {
   greetingLabel: string;
   firstName: string;
-  showProfileCard?: boolean;
-  profileHref?: string;
+  /** Card de primeiros passos — só quando a clínica ainda não concluiu o setup. */
+  showSetupCard?: boolean;
+  setupHref?: string;
 };
 
 /** Page header do dashboard — tipografia e card alinhados a `prototipos/dashboard-clivra.png`. */
 export function DashboardHero({
   greetingLabel,
   firstName,
-  showProfileCard = true,
-  profileHref = '/app/configuracoes/clinica',
+  showSetupCard = false,
+  setupHref = '/app/primeiros-passos',
 }: DashboardHeroProps) {
-  const [profileDismissed, setProfileDismissed] = useState(false);
-  const showCard = showProfileCard && !profileDismissed;
+  const [setupDismissed, setSetupDismissed] = useState(false);
+  const showCard = showSetupCard && !setupDismissed;
 
   return (
     <section
@@ -55,7 +56,7 @@ export function DashboardHero({
         >
           <button
             type="button"
-            onClick={() => setProfileDismissed(true)}
+            onClick={() => setSetupDismissed(true)}
             className="absolute top-2.5 right-2.5 z-20 inline-flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Fechar"
           >
@@ -63,22 +64,22 @@ export function DashboardHero({
           </button>
 
           <span className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <ClipboardListIcon className="size-4" strokeWidth={1.55} />
+            <ListChecksIcon className="size-4" strokeWidth={1.55} />
           </span>
 
           <div className="relative z-10 min-w-0 flex-1">
             <p className="text-[14px] font-semibold leading-tight text-foreground">
-              Complete seu perfil
+              Complete os primeiros passos
             </p>
             <p className="mt-1 max-w-[18rem] text-[12px] leading-snug text-muted-foreground">
-              Mantenha suas informações sempre atualizadas para uma melhor experiência no Clivra.
+              Configure a clínica, horários e profissionais para começar a atender com o Clivra.
             </p>
             <Link
-              href={profileHref}
+              href={setupHref}
               prefetch={false}
-              className="mt-3 inline-flex h-8 items-center rounded-md bg-primary px-3 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-secondary"
+              className="mt-3 inline-flex h-8 cursor-pointer items-center rounded-md bg-primary px-3 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-secondary"
             >
-              Ver perfil
+              Continuar
             </Link>
           </div>
 

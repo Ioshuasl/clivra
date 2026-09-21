@@ -29,8 +29,8 @@ export async function startOnboardingSuggestTour(
     stagePadding: 8,
     stageRadius: 12,
     allowClose: true,
-    nextBtnText: 'Abrir onboarding',
-    doneBtnText: 'Abrir onboarding',
+    nextBtnText: 'Abrir primeiros passos',
+    doneBtnText: 'Abrir primeiros passos',
     popoverClass: 'onboarding-suggest-popover',
     steps: [
       {
@@ -38,7 +38,7 @@ export async function startOnboardingSuggestTour(
         popover: {
           title: 'Configure sua clínica',
           description:
-            'Siga o wizard de onboarding para horários, profissionais e procedimentos. Você pode pular etapas depois dos mínimos.',
+            'Complete os primeiros passos: dados da clínica, horários e profissionais. Etapas opcionais você pode pular por agora.',
           side: 'bottom',
           align: 'start',
           onNextClick: () => {

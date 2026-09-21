@@ -16,6 +16,7 @@ import {
   settingsHref,
   type SettingsNavItem,
 } from '@/packages/admin/helpers/SettingsTabs';
+import { PRIMEIROS_PASSOS_PATH, ONBOARDING_LEGACY_PATH } from '@/packages/admin/enum/OnboardingStepEnum';
 
 export type AdminNavGroup = 'main' | 'settings';
 
@@ -33,6 +34,8 @@ export type AdminNavItem = {
   group: AdminNavGroup;
   permission?: string;
   children?: AdminNavChild[];
+  /** Hide from sidebar when onboarding/primeiros passos is completed. */
+  hideWhenOnboardingComplete?: boolean;
 };
 
 function toNavChild(item: SettingsNavItem): AdminNavChild {
@@ -46,6 +49,13 @@ function toNavChild(item: SettingsNavItem): AdminNavChild {
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: '/app', label: 'Início', icon: HomeIcon, group: 'main' },
+  {
+    href: PRIMEIROS_PASSOS_PATH,
+    label: 'Primeiros passos',
+    icon: ListChecksIcon,
+    group: 'main',
+    hideWhenOnboardingComplete: true,
+  },
   { href: '/app/pacientes', label: 'Pacientes', icon: ContactIcon, group: 'main' },
   { href: '/app/agenda', label: 'Agenda', icon: CalendarDaysIcon, group: 'main' },
   {
@@ -76,7 +86,6 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'main',
     permission: 'reports.read',
   },
-  { href: '/app/onboarding', label: 'Onboarding', icon: ListChecksIcon, group: 'main' },
   {
     href: SETTINGS_PATH,
     label: 'Configurações',
@@ -127,6 +136,25 @@ export function buildAdminBreadcrumbs(pathname: string): AdminBreadcrumb[] {
 
     if (item.href === '/app') continue;
     if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+      if (pathname.startsWith('/app/relatorios/') && pathname !== '/app/relatorios') {
+        const reportLabels: Record<string, string> = {
+          faltas: 'Faltas',
+          receita: 'Receita',
+          producao: 'Procedimentos',
+          overdue: 'Inadimplência',
+          'no-shows': 'Faltas',
+          revenue: 'Receita',
+          procedures: 'Procedimentos',
+          production: 'Produção',
+          'cash-flow': 'Fluxo de caixa',
+        };
+        const slug = pathname.replace('/app/relatorios/', '').split('/')[0] ?? '';
+        return [
+          { label: 'Início', href: '/app' },
+          { label: item.label, href: item.href },
+          { label: reportLabels[slug] ?? 'Detalhe' },
+        ];
+      }
       return [{ label: 'Início', href: '/app' }, { label: item.label }];
     }
   }
@@ -140,6 +168,14 @@ export function isAdminNavActive(pathname: string, href: string): boolean {
   }
   if (href === SETTINGS_PATH) {
     return pathname === SETTINGS_PATH || pathname.startsWith(`${SETTINGS_PATH}/`);
+  }
+  if (href === PRIMEIROS_PASSOS_PATH) {
+    return (
+      pathname === PRIMEIROS_PASSOS_PATH ||
+      pathname.startsWith(`${PRIMEIROS_PASSOS_PATH}/`) ||
+      pathname === ONBOARDING_LEGACY_PATH ||
+      pathname.startsWith(`${ONBOARDING_LEGACY_PATH}/`)
+    );
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }

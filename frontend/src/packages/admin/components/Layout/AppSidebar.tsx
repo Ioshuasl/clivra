@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDownIcon, PanelLeftIcon, XIcon, type LucideIcon } from 'lucide-react';
+import { useOnboardingGetHook } from '@/packages/admin/hooks/Onboarding/useOnboardingGetHook';
 import {
   ADMIN_NAV_ITEMS,
   isAdminNavActive,
@@ -216,6 +217,8 @@ function SidebarBody({
   const { me } = useAuth();
   const { setMobileOpen } = useClivraShell();
   const chairsHref = settingsHref(SETTINGS_SECTION.CADEIRAS);
+  const onboardingQuery = useOnboardingGetHook();
+  const onboardingCompleted = Boolean(onboardingQuery.data?.completed);
 
   return (
     <div className="flex h-full flex-col">
@@ -243,7 +246,8 @@ function SidebarBody({
           const items = ADMIN_NAV_ITEMS.filter(
             (item) =>
               item.group === group.id &&
-              (!item.permission || hasPermission(me, item.permission)),
+              (!item.permission || hasPermission(me, item.permission)) &&
+              !(item.hideWhenOnboardingComplete && onboardingCompleted),
           );
           if (items.length === 0) return null;
 

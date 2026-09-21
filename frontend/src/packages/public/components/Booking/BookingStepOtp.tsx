@@ -28,17 +28,25 @@ export function BookingStepOtp({
 
   return (
     <form
-      className="grid gap-4"
+      className="flex flex-1 flex-col gap-4 sm:gap-5"
       onSubmit={(event) => {
         void form.handleSubmit(onSave)(event);
       }}
     >
-      <p className="text-sm text-muted-foreground">
-        Enviamos um código de 6 dígitos por {channelLabel}. Ele expira em 5 minutos.
-      </p>
+      <div className="rounded-[12px] border border-border bg-muted/40 px-4 py-3.5">
+        <p className="text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
+          Enviamos um código de 6 dígitos por <span className="font-medium text-foreground">{channelLabel}</span>.
+          Ele expira em 5 minutos.
+        </p>
+      </div>
 
-      <Field data-invalid={Boolean(form.formState.errors.code)}>
-        <FieldLabel htmlFor="booking-otp">Código de verificação</FieldLabel>
+      <Field data-invalid={Boolean(form.formState.errors.code)} className="items-center">
+        <FieldLabel
+          htmlFor="booking-otp"
+          className="w-full text-center text-[13px] font-semibold sm:text-[14px]"
+        >
+          Código de verificação
+        </FieldLabel>
         <Controller
           control={form.control}
           name="code"
@@ -50,19 +58,38 @@ export function BookingStepOtp({
               onChange={field.onChange}
               aria-label="Código de verificação"
               autoComplete="one-time-code"
+              containerClassName="justify-center"
             >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+              <InputOTPGroup className="gap-1.5 rounded-none border-0 sm:gap-2">
+                <InputOTPSlot
+                  index={0}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] first:border-l sm:size-12"
+                />
+                <InputOTPSlot
+                  index={1}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] sm:size-12"
+                />
+                <InputOTPSlot
+                  index={2}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] sm:size-12"
+                />
+                <InputOTPSlot
+                  index={3}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] sm:size-12"
+                />
+                <InputOTPSlot
+                  index={4}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] sm:size-12"
+                />
+                <InputOTPSlot
+                  index={5}
+                  className="size-11 rounded-[10px] border border-input text-[18px] first:rounded-[10px] last:rounded-[10px] sm:size-12"
+                />
               </InputOTPGroup>
             </InputOTP>
           )}
         />
-        <FieldError>{form.formState.errors.code?.message}</FieldError>
+        <FieldError className="text-center">{form.formState.errors.code?.message}</FieldError>
       </Field>
 
       {errorMessage ? (
@@ -71,12 +98,25 @@ export function BookingStepOtp({
         </Alert>
       ) : null}
 
-      <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? 'Confirmando…' : 'Confirmar agendamento'}
-      </Button>
-      <Button type="button" variant="ghost" className="w-full" onClick={onBack} disabled={pending}>
-        Voltar
-      </Button>
+      <div className="mt-auto grid gap-2 pt-1 sm:pt-2">
+        <Button
+          type="submit"
+          size="lg"
+          className="h-11 w-full cursor-pointer rounded-[10px] text-[15px] font-semibold sm:h-12"
+          disabled={pending}
+        >
+          {pending ? 'Confirmando…' : 'Confirmar agendamento'}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-11 w-full cursor-pointer rounded-[10px] sm:h-12"
+          onClick={onBack}
+          disabled={pending}
+        >
+          Voltar
+        </Button>
+      </div>
     </form>
   );
 }

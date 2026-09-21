@@ -120,6 +120,10 @@ export function PatientQuotesPanel({
         <QuoteTable
           quotes={listQuery.data?.items ?? []}
           patientNames={{ [patientId]: patientName }}
+          onRowClick={(quote) => {
+            setFormQuoteId(quote.id);
+            setFormOpen(true);
+          }}
           onEdit={(quote) => {
             setFormQuoteId(quote.id);
             setFormOpen(true);
@@ -134,6 +138,7 @@ export function PatientQuotesPanel({
               window.open(result.url, '_blank', 'noopener,noreferrer');
             });
           }}
+          duplicatingId={duplicate.isPending ? duplicate.variables ?? null : null}
         />
       </CardContent>
 

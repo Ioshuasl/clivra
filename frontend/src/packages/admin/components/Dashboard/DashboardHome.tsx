@@ -31,6 +31,7 @@ import {
 import { DashboardMiniCalendar } from '@/packages/admin/components/Dashboard/DashboardMiniCalendar';
 import { DashboardQuickActions } from '@/packages/admin/components/Dashboard/DashboardQuickActions';
 import { DashboardUpcomingAppointments } from '@/packages/admin/components/Dashboard/DashboardUpcomingAppointments';
+import { PRIMEIROS_PASSOS_PATH } from '@/packages/admin/enum/OnboardingStepEnum';
 import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { formatCents } from '@/packages/admin/helpers/FormatCents';
 import { useDashboardAppointmentListHook } from '@/packages/admin/hooks/Dashboard/useDashboardAppointmentListHook';
@@ -113,10 +114,7 @@ export function DashboardHome() {
   const firstName = displayFirstName(user?.name, role);
   const greet = greetingLabel(today);
 
-  const showProfileCard = true;
-  const profileHref = onboarding.data && !onboarding.data.completed
-    ? '/app/onboarding'
-    : '/app/configuracoes/clinica';
+  const showSetupCard = Boolean(onboarding.data && !onboarding.data.completed);
 
   const dayItems = useMemo(() => {
     return [...(dayAppointments.data ?? [])].sort((a, b) =>
@@ -272,8 +270,8 @@ export function DashboardHome() {
       <DashboardHero
         greetingLabel={greet}
         firstName={firstName}
-        showProfileCard={showProfileCard}
-        profileHref={profileHref}
+        showSetupCard={showSetupCard}
+        setupHref={PRIMEIROS_PASSOS_PATH}
       />
 
       {dashboard.isError ? (
@@ -315,7 +313,7 @@ export function DashboardHome() {
             onSelectDay={(day) => setSelectedDay(startOfDay(day))}
             onMonthChange={(month) => setCalendarMonth(startOfMonth(month))}
           />
-          <DashboardQuickActions />
+          <DashboardQuickActions showPrimeirosPassos={showSetupCard} />
         </aside>
       </div>
 

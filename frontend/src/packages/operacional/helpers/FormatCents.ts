@@ -9,3 +9,9 @@ export function reaisInputToCents(value: string): number {
   if (!Number.isFinite(amount) || amount < 0) return 0;
   return Math.round(amount * 100);
 }
+
+/** Valor em reais para input (ex.: 12.5 → "12,50"). */
+export function centsToReaisInput(cents: number): string {
+  if (!Number.isFinite(cents) || cents <= 0) return '0';
+  return (cents / 100).toFixed(2).replace('.', ',');
+}

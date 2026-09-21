@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { PRIMEIROS_PASSOS_PATH } from '@/packages/admin/enum/OnboardingStepEnum';
 import { startOnboardingSuggestTour } from '@/packages/admin/helpers/StartOnboardingSuggestTour';
 import { hasOnboardingSuggest } from '@/shared/helpers/onboarding-suggest-flag';
 
@@ -22,7 +23,7 @@ export function useOnboardingSuggestTourHook({ ready }: UseOnboardingSuggestTour
     void (async () => {
       stop = await startOnboardingSuggestTour({
         onOpenWizard: () => {
-          router.push('/app/onboarding');
+          router.push(PRIMEIROS_PASSOS_PATH);
         },
       });
       if (cancelled) {

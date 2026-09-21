@@ -83,18 +83,24 @@ export function FinanceReportsIndex() {
 
   return (
     <div className="grid min-w-0 gap-4">
-      <div>
+      <div className="flex flex-wrap gap-4">
         <Link
           href="/app/financeiro"
           className={cn(buttonVariants({ variant: 'link' }), 'h-auto cursor-pointer px-0')}
         >
           ← Voltar ao painel
         </Link>
+        <Link
+          href="/app/relatorios"
+          className={cn(buttonVariants({ variant: 'link' }), 'h-auto cursor-pointer px-0')}
+        >
+          Ver todos os relatórios
+        </Link>
       </div>
 
       <ClivraPageHeader
         title="Relatórios financeiros"
-        description="Fluxo, produção e resumo do período — sem caça entre telas."
+        description="Fluxo, produção e resumo do período — o mesmo relatório acessível por Relatórios."
         action={
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">

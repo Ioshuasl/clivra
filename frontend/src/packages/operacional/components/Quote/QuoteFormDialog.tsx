@@ -1,9 +1,13 @@
 'use client';
 
-import { useDeferredValue, useEffect, useState } from 'react';
-import { useFieldArray } from 'react-hook-form';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { Controller, useFieldArray } from 'react-hook-form';
+import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { TOOTH_FACES } from '@/packages/operacional/enum/Quote/ToothFaceEnum';
-import { formatCents } from '@/packages/operacional/helpers/FormatCents';
+import {
+  centsToReaisInput,
+  formatCents,
+} from '@/packages/operacional/helpers/FormatCents';
 import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useAgendaProfessionalListHook } from '@/packages/operacional/hooks/Appointment/useAgendaProfessionalListHook';
 import { usePatientListHook } from '@/packages/operacional/hooks/Patient/usePatientListHook';
@@ -21,41 +25,71 @@ import { useQuoteUpdateHook } from '@/packages/operacional/hooks/Quote/useQuoteU
 import {
   toQuoteCreatePayload,
   toQuoteItemPayload,
+  toQuoteUpdatePayload,
   type QuoteCreateFormValues,
   type QuoteItemAddFormValues,
   type QuoteUpdateFormValues,
 } from '@/packages/operacional/schemas/Quote/QuoteSchema';
 import type { QuoteFormDialogProps } from '@/packages/operacional/types/Quote/QuoteFormDialogTypes';
+import type { QuoteProcedureOption } from '@/packages/operacional/types/Quote/QuoteTypes';
 import { useAuth } from '@/shared/auth/AuthProvider';
-import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
+import { useSheetOpenState } from '@/shared/motion/useSheetOpenState';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog';
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/shared/ui/combobox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/shared/ui/sheet';
 import { Textarea } from '@/shared/ui/textarea';
+
+const emptyItem: QuoteCreateFormValues['items'][number] = {
+  procedureId: '',
+  toothCode: '',
+  face: '',
+  quantity: 1,
+  discountCents: 0,
+};
+
+function procedureLabel(item: QuoteProcedureOption): string {
+  return `${item.name} · ${formatCents(item.priceCents)}`;
+}
 
 export function QuoteFormDialog({ open, quoteId, patientId, onClose }: QuoteFormDialogProps) {
   const isEdit = Boolean(quoteId);
+  const { sheetOpen, requestClose, onOpenChange, onOpenChangeComplete } = useSheetOpenState(
+    open,
+    onClose,
+  );
+
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <MotionDialogBody>
-          {isEdit && quoteId ? (
-            <QuoteEditForm quoteId={quoteId} onClose={onClose} />
-          ) : (
-            <QuoteCreateForm patientId={patientId} onClose={onClose} />
-          )}
-        </MotionDialogBody>
-      </DialogContent>
-    </Dialog>
+    <Sheet
+      open={sheetOpen}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={onOpenChangeComplete}
+    >
+      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
+        {isEdit && quoteId ? (
+          <QuoteEditForm quoteId={quoteId} onClose={requestClose} />
+        ) : (
+          <QuoteCreateForm patientId={patientId} onClose={requestClose} />
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -73,9 +107,34 @@ function QuoteCreateForm({
   const proceduresQuery = useQuoteProcedureListHook();
   const [patientSearch, setPatientSearch] = useState('');
   const deferredSearch = useDeferredValue(patientSearch);
-  const patientsQuery = usePatientListHook(deferredSearch);
+  const patientsQuery = usePatientListHook(deferredSearch, { active: 'true', limit: 30 });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'items' });
   const receptionLocked = me?.current.role === 'RECEPTION';
+
+  const patients = patientsQuery.data?.items ?? [];
+  const patientIds = useMemo(() => {
+    const ids = patients.map((item) => item.id);
+    if (patientId && !ids.includes(patientId)) return [patientId, ...ids];
+    return ids;
+  }, [patients, patientId]);
+
+  const patientLabelById = useMemo(() => {
+    const map = new Map(
+      patients.map((item) => [item.id, `#${item.code} ${item.socialName || item.name}`] as const),
+    );
+    return (id: string) => map.get(id) ?? id;
+  }, [patients]);
+
+  const procedures = proceduresQuery.data ?? [];
+  const procedureIds = useMemo(() => procedures.map((item) => item.id), [procedures]);
+  const procedureById = useMemo(
+    () => new Map(procedures.map((item) => [item.id, item] as const)),
+    [procedures],
+  );
+  const procedureLabelById = (id: string) => {
+    const item = procedureById.get(id);
+    return item ? procedureLabel(item) : id;
+  };
 
   useEffect(() => {
     form.reset({
@@ -83,9 +142,10 @@ function QuoteCreateForm({
       professionalId: '',
       validUntil: '',
       notes: '',
-      discountCents: 0,
-      items: [{ procedureId: '', toothCode: '', face: '', quantity: 1, discountCents: 0 }],
+      discountReais: '0',
+      items: [emptyItem],
     });
+    setPatientSearch('');
   }, [patientId, form]);
 
   const onSave = async (values: QuoteCreateFormValues) => {
@@ -94,47 +154,59 @@ function QuoteCreateForm({
   };
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Novo orçamento</DialogTitle>
-      </DialogHeader>
-      <form
-        className="grid gap-4"
-        onSubmit={(event) => {
-          void form.handleSubmit(onSave)(event);
-        }}
-      >
+    <form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={(event) => {
+        void form.handleSubmit(onSave)(event);
+      }}
+    >
+      <SheetHeader className="border-b border-border px-4 py-4 text-left">
+        <SheetTitle>Novo orçamento</SheetTitle>
+        <SheetDescription>Paciente, profissional e itens da proposta.</SheetDescription>
+      </SheetHeader>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <FieldGroup>
           {!patientId ? (
-            <>
-              <Field>
-                <FieldLabel htmlFor="quote-patient-search">Buscar paciente</FieldLabel>
-                <Input
-                  id="quote-patient-search"
-                  value={patientSearch}
-                  onChange={(event) => setPatientSearch(event.target.value)}
-                  placeholder="Nome, telefone ou ficha"
-                />
-              </Field>
-              <Field data-invalid={Boolean(form.formState.errors.patientId)}>
-                <FieldLabel htmlFor="quote-patient">Paciente</FieldLabel>
-                <NativeSelect
-                  id="quote-patient"
-                  value={form.watch('patientId')}
-                  onChange={(event) =>
-                    form.setValue('patientId', event.target.value, { shouldValidate: true })
-                  }
-                >
-                  <NativeSelectOption value="">Selecione</NativeSelectOption>
-                  {(patientsQuery.data?.items ?? []).map((patient) => (
-                    <NativeSelectOption key={patient.id} value={patient.id}>
-                      {patient.socialName || patient.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-                <FieldError>{form.formState.errors.patientId?.message}</FieldError>
-              </Field>
-            </>
+            <Field data-invalid={Boolean(form.formState.errors.patientId)}>
+              <FieldLabel htmlFor="quote-patient">Paciente</FieldLabel>
+              <Controller
+                control={form.control}
+                name="patientId"
+                render={({ field }) => (
+                  <Combobox
+                    items={patientIds}
+                    value={field.value || null}
+                    onValueChange={(next) => {
+                      field.onChange(typeof next === 'string' ? next : '');
+                    }}
+                    onInputValueChange={setPatientSearch}
+                    itemToStringLabel={patientLabelById}
+                    filter={null}
+                  >
+                    <ComboboxInput
+                      id="quote-patient"
+                      placeholder="Buscar paciente…"
+                      className="w-full"
+                      showClear
+                    />
+                    <ComboboxContent className="z-[80]">
+                      <ComboboxEmpty>
+                        {patientsQuery.isLoading ? 'Carregando…' : 'Nenhum paciente encontrado.'}
+                      </ComboboxEmpty>
+                      <ComboboxList>
+                        {(id) => (
+                          <ComboboxItem key={id} value={id}>
+                            {patientLabelById(id)}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                )}
+              />
+              <FieldError>{form.formState.errors.patientId?.message}</FieldError>
+            </Field>
           ) : null}
 
           <Field data-invalid={Boolean(form.formState.errors.professionalId)}>
@@ -146,7 +218,7 @@ function QuoteCreateForm({
                 form.setValue('professionalId', event.target.value, { shouldValidate: true })
               }
             >
-              <NativeSelectOption value="">Selecione</NativeSelectOption>
+              <NativeSelectOption value="">Escolha…</NativeSelectOption>
               {(professionalsQuery.data ?? []).map((professional) => (
                 <NativeSelectOption key={professional.id} value={professional.id}>
                   {professional.name}
@@ -161,50 +233,90 @@ function QuoteCreateForm({
               <FieldLabel htmlFor="quote-valid-until">Validade</FieldLabel>
               <Input id="quote-valid-until" type="date" {...form.register('validUntil')} />
             </Field>
-            <Field>
-              <FieldLabel htmlFor="quote-discount">Desconto (centavos)</FieldLabel>
+            <Field data-invalid={Boolean(form.formState.errors.discountReais)}>
+              <FieldLabel htmlFor="quote-discount">Desconto (R$)</FieldLabel>
               <Input
                 id="quote-discount"
-                type="number"
-                min={0}
+                inputMode="decimal"
+                placeholder="0,00"
                 disabled={receptionLocked}
-                {...form.register('discountCents', { valueAsNumber: true })}
+                {...form.register('discountReais')}
               />
+              <FieldError>{form.formState.errors.discountReais?.message}</FieldError>
             </Field>
           </div>
+
           <Field>
             <FieldLabel htmlFor="quote-notes">Observações comerciais</FieldLabel>
-            <Textarea id="quote-notes" rows={2} {...form.register('notes')} />
+            <Textarea id="quote-notes" rows={2} placeholder="Opcional" {...form.register('notes')} />
           </Field>
         </FieldGroup>
 
-        <div className="grid gap-3">
-          <p className="text-sm font-medium">Itens</p>
+        <div className="mt-6 grid gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">Itens</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => append(emptyItem)}
+            >
+              <PlusIcon className="size-4" strokeWidth={1.7} />
+              Adicionar
+            </Button>
+          </div>
+
           {fields.map((field, index) => {
             const procedureId = form.watch(`items.${index}.procedureId`);
-            const procedure = (proceduresQuery.data ?? []).find((item) => item.id === procedureId);
+            const procedure = procedureById.get(procedureId);
             return (
-              <div key={field.id} className="grid gap-3 rounded-md border p-3">
+              <div
+                key={field.id}
+                className="grid gap-3 rounded-xl border border-border bg-card p-3 shadow-[0_1px_2px_rgb(74_15_22/0.04)]"
+              >
                 <Field data-invalid={Boolean(form.formState.errors.items?.[index]?.procedureId)}>
                   <FieldLabel htmlFor={`quote-item-procedure-${index}`}>Procedimento</FieldLabel>
-                  <NativeSelect
-                    id={`quote-item-procedure-${index}`}
-                    value={procedureId}
-                    onChange={(event) =>
-                      form.setValue(`items.${index}.procedureId`, event.target.value, {
-                        shouldValidate: true,
-                      })
-                    }
-                  >
-                    <NativeSelectOption value="">Selecione</NativeSelectOption>
-                    {(proceduresQuery.data ?? []).map((item) => (
-                      <NativeSelectOption key={item.id} value={item.id}>
-                        {item.name} · {formatCents(item.priceCents)}
-                      </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
-                  <FieldError>{form.formState.errors.items?.[index]?.procedureId?.message}</FieldError>
+                  <Controller
+                    control={form.control}
+                    name={`items.${index}.procedureId`}
+                    render={({ field: itemField }) => (
+                      <Combobox
+                        items={procedureIds}
+                        value={itemField.value || null}
+                        onValueChange={(next) => {
+                          itemField.onChange(typeof next === 'string' ? next : '');
+                        }}
+                        itemToStringLabel={procedureLabelById}
+                      >
+                        <ComboboxInput
+                          id={`quote-item-procedure-${index}`}
+                          placeholder="Buscar procedimento…"
+                          className="w-full"
+                          showClear
+                        />
+                        <ComboboxContent className="z-[80]">
+                          <ComboboxEmpty>
+                            {proceduresQuery.isLoading
+                              ? 'Carregando…'
+                              : 'Nenhum procedimento encontrado.'}
+                          </ComboboxEmpty>
+                          <ComboboxList>
+                            {(id) => (
+                              <ComboboxItem key={id} value={id}>
+                                {procedureLabelById(id)}
+                              </ComboboxItem>
+                            )}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )}
+                  />
+                  <FieldError>
+                    {form.formState.errors.items?.[index]?.procedureId?.message}
+                  </FieldError>
                 </Field>
+
                 <div className="grid gap-3 sm:grid-cols-3">
                   {procedure?.requiresTooth ? (
                     <Field>
@@ -212,6 +324,7 @@ function QuoteCreateForm({
                       <Input
                         id={`quote-item-tooth-${index}`}
                         maxLength={2}
+                        inputMode="numeric"
                         {...form.register(`items.${index}.toothCode`)}
                       />
                     </Field>
@@ -239,7 +352,7 @@ function QuoteCreateForm({
                     </Field>
                   ) : null}
                   <Field>
-                    <FieldLabel htmlFor={`quote-item-qty-${index}`}>Qtd</FieldLabel>
+                    <FieldLabel htmlFor={`quote-item-qty-${index}`}>Quantidade</FieldLabel>
                     <Input
                       id={`quote-item-qty-${index}`}
                       type="number"
@@ -248,41 +361,49 @@ function QuoteCreateForm({
                     />
                   </Field>
                 </div>
+
                 {fields.length > 1 ? (
-                  <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>
-                    Remover
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="cursor-pointer text-muted-foreground hover:text-destructive"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2Icon className="size-4" strokeWidth={1.7} />
+                      Remover
+                    </Button>
+                  </div>
                 ) : null}
               </div>
             );
           })}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              append({ procedureId: '', toothCode: '', face: '', quantity: 1, discountCents: 0 })
-            }
-          >
-            Adicionar item
-          </Button>
+          {form.formState.errors.items?.root?.message ||
+          typeof form.formState.errors.items?.message === 'string' ? (
+            <p className="text-sm text-destructive" role="alert">
+              {form.formState.errors.items?.root?.message ??
+                form.formState.errors.items?.message}
+            </p>
+          ) : null}
         </div>
 
         {create.isError ? (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mt-4" role="alert">
             <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
           </Alert>
         ) : null}
+      </div>
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={create.isPending}>
-            {create.isPending ? 'Salvando…' : 'Criar'}
-          </Button>
-        </DialogFooter>
-      </form>
-    </>
+      <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit" className="cursor-pointer" disabled={create.isPending}>
+          {create.isPending ? 'Salvando…' : 'Criar orçamento'}
+        </Button>
+      </SheetFooter>
+    </form>
   );
 }
 
@@ -297,149 +418,246 @@ function QuoteEditForm({ quoteId, onClose }: { quoteId: string; onClose: () => v
   const proceduresQuery = useQuoteProcedureListHook();
   const receptionLocked = me?.current.role === 'RECEPTION';
 
+  const procedures = proceduresQuery.data ?? [];
+  const procedureIds = useMemo(() => procedures.map((item) => item.id), [procedures]);
+  const procedureById = useMemo(
+    () => new Map(procedures.map((item) => [item.id, item] as const)),
+    [procedures],
+  );
+  const procedureLabelById = (id: string) => {
+    const item = procedureById.get(id);
+    return item ? procedureLabel(item) : id;
+  };
+
   useEffect(() => {
     const quote = quoteQuery.data;
     if (!quote) return;
     form.reset({
       validUntil: quote.validUntil ?? '',
       notes: quote.notes ?? '',
-      discountCents: quote.discountCents,
+      discountReais: centsToReaisInput(quote.discountCents),
     });
   }, [quoteQuery.data, form]);
 
   const onSave = async (values: QuoteUpdateFormValues) => {
-    await update.mutateAsync({
-      validUntil: values.validUntil?.trim() ? values.validUntil : null,
-      notes: values.notes?.trim() ? values.notes : null,
-      discountCents: values.discountCents,
-    });
+    await update.mutateAsync(toQuoteUpdatePayload(values));
     onClose();
   };
 
   const onAddItem = async (values: QuoteItemAddFormValues) => {
     await addItem.mutateAsync(toQuoteItemPayload(values));
-    itemForm.reset({ procedureId: '', toothCode: '', face: '', quantity: 1, discountCents: 0 });
+    itemForm.reset(emptyItem);
   };
 
   const quote = quoteQuery.data;
   const addProcedureId = itemForm.watch('procedureId');
-  const addProcedure = (proceduresQuery.data ?? []).find((item) => item.id === addProcedureId);
+  const addProcedure = procedureById.get(addProcedureId);
+  const pending = update.isPending;
+  const error = update.error ?? addItem.error ?? removeItem.error;
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Editar orçamento {quote?.number ? `nº ${quote.number}` : ''}</DialogTitle>
-      </DialogHeader>
-      {quoteQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando…</p>
-      ) : (
-        <form
-          className="grid gap-4"
-          onSubmit={(event) => {
-            void form.handleSubmit(onSave)(event);
-          }}
-        >
-          {quote?.validUntil ? (
-            <Alert>
-              <AlertDescription>Validade: {quote.validUntil}. Totais calculados no servidor.</AlertDescription>
-            </Alert>
-          ) : null}
-          <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="quote-edit-valid">Validade</FieldLabel>
-                <Input id="quote-edit-valid" type="date" {...form.register('validUntil')} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="quote-edit-discount">Desconto (centavos)</FieldLabel>
-                <Input
-                  id="quote-edit-discount"
-                  type="number"
-                  min={0}
-                  disabled={receptionLocked}
-                  {...form.register('discountCents', { valueAsNumber: true })}
-                />
-              </Field>
-            </div>
-            <Field>
-              <FieldLabel htmlFor="quote-edit-notes">Observações comerciais</FieldLabel>
-              <Textarea id="quote-edit-notes" rows={2} {...form.register('notes')} />
-            </Field>
-          </FieldGroup>
+    <form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={(event) => {
+        void form.handleSubmit(onSave)(event);
+      }}
+    >
+      <SheetHeader className="border-b border-border px-4 py-4 text-left">
+        <SheetTitle>
+          {quote?.number ? `Orçamento nº ${quote.number}` : 'Editar orçamento'}
+        </SheetTitle>
+        <SheetDescription>
+          {quote ? `Total ${formatCents(quote.totalCents)} · totais recalculados ao salvar.` : 'Carregando…'}
+        </SheetDescription>
+      </SheetHeader>
 
-          <div className="grid gap-2">
-            <p className="text-sm font-medium">Itens</p>
-            {(quote?.items ?? []).map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
-                <span>
-                  {item.procedureName}
-                  {item.toothCode ? ` · dente ${item.toothCode}` : ''}
-                  {item.face ? ` ${item.face}` : ''} · {formatCents(item.totalCents)}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={removeItem.isPending}
-                  onClick={() => void removeItem.mutateAsync(item.id)}
-                >
-                  Remover
-                </Button>
-              </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        {quoteQuery.isLoading ? (
+          <div className="grid gap-2" aria-busy="true">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-10 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
-
-          <div className="grid gap-3 rounded-md border p-3">
-            <p className="text-sm font-medium">Adicionar item</p>
-            <Field>
-              <FieldLabel htmlFor="quote-add-procedure">Procedimento</FieldLabel>
-              <NativeSelect
-                id="quote-add-procedure"
-                value={addProcedureId}
-                onChange={(event) => itemForm.setValue('procedureId', event.target.value)}
-              >
-                <NativeSelectOption value="">Selecione</NativeSelectOption>
-                {(proceduresQuery.data ?? []).map((item) => (
-                  <NativeSelectOption key={item.id} value={item.id}>
-                    {item.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </Field>
-            {addProcedure?.requiresTooth ? (
+        ) : (
+          <>
+            <FieldGroup>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="quote-edit-valid">Validade</FieldLabel>
+                  <Input id="quote-edit-valid" type="date" {...form.register('validUntil')} />
+                </Field>
+                <Field data-invalid={Boolean(form.formState.errors.discountReais)}>
+                  <FieldLabel htmlFor="quote-edit-discount">Desconto (R$)</FieldLabel>
+                  <Input
+                    id="quote-edit-discount"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    disabled={receptionLocked}
+                    {...form.register('discountReais')}
+                  />
+                  <FieldError>{form.formState.errors.discountReais?.message}</FieldError>
+                </Field>
+              </div>
               <Field>
-                <FieldLabel htmlFor="quote-add-tooth">Dente</FieldLabel>
-                <Input id="quote-add-tooth" maxLength={2} {...itemForm.register('toothCode')} />
+                <FieldLabel htmlFor="quote-edit-notes">Observações comerciais</FieldLabel>
+                <Textarea
+                  id="quote-edit-notes"
+                  rows={2}
+                  placeholder="Opcional"
+                  {...form.register('notes')}
+                />
               </Field>
+            </FieldGroup>
+
+            <div className="mt-6 grid gap-2">
+              <p className="text-sm font-semibold text-foreground">Itens</p>
+              {(quote?.items ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum item neste orçamento.</p>
+              ) : (
+                (quote?.items ?? []).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {item.procedureName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {[
+                          item.toothCode ? `Dente ${item.toothCode}` : null,
+                          item.face || null,
+                          formatCents(item.totalCents),
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="cursor-pointer text-muted-foreground hover:text-destructive"
+                      aria-label={`Remover ${item.procedureName}`}
+                      disabled={removeItem.isPending}
+                      onClick={() => void removeItem.mutateAsync(item.id)}
+                    >
+                      <Trash2Icon strokeWidth={1.7} />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-4 grid gap-3 rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-sm font-semibold text-foreground">Adicionar item</p>
+              <Field data-invalid={Boolean(itemForm.formState.errors.procedureId)}>
+                <FieldLabel htmlFor="quote-add-procedure">Procedimento</FieldLabel>
+                <Controller
+                  control={itemForm.control}
+                  name="procedureId"
+                  render={({ field }) => (
+                    <Combobox
+                      items={procedureIds}
+                      value={field.value || null}
+                      onValueChange={(next) => {
+                        field.onChange(typeof next === 'string' ? next : '');
+                      }}
+                      itemToStringLabel={procedureLabelById}
+                    >
+                      <ComboboxInput
+                        id="quote-add-procedure"
+                        placeholder="Buscar procedimento…"
+                        className="w-full"
+                        showClear
+                      />
+                      <ComboboxContent className="z-[80]">
+                        <ComboboxEmpty>
+                          {proceduresQuery.isLoading
+                            ? 'Carregando…'
+                            : 'Nenhum procedimento encontrado.'}
+                        </ComboboxEmpty>
+                        <ComboboxList>
+                          {(id) => (
+                            <ComboboxItem key={id} value={id}>
+                              {procedureLabelById(id)}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  )}
+                />
+                <FieldError>{itemForm.formState.errors.procedureId?.message}</FieldError>
+              </Field>
+
+              {addProcedure?.requiresTooth ? (
+                <Field>
+                  <FieldLabel htmlFor="quote-add-tooth">Dente</FieldLabel>
+                  <Input
+                    id="quote-add-tooth"
+                    maxLength={2}
+                    inputMode="numeric"
+                    {...itemForm.register('toothCode')}
+                  />
+                </Field>
+              ) : null}
+              {addProcedure?.requiresFace ? (
+                <Field>
+                  <FieldLabel htmlFor="quote-add-face">Face</FieldLabel>
+                  <NativeSelect
+                    id="quote-add-face"
+                    value={itemForm.watch('face') ?? ''}
+                    onChange={(event) =>
+                      itemForm.setValue(
+                        'face',
+                        event.target.value as QuoteItemAddFormValues['face'],
+                      )
+                    }
+                  >
+                    <NativeSelectOption value="">—</NativeSelectOption>
+                    {TOOTH_FACES.map((face) => (
+                      <NativeSelectOption key={face} value={face}>
+                        {face}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+              ) : null}
+
+              <Button
+                type="button"
+                variant="outline"
+                className="cursor-pointer"
+                disabled={addItem.isPending}
+                onClick={() => void itemForm.handleSubmit(onAddItem)()}
+              >
+                <PlusIcon className="size-4" strokeWidth={1.7} />
+                {addItem.isPending ? 'Incluindo…' : 'Incluir item'}
+              </Button>
+            </div>
+
+            {error ? (
+              <Alert variant="destructive" className="mt-4" role="alert">
+                <AlertDescription>{operacionalErrorMessage(error)}</AlertDescription>
+              </Alert>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              disabled={addItem.isPending}
-              onClick={() => void itemForm.handleSubmit(onAddItem)()}
-            >
-              Incluir item
-            </Button>
-          </div>
+          </>
+        )}
+      </div>
 
-          {update.isError || addItem.isError || removeItem.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>
-                {operacionalErrorMessage(update.error ?? addItem.error ?? removeItem.error)}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={update.isPending}>
-              {update.isPending ? 'Salvando…' : 'Salvar'}
-            </Button>
-          </DialogFooter>
-        </form>
-      )}
-    </>
+      <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          className="cursor-pointer"
+          disabled={pending || quoteQuery.isLoading}
+        >
+          {pending ? 'Salvando…' : 'Salvar'}
+        </Button>
+      </SheetFooter>
+    </form>
   );
 }

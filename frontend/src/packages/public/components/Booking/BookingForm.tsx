@@ -159,9 +159,11 @@ export function BookingForm({ slug }: BookingFormProps) {
   if (clinicQuery.isLoading) {
     return (
       <BookingShell title="Carregando…">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-12 w-full rounded-[12px]" />
+        <Skeleton className="h-12 w-full rounded-[12px]" />
+        <Skeleton className="h-12 w-full rounded-[12px]" />
+        <Skeleton className="mt-2 h-11 w-full rounded-[10px]" />
       </BookingShell>
     );
   }
@@ -179,7 +181,7 @@ export function BookingForm({ slug }: BookingFormProps) {
           <Button
             type="button"
             size="lg"
-            className="w-full cursor-pointer"
+            className="mt-auto h-11 w-full cursor-pointer rounded-[10px] font-semibold sm:h-12"
             onClick={() => void clinicQuery.refetch()}
           >
             Tentar novamente
@@ -211,8 +213,12 @@ export function BookingForm({ slug }: BookingFormProps) {
           ? undefined
           : 'Reserve um horário. O dentista define o atendimento na consulta.'
       }
-      stepLabel={stepMeta ? `Passo ${visibleIndex} de ${visibleTotal} · ${stepMeta.label}` : undefined}
-      progress={step === 'success' ? 100 : Math.round((visibleIndex / visibleTotal) * 100)}
+      stepLabel={step === 'success' ? undefined : stepMeta?.label}
+      stepIndex={step === 'success' ? undefined : visibleIndex}
+      stepTotal={step === 'success' ? undefined : visibleTotal}
+      progress={
+        step === 'success' ? undefined : Math.round((visibleIndex / visibleTotal) * 100)
+      }
     >
       {step === 'professional' && !skipProfessional ? (
         <BookingStepProfessional

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeftIcon } from 'lucide-react';
 import { AGING_BAND_LABELS } from '@/packages/financeiro/enum/Report/AgingBandEnum';
 import { RECEIPT_SEND_CHANNEL_LABELS } from '@/packages/financeiro/enum/Payment/ReceiptSendChannelEnum';
 import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
@@ -8,8 +10,9 @@ import { formatCents } from '@/packages/financeiro/helpers/FormatCents';
 import { useInstallmentChargeHook } from '@/packages/financeiro/hooks/Installment/useInstallmentChargeHook';
 import { useOverdueGetHook } from '@/packages/financeiro/hooks/Report/useOverdueGetHook';
 import { Can } from '@/shared/auth/Can';
+import { ClivraPageHeader, ClivraSurface } from '@/shared/layout/ClivraPage';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
-import { Button } from '@/shared/ui/button';
+import { Button, buttonVariants } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -18,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+import { cn } from '@/shared/helpers/utils';
 
 export function OverdueIndex() {
   const report = useOverdueGetHook();
@@ -35,21 +39,25 @@ export function OverdueIndex() {
     if (result.copyText) setCopyText(result.copyText);
   };
 
-  if (report.isLoading) {
-    return <p className="text-sm text-muted-foreground">Carregando inadimplência…</p>;
-  }
-
-  if (report.isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>{financeiroErrorMessage(report.error)}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <div className="grid gap-4">
-      <h1 className="text-xl font-semibold">Inadimplência</h1>
+    <div className="grid min-w-0 gap-4">
+      <div>
+        <Link
+          href="/app/relatorios"
+          className={cn(
+            buttonVariants({ variant: 'link' }),
+            'inline-flex h-auto cursor-pointer items-center gap-1.5 px-0',
+          )}
+        >
+          <ArrowLeftIcon className="size-3.5" strokeWidth={1.8} />
+          Voltar aos relatórios
+        </Link>
+      </div>
+
+      <ClivraPageHeader
+        title="Inadimplência"
+        description="Parcelas vencidas por faixa de atraso — cobre direto pelo WhatsApp."
+      />
 
       {charge.isError ? (
         <Alert variant="destructive">
@@ -67,57 +75,87 @@ export function OverdueIndex() {
         </Alert>
       ) : null}
 
-      {(report.data?.buckets ?? []).map((bucket) => (
-        <div key={bucket.band} className="grid gap-2">
-          <h2 className="text-sm font-medium">
-            {AGING_BAND_LABELS[bucket.band]} · {bucket.count} · {formatCents(bucket.totalCents)}
-          </h2>
-          {bucket.items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum item nesta faixa.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Paciente</TableHead>
-                  <TableHead>Vencimento</TableHead>
-                  <TableHead>Dias</TableHead>
-                  <TableHead>Saldo</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bucket.items.map((item) => (
-                  <TableRow key={item.installmentId}>
-                    <TableCell>#{item.patientCode}</TableCell>
-                    <TableCell>{item.dueDate}</TableCell>
-                    <TableCell>{item.daysOverdue}</TableCell>
-                    <TableCell>{formatCents(item.remainingCents)}</TableCell>
-                    <TableCell>
-                      <Can permission="finance.write">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          disabled={charge.isPending}
-                          onClick={() => {
-                            void onCharge(item.installmentId);
-                          }}
-                        >
-                          Cobrar no WhatsApp
-                        </Button>
-                      </Can>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-      ))}
+      {report.isLoading ? (
+        <ClivraSurface contentClassName="px-4 py-6">
+          <p className="text-sm text-muted-foreground">Carregando inadimplência…</p>
+        </ClivraSurface>
+      ) : report.isError ? (
+        <Alert variant="destructive">
+          <AlertDescription>{financeiroErrorMessage(report.error)}</AlertDescription>
+        </Alert>
+      ) : (
+        <div className="grid gap-4">
+          {(report.data?.buckets ?? []).map((bucket) => (
+            <ClivraSurface
+              key={bucket.band}
+              toolbar={
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="text-base font-semibold">{AGING_BAND_LABELS[bucket.band]}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {bucket.count} parcela{bucket.count === 1 ? '' : 's'} ·{' '}
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {formatCents(bucket.totalCents)}
+                    </span>
+                  </p>
+                </div>
+              }
+              contentClassName="px-4 py-2"
+            >
+              {bucket.items.length === 0 ? (
+                <p className="py-4 text-sm text-muted-foreground">Nenhum item nesta faixa.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Paciente</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Dias</TableHead>
+                      <TableHead className="text-right">Saldo</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {bucket.items.map((item) => (
+                      <TableRow key={item.installmentId}>
+                        <TableCell>#{item.patientCode}</TableCell>
+                        <TableCell className="tabular-nums">{item.dueDate}</TableCell>
+                        <TableCell className="tabular-nums">{item.daysOverdue}</TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatCents(item.remainingCents)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Can permission="finance.write">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="cursor-pointer"
+                              disabled={charge.isPending}
+                              onClick={() => {
+                                void onCharge(item.installmentId);
+                              }}
+                            >
+                              Cobrar no WhatsApp
+                            </Button>
+                          </Can>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </ClivraSurface>
+          ))}
 
-      {(report.data?.buckets ?? []).every((b) => b.count === 0) ? (
-        <p className="text-sm text-muted-foreground">Sem parcelas em atraso.</p>
-      ) : null}
+          {(report.data?.buckets ?? []).every((b) => b.count === 0) ? (
+            <ClivraSurface contentClassName="px-4 py-6">
+              <p className="text-sm text-muted-foreground">
+                Sem parcelas em atraso. Volte ao Financeiro para acompanhar o vencimento do dia.
+              </p>
+            </ClivraSurface>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
