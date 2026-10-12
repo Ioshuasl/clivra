@@ -125,11 +125,7 @@ export const cashCountedSchema = z
 export const cashSessionCloseSchema = z
   .object({
     countedByMethod: z.array(cashCountedSchema).min(1).max(20),
-    // '' → null: regra de motivo mínimo fica no domínio (422 se houver diferença).
-    differenceReason: z.preprocess(
-      (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
-      z.string().trim().min(10).max(2000).optional().nullable(),
-    ),
+    differenceReason: z.string().trim().min(10).max(2000).optional().nullable(),
   })
   .strict();
 

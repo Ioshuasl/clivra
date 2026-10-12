@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../shared/middlewares/error_handler.middleware.js';
-import { exportIdParamSchema } from '../schemas/reporting.schema.js';
-import { GetService } from '../services/export/report_export_get.service.js';
+import { exportIdParamSchema } from '../schemas/report.schema.js';
+import { GetService } from '../services/export/export_get.service.js';
 
 function requireCtx(req: Request) {
   if (!req.ctx) {
@@ -11,15 +11,15 @@ function requireCtx(req: Request) {
 }
 
 export class ExportController {
-  constructor(private readonly getExport = new GetService()) {}
+  constructor(private readonly get = new GetService()) {}
 
-  get = async (req: Request, res: Response): Promise<void> => {
+  getExport = async (req: Request, res: Response): Promise<void> => {
     const ctx = requireCtx(req);
     const params = exportIdParamSchema.safeParse(req.params);
     if (!params.success) {
       throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, params.error);
     }
-    const result = await this.getExport.execute(ctx, params.data.id);
+    const result = await this.get.execute(ctx, params.data.id);
     res.status(200).json({ data: result });
   };
 }

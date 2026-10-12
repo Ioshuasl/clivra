@@ -1,7 +1,7 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
-import type { ConversationSummary } from '../../types/messaging.types.js';
-import { mapConversation } from './mappers/conversation.mapper.js';
+import { mapConversation } from '../../helpers/messaging_mapper.helper.js';
+import type { ConversationSummary } from '../../types/conversation/conversation.types.js';
 
 export class GetRepository {
   async execute(ctx: RequestContext, conversationId: string): Promise<ConversationSummary | null> {

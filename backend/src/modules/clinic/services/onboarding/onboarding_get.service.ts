@@ -49,10 +49,13 @@ export class GetService {
       firstAppointment: false,
     };
 
-    const completed = REQUIRED_ONBOARDING_STEPS.every((step) => stepsStatus[step]);
+    const skipped = new Set(state.onboarding.skippedSteps);
+    const completed = REQUIRED_ONBOARDING_STEPS.every(
+      (step) => stepsStatus[step] || skipped.has(step),
+    );
 
     return {
-      requiredSteps: [...REQUIRED_ONBOARDING_STEPS],
+      requiredSteps: REQUIRED_ONBOARDING_STEPS,
       skippedSteps: state.onboarding.skippedSteps,
       stepsStatus,
       completed,

@@ -269,43 +269,17 @@ export class ListPatientsRepository {
     input: {
       search?: string;
       cursor?: string;
-      page?: number;
       limit: number;
       active?: boolean;
     },
   ): Promise<PatientListResult> {
     const tenantPrisma = getTenantPrisma();
     return tenantPrisma.runInTenantContext(ctx, async (tx) => {
-      const usePage = input.page != null || !input.cursor;
-      const page = Math.max(1, input.page ?? 1);
-      const pageSize = input.limit;
-      const offset = (page - 1) * pageSize;
       const search = input.search?.trim();
-
       if (search) {
         const digits = search.replace(/\D/g, '');
         const last4 = digits.slice(-4);
         const activeFilter = input.active;
-
-        const countRows = await tx.$queryRaw<Array<{ count: bigint }>>`
-          SELECT COUNT(*)::bigint AS count
-          FROM patient
-          WHERE tenant_id = ${ctx.tenantId}::uuid
-            AND deleted_at IS NULL
-            AND (${activeFilter === undefined ? null : activeFilter}::boolean IS NULL
-                 OR active = ${activeFilter === undefined ? null : activeFilter}::boolean)
-            AND (
-              CAST(code AS TEXT) = ${search}
-              OR (${digits.length === 11} AND cpf = ${digits})
-              OR (${digits.length >= 4} AND (
-                    phone_primary LIKE ${'%' + digits}
-                    OR right(regexp_replace(coalesce(phone_primary, ''), '\\D', '', 'g'), 4) = ${last4}
-                  ))
-              OR unaccent(lower(name)) LIKE '%' || unaccent(lower(${search})) || '%'
-            )
-        `;
-        const total = Number(countRows[0]?.count ?? 0n);
-
         const rows = await tx.$queryRaw<
           Array<{
             id: string;
@@ -345,11 +319,11 @@ export class ListPatientsRepository {
               OR unaccent(lower(name)) LIKE '%' || unaccent(lower(${search})) || '%'
             )
           ORDER BY active DESC, name ASC
-          LIMIT ${pageSize}
-          OFFSET ${usePage ? offset : 0}
+          LIMIT ${input.limit + 1}
         `;
 
-        const items = rows.map((row) =>
+        const page = rows.slice(0, input.limit);
+        const items = page.map((row) =>
           mapPatientSummary({
             id: row.id,
             unitId: row.unit_id,
@@ -370,55 +344,26 @@ export class ListPatientsRepository {
             updatedAt: row.updated_at,
           }),
         );
-
-        return {
-          items,
-          nextCursor: null,
-          page,
-          pageSize,
-          total,
-        };
+        const nextCursor =
+          rows.length > input.limit ? (page[page.length - 1]?.id ?? null) : null;
+        return { items, nextCursor };
       }
 
-      const where = {
-        tenantId: ctx.tenantId,
-        deletedAt: null as null,
-        ...(input.active === undefined ? {} : { active: input.active }),
-        ...(!usePage && input.cursor ? { id: { lt: input.cursor } } : {}),
-      };
-
-      if (!usePage && input.cursor) {
-        const rows = await tx.patient.findMany({
-          where,
-          orderBy: [{ active: 'desc' }, { name: 'asc' }, { id: 'desc' }],
-          take: pageSize + 1,
-          select: patientSelect,
-        });
-        const pageItems = rows.slice(0, pageSize);
-        return {
-          items: pageItems.map(mapPatientSummary),
-          nextCursor: rows.length > pageSize ? (pageItems[pageItems.length - 1]?.id ?? null) : null,
-          page: 1,
-          pageSize,
-          total: pageItems.length,
-        };
-      }
-
-      const total = await tx.patient.count({ where });
       const rows = await tx.patient.findMany({
-        where,
+        where: {
+          tenantId: ctx.tenantId,
+          deletedAt: null,
+          ...(input.active === undefined ? {} : { active: input.active }),
+          ...(input.cursor ? { id: { lt: input.cursor } } : {}),
+        },
         orderBy: [{ active: 'desc' }, { name: 'asc' }, { id: 'desc' }],
-        skip: offset,
-        take: pageSize,
+        take: input.limit + 1,
         select: patientSelect,
       });
-
+      const page = rows.slice(0, input.limit);
       return {
-        items: rows.map(mapPatientSummary),
-        nextCursor: null,
-        page,
-        pageSize,
-        total,
+        items: page.map(mapPatientSummary),
+        nextCursor: rows.length > input.limit ? (page[page.length - 1]?.id ?? null) : null,
       };
     });
   }

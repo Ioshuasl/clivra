@@ -214,50 +214,12 @@ function Find-AcceptOpenInstallment {
     [int]$MinBalanceCents = 200
   )
 
-  # Lista sem status traz PAID antigos (dueDate ASC + limit) e esconde OPEN recentes.
-  function Find-OpenRow {
-    param([object[]]$Rows)
-    @($Rows) | Where-Object {
-      $_.status -in @('OPEN', 'PARTIALLY_PAID', 'OVERDUE') -and
-      (([int64]$_.amountCents) - ([int64]$_.paidCents)) -ge $MinBalanceCents
-    } | Select-Object -First 1
-  }
-
-  $open = $null
-  foreach ($status in @('OPEN', 'PARTIALLY_PAID', 'OVERDUE')) {
-    $path = '/api/v1/installments?patientId={0}&status={1}&limit=50' -f $PatientId, $status
-    $res = Invoke-ApiJson -Method GET -Path $path -Token $Session.Token -TenantId $Session.TenantId
-    $open = Find-OpenRow -Rows @($res.Body.data)
-    if ($open) { break }
-  }
-
-  if (-not $open) {
-    $need = [Math]::Max(5000, $MinBalanceCents)
-    $due = (Get-Date).AddDays(7).ToString('yyyy-MM-dd')
-    $created = Invoke-ApiJson -Method POST -Path '/api/v1/receivables' `
-      -Token $Session.Token -TenantId $Session.TenantId `
-      -IdempotencyKey (New-IdempotencyKey) `
-      -Body @{
-        patientId        = $PatientId
-        totalCents       = $need
-        installmentCount = 1
-        firstDueDate     = $due
-        description      = '[accept] parcela aberta para aceite'
-      }
-    if ($created.Status -notin @(200, 201)) {
-      throw ("criar parcela para aceite falhou: HTTP {0} {1}" -f $created.Status, $created.Text)
-    }
-    $line = @($created.Body.data.installments) | Select-Object -First 1
-    if ($line) {
-      $open = [pscustomobject]@{
-        id           = [string]$line.id
-        receivableId = [string]$created.Body.data.id
-        amountCents  = [int64]$line.amountCents
-        paidCents    = [int64]0
-        status       = 'OPEN'
-      }
-    }
-  }
+  $path = '/api/v1/installments?patientId={0}&limit=50' -f $PatientId
+  $res = Invoke-ApiJson -Method GET -Path $path -Token $Session.Token -TenantId $Session.TenantId
+  $open = @($res.Body.data) | Where-Object {
+    $_.status -in @('OPEN', 'PARTIALLY_PAID', 'OVERDUE') -and
+    (([int64]$_.amountCents) - ([int64]$_.paidCents)) -ge $MinBalanceCents
+  } | Select-Object -First 1
 
   if (-not $open) { throw 'parcela em aberto insuficiente para o teste' }
   return $open

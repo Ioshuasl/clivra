@@ -7,17 +7,8 @@ import { Role } from '../src/modules/identity/enum/role/role.enum.js';
 import { hashToken } from '../src/shared/helpers/token_hash.js';
 import { addDays } from '../src/modules/identity/helpers/slug.helper.js';
 import { MarkOverdueService } from '../src/modules/billing/services/installment/installment_mark_overdue.service.js';
-import { addCalendarMonths } from '../src/modules/billing/helpers/installment_due_dates.helper.js';
 
 type Json = { status: number; body: Record<string, unknown> | null };
-
-/** YYYY-MM-DD civil UTC a partir de hoje ± offset de dias (smoke estável no calendário). */
-function ymdFromToday(offsetDays: number): string {
-  const d = new Date();
-  d.setUTCHours(12, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
-}
 
 async function main() {
   const app = createApp();
@@ -111,11 +102,6 @@ async function main() {
   console.log('category-dup', dupCat.status, errorCode(dupCat));
   if (dupCat.status !== 409) failed = true;
 
-  // Vencimento passado (pagável) + próximo mês ainda no futuro → spawned OPEN.
-  const payableDue = ymdFromToday(-20);
-  const expectedSpawnDue = addCalendarMonths(payableDue, 1);
-  const recurrenceUntil = addCalendarMonths(ymdFromToday(0), 24);
-
   const payable = await request('/api/v1/payables', {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
@@ -124,12 +110,12 @@ async function main() {
       categoryId: rent?.id,
       description: 'Aluguel agosto',
       amountCents: 250000,
-      dueDate: payableDue,
+      dueDate: '2026-08-10',
       supplier: 'Imobiliaria Centro',
-      recurrence: { frequency: 'MONTHLY', until: recurrenceUntil },
+      recurrence: { frequency: 'MONTHLY', until: '2027-12-31' },
     }),
   });
-  console.log('payable-create', payable.status, payableDue, '→', expectedSpawnDue);
+  console.log('payable-create', payable.status);
   if (payable.status !== 201) failed = true;
   const payableId = dataOf(payable).id as string;
 
@@ -149,27 +135,19 @@ async function main() {
     body: JSON.stringify({ method: 'CASH' }),
   });
   console.log('pay-cash-no-session', cashPay.status, errorCode(cashPay));
-  // Ciclo de caixa desativado: CASH sem sessão aberta é permitido — cria outro título para o fluxo PIX.
-  if (cashPay.status !== 200) failed = true;
+  if (cashPay.status !== 422 || errorCode(cashPay) !== 'CASH_SESSION_REQUIRED') failed = true;
 
-  const payable2 = await request('/api/v1/payables', {
+  const opened = await request('/api/v1/cash-sessions', {
     method: 'POST',
-    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({
-      unitId,
-      categoryId: rent?.id,
-      description: 'Aluguel setembro',
-      amountCents: 250000,
-      dueDate: payableDue,
-      supplier: 'Imobiliaria Centro',
-      recurrence: { frequency: 'MONTHLY', until: recurrenceUntil },
-    }),
+    headers: {
+      ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': randomUUID() }),
+    },
+    body: JSON.stringify({ unitId, openingCents: 0 }),
   });
-  if (payable2.status !== 201) failed = true;
-  const payablePixId = dataOf(payable2).id as string;
+  if (opened.status !== 201) failed = true;
 
   const payKey = randomUUID();
-  const paid = await request(`/api/v1/payables/${payablePixId}/pay`, {
+  const paid = await request(`/api/v1/payables/${payableId}/pay`, {
     method: 'POST',
     headers: {
       ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': payKey }),
@@ -182,7 +160,7 @@ async function main() {
   if (!dataOf(paid).spawnedPayableId) failed = true;
   const spawnedId = dataOf(paid).spawnedPayableId as string;
 
-  const replay = await request(`/api/v1/payables/${payablePixId}/pay`, {
+  const replay = await request(`/api/v1/payables/${payableId}/pay`, {
     method: 'POST',
     headers: {
       ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': payKey }),
@@ -191,17 +169,17 @@ async function main() {
   });
   console.log('payable-pay-replay', replay.status);
   if (replay.status !== 200) failed = true;
-  if (dataOf(replay).payableId !== payablePixId) failed = true;
+  if (dataOf(replay).payableId !== payableId) failed = true;
 
   const spawned = await request(`/api/v1/payables/${spawnedId}`, {
     headers: authHeaders(token, tenantId),
   });
   console.log('spawned', spawned.status, dataOf(spawned).dueDate, dataOf(spawned).status);
   if (spawned.status !== 200) failed = true;
-  if (dataOf(spawned).dueDate !== expectedSpawnDue) failed = true;
+  if (dataOf(spawned).dueDate !== '2026-09-10') failed = true;
   if (dataOf(spawned).status !== 'OPEN') failed = true;
 
-  const patchPaid = await request(`/api/v1/payables/${payablePixId}`, {
+  const patchPaid = await request(`/api/v1/payables/${payableId}`, {
     method: 'PATCH',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
     body: JSON.stringify({ description: 'nao pode' }),

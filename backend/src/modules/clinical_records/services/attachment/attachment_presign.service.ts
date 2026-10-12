@@ -1,12 +1,12 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { idGenerator } from '../../../../shared/helpers/id_generator.js';
 import { getObjectStorage, ObjectStorageError } from '../../../../shared/storage/index.js';
-import { assertPlanLimit, UsageMetric } from '../../../subscription/subscription_public.js';
 import { Attachment } from '../../models/attachment/attachment.model.js';
 import {
   MedicalRecordNotFoundError,
   StorageUnavailableError,
 } from '../../models/errors/clinical_records.errors.js';
+import { assertCanAdd, UsageMetric } from '../../../subscription/subscription_public.js';
 import {
   PRESIGN_TTL_SECONDS,
   buildAttachmentStorageKey,
@@ -32,7 +32,7 @@ export class PresignService {
     const recordId = await this.getRecordId.execute(ctx, patientId);
     if (!recordId) throw new MedicalRecordNotFoundError();
 
-    await assertPlanLimit(ctx, UsageMetric.STORAGE_BYTES, attachmentSchema.sizeBytes);
+    await assertCanAdd(ctx, UsageMetric.STORAGE_BYTES, attachmentSchema.sizeBytes);
 
     const storageKey = buildAttachmentStorageKey({
       tenantId: ctx.tenantId,

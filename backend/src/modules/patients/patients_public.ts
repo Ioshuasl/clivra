@@ -42,17 +42,12 @@ export async function findPatientIdByPhone(
   phone: string,
 ): Promise<string | null> {
   const e164 = toE164Br(phone);
-  const matchesE164 = await findByPhone.execute(ctx, e164);
-  if (matchesE164[0]?.id) return matchesE164[0].id;
-
-  // Cadastro MVP grava phonePrimary via normalizePhone (só dígitos, sem DDI 55).
-  if (e164.startsWith('55') && e164.length >= 12) {
-    const national = e164.slice(2);
-    const matchesNational = await findByPhone.execute(ctx, national);
-    if (matchesNational[0]?.id) return matchesNational[0].id;
-  }
-
-  return null;
+  const exact = await findByPhone.execute(ctx, e164);
+  if (exact[0]?.id) return exact[0].id;
+  const national = e164.startsWith('55') && e164.length >= 12 ? e164.slice(2) : e164;
+  if (national === e164) return null;
+  const local = await findByPhone.execute(ctx, national);
+  return local[0]?.id ?? null;
 }
 
 /** Consentimento de marketing ativo? (messaging — RF-E3-08). */

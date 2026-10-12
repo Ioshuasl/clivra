@@ -15,11 +15,7 @@ export class WhatsAppCloudProvider implements MessagingProvider {
     throw new Error('Cloud API não está ativa. Use WAHA (ADR-0016).');
   }
 
-  async sendImage(_input: SendMediaInput): Promise<SendResult> {
-    throw new Error('MEDIA_NOT_SUPPORTED');
-  }
-
-  async sendFile(_input: SendMediaInput): Promise<SendResult> {
-    throw new Error('MEDIA_NOT_SUPPORTED');
+  async sendMedia(_input: SendMediaInput): Promise<SendResult> {
+    throw new Error('Cloud API não está ativa. Use WAHA (ADR-0016).');
   }
 }

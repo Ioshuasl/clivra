@@ -1,7 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import { env } from './shared/config/env.js';
 import { logger } from './shared/config/logger.js';
-import { isOutboxDispatchPaused } from './shared/database/outbox_dispatch_pause.js';
 import { OutboxDispatcher } from './shared/database/outbox_dispatcher.js';
 import { getPrismaClient } from './shared/database/tenant_prisma.js';
 import { scheduleAppointmentNotificationsJob } from './modules/scheduling/jobs/schedule_appointment_notifications.job.js';
@@ -14,7 +13,12 @@ import { generateQuotePdfJob } from './modules/treatments/jobs/generate_quote_pd
 import { expireQuotesJob } from './modules/treatments/jobs/expire_quotes.job.js';
 import { markOverdueInstallmentsJob } from './modules/billing/jobs/mark_overdue_installments.job.js';
 import { generateReceiptPdfJob } from './modules/billing/jobs/generate_receipt_pdf.job.js';
-import { generateExportJob } from './modules/reporting/jobs/report_export.job.js';
+import { reportExportJob } from './modules/reporting/jobs/report_export.job.js';
+import { tenantExportJob } from './modules/platform/jobs/tenant_export.job.js';
+import { patientPackageJob } from './modules/platform/jobs/patient_package.job.js';
+import { patientAnonymizeJob } from './modules/platform/jobs/patient_anonymize.job.js';
+import { dsrDueReminderJob } from './modules/platform/jobs/dsr_due_reminder.job.js';
+import { anomalyClinicalReadJob } from './modules/platform/jobs/anomaly_clinical_read.job.js';
 import { trialExpireJob } from './modules/subscription/jobs/trial_expire.job.js';
 import { recalculateUsageCountersJob } from './modules/subscription/jobs/recalculate_usage_counters.job.js';
 import {
@@ -37,7 +41,9 @@ import { JOB, QUEUE } from './shared/queue/queue_names.js';
 const DISPATCH_INTERVAL_MS = 5_000;
 const EXPIRE_QUOTES_INTERVAL_MS = 15 * 60_000;
 const MARK_OVERDUE_INTERVAL_MS = 15 * 60_000;
-const TRIAL_EXPIRE_INTERVAL_MS = 15 * 60_000;
+const SUBSCRIPTION_INTERVAL_MS = 15 * 60_000;
+const DSR_REMINDER_INTERVAL_MS = 15 * 60_000;
+const ANOMALY_INTERVAL_MS = 5 * 60_000;
 const ASAAS_BILLING_INTERVAL_MS = 15 * 60_000;
 const ASAAS_SWEEP_INTERVAL_MS = 5 * 60_000;
 
@@ -78,17 +84,22 @@ async function enqueueMarkOverdue(queue: BullmqJobQueue): Promise<void> {
   }
 }
 
+async function enqueueTrialExpire(queue: BullmqJobQueue): Promise<void> {
+  if (!queue.isConnected()) return;
+  const ymd = new Date().toISOString().slice(0, 10);
+  await queue.add(
+    QUEUE.platform,
+    JOB.trialExpire,
+    { tenantId: '00000000-0000-0000-0000-000000000000', requestId: `trial-expire:${ymd}` },
+    { jobId: `trial-expire:${ymd}:${new Date().getUTCHours()}` },
+  );
+}
+
 async function enqueueSubscriptionLifecycle(queue: BullmqJobQueue): Promise<void> {
   if (!queue.isConnected()) return;
   const tenants = await listTenantsForScheduledJobs();
   for (const tenant of tenants) {
     const ymd = todayInTimezone(tenant.timezone);
-    await queue.add(
-      QUEUE.platform,
-      JOB.expireTrials,
-      { tenantId: tenant.id, requestId: `expire-trials:${ymd}` },
-      { jobId: `expire-trials:${tenant.id}:${ymd}` },
-    );
     await queue.add(
       QUEUE.platform,
       JOB.recalculateUsageCounters,
@@ -141,31 +152,6 @@ async function enqueueExpireQuotes(queue: BullmqJobQueue): Promise<void> {
   }
 }
 
-async function enqueueTrialExpire(queue: BullmqJobQueue): Promise<void> {
-  if (!queue.isConnected()) return;
-  const ymd = new Date().toISOString().slice(0, 10);
-  await queue.add(
-    QUEUE.platform,
-    JOB.trialExpire,
-    { tenantId: '00000000-0000-0000-0000-000000000000', requestId: `trial-expire:${ymd}` },
-    { jobId: `trial-expire:${ymd}:${new Date().getUTCHours()}` },
-  );
-}
-
-async function enqueueRecalculateUsage(queue: BullmqJobQueue): Promise<void> {
-  if (!queue.isConnected()) return;
-  const tenants = await listTenantsForScheduledJobs();
-  for (const tenant of tenants) {
-    const ymd = todayInTimezone(tenant.timezone);
-    await queue.add(
-      QUEUE.platform,
-      JOB.recalculateUsageCounters,
-      { tenantId: tenant.id, requestId: `usage-recalc:${ymd}` },
-      { jobId: `usage-recalc:${tenant.id}:${ymd}` },
-    );
-  }
-}
-
 async function main(): Promise<void> {
   logger.info('worker_starting');
 
@@ -180,13 +166,10 @@ async function main(): Promise<void> {
   queue.register(QUEUE.platform, JOB.patientAnonymize, patientAnonymizeJob);
   queue.register(QUEUE.platform, JOB.dsrDueReminder, dsrDueReminderJob);
   queue.register(QUEUE.platform, JOB.anomalyClinicalRead, anomalyClinicalReadJob);
-  queue.register(QUEUE.platform, JOB.expireTrials, expireTrialsJob);
-  queue.register(QUEUE.platform, JOB.recalculateUsageCounters, recalculateUsageCountersJob);
-  queue.register(QUEUE.platform, JOB.generateReceiptPdf, generateReceiptPdfJob);
-  queue.register(QUEUE.reporting, JOB.generateExport, generateExportJob);
-  queue.register(QUEUE.platform, JOB.expireQuotes, expireQuotesJob);
   queue.register(QUEUE.platform, JOB.trialExpire, trialExpireJob);
   queue.register(QUEUE.platform, JOB.recalculateUsageCounters, recalculateUsageCountersJob);
+  queue.register(QUEUE.platform, JOB.generateReceiptPdf, generateReceiptPdfJob);
+  queue.register(QUEUE.platform, JOB.expireQuotes, expireQuotesJob);
   queue.register(QUEUE.billing, JOB.markOverdueInstallments, markOverdueInstallmentsJob);
   queue.register(QUEUE.platform, JOB.processAsaasEvent, processAsaasEventJob);
   queue.register(QUEUE.platform, JOB.reconcileAsaasSubscriptions, reconcileAsaasSubscriptionJob);
@@ -221,7 +204,6 @@ async function main(): Promise<void> {
 
   const tick = async (): Promise<void> => {
     try {
-      if (await isOutboxDispatchPaused()) return;
       const n = await dispatcher.dispatchOnce();
       if (n > 0) logger.info({ dispatched: n }, 'outbox_dispatched');
     } catch (err) {
@@ -260,16 +242,34 @@ async function main(): Promise<void> {
     logger.error({ err }, 'mark_overdue_enqueue_error');
   });
 
-  const trialInterval = setInterval(() => {
+  const subscriptionInterval = setInterval(() => {
     void enqueueTrialExpire(queue).catch((err) => {
       logger.error({ err }, 'trial_expire_enqueue_error');
     });
-    void enqueueRecalculateUsage(queue).catch((err) => {
-      logger.error({ err }, 'usage_recalc_enqueue_error');
+    void enqueueSubscriptionLifecycle(queue).catch((err) => {
+      logger.error({ err }, 'subscription_lifecycle_enqueue_error');
     });
-  }, TRIAL_EXPIRE_INTERVAL_MS);
-  void enqueueTrialExpire(queue).catch((err) => {
-    logger.error({ err }, 'trial_expire_enqueue_error');
+  }, SUBSCRIPTION_INTERVAL_MS);
+  void enqueueSubscriptionLifecycle(queue).catch((err) => {
+    logger.error({ err }, 'subscription_lifecycle_enqueue_error');
+  });
+
+  const dsrReminderInterval = setInterval(() => {
+    void enqueueDsrDueReminder(queue).catch((err) => {
+      logger.error({ err }, 'dsr_due_reminder_enqueue_error');
+    });
+  }, DSR_REMINDER_INTERVAL_MS);
+  void enqueueDsrDueReminder(queue).catch((err) => {
+    logger.error({ err }, 'dsr_due_reminder_enqueue_error');
+  });
+
+  const anomalyInterval = setInterval(() => {
+    void enqueueAnomalyClinicalRead(queue).catch((err) => {
+      logger.error({ err }, 'anomaly_clinical_read_enqueue_error');
+    });
+  }, ANOMALY_INTERVAL_MS);
+  void enqueueAnomalyClinicalRead(queue).catch((err) => {
+    logger.error({ err }, 'anomaly_clinical_read_enqueue_error');
   });
 
   const asaasBillingInterval = setInterval(() => {
@@ -297,7 +297,9 @@ async function main(): Promise<void> {
     clearInterval(interval);
     clearInterval(expireInterval);
     clearInterval(overdueInterval);
-    clearInterval(trialInterval);
+    clearInterval(subscriptionInterval);
+    clearInterval(dsrReminderInterval);
+    clearInterval(anomalyInterval);
     clearInterval(asaasBillingInterval);
     clearInterval(asaasSweepInterval);
     health.close();

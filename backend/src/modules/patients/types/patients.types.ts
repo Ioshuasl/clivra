@@ -80,9 +80,6 @@ export type PatientCreateResult = {
 export type PatientListResult = {
   items: PatientSummary[];
   nextCursor: string | null;
-  page: number;
-  pageSize: number;
-  total: number;
 };
 
 export type TimelineSource =

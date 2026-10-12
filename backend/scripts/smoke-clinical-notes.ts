@@ -5,7 +5,6 @@ import { getPrismaClient, getTenantPrisma } from '../src/shared/database/tenant_
 import { hashToken } from '../src/shared/helpers/token_hash.js';
 import { addDays } from '../src/modules/identity/helpers/slug.helper.js';
 import { Role } from '../src/modules/identity/enum/role/role.enum.js';
-import { PLAN_IDS } from '../src/modules/subscription/enum/plan/plan_code.enum.js';
 
 type Json = { status: number; body: Record<string, unknown> | null };
 
@@ -169,14 +168,6 @@ async function main() {
   const prisma = getPrismaClient();
   const tenantDb = getTenantPrisma();
   const smokeCtx = { tenantId, userId: ownerUserId, requestId: 'smoke' };
-
-  // Essencial = 2 adminUsers; smoke precisa OWNER + ASB + RECEPTION → sobe para Clínica.
-  await tenantDb.runInTenantContext(smokeCtx, (tx) =>
-    tx.subscription.update({
-      where: { tenantId },
-      data: { planId: PLAN_IDS.CLINICA },
-    }),
-  );
 
   const stored = await tenantDb.runInTenantContext(smokeCtx, async (tx) =>
     tx.clinicalNote.findFirst({ where: { id: noteId, tenantId } }),

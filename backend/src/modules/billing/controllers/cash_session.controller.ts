@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../shared/middlewares/error_handler.middleware.js';
-import { CASH_SESSION_LIFECYCLE_ENABLED } from '../helpers/cash_session_lifecycle.helper.js';
 import {
   cashMovementCreateSchema,
   cashSessionCloseSchema,
@@ -21,16 +20,6 @@ function requireCtx(req: Request) {
   return req.ctx;
 }
 
-function assertLifecycleEnabled(): void {
-  if (!CASH_SESSION_LIFECYCLE_ENABLED) {
-    throw new AppError(
-      'FEATURE_DISABLED',
-      'Abertura e fechamento de caixa estão desativados neste momento.',
-      501,
-    );
-  }
-}
-
 export class CashSessionController {
   constructor(
     private readonly openSession = new OpenService(),
@@ -41,7 +30,6 @@ export class CashSessionController {
   ) {}
 
   create = async (req: Request, res: Response): Promise<void> => {
-    assertLifecycleEnabled();
     const ctx = requireCtx(req);
     const parsed = cashSessionCreateSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -73,7 +61,6 @@ export class CashSessionController {
   };
 
   close = async (req: Request, res: Response): Promise<void> => {
-    assertLifecycleEnabled();
     const ctx = requireCtx(req);
     const params = cashSessionIdParamSchema.safeParse(req.params);
     if (!params.success) {
@@ -89,7 +76,6 @@ export class CashSessionController {
   };
 
   createMovement = async (req: Request, res: Response): Promise<void> => {
-    assertLifecycleEnabled();
     const ctx = requireCtx(req);
     const params = cashSessionIdParamSchema.safeParse(req.params);
     if (!params.success) {

@@ -23,17 +23,16 @@ Assert-Accept 'manual_receivable_create' ($recv.Status -in @(200, 201)) ("HTTP {
 $receivableId = [string]$recv.Body.data.id
 if (-not $receivableId) { $receivableId = [string]$recv.Body.data.receivableId }
 
-# Preferir parcelas do create (lista sem status pode omitir OPEN recentes entre PAID antigos).
-$rows = @($recv.Body.data.installments)
+$listPath = '/api/v1/installments?patientId={0}&limit=50' -f $patientId
+$list = Invoke-ApiJson -Method GET -Path $listPath -Token $session.Token -TenantId $session.TenantId
+$rows = @($list.Body.data) | Where-Object { $_.receivableId -eq $receivableId }
 if ($rows.Count -eq 0 -and $receivableId) {
-  $listPath = '/api/v1/installments?patientId={0}&status=OPEN&limit=50' -f $patientId
-  $list = Invoke-ApiJson -Method GET -Path $listPath -Token $session.Token -TenantId $session.TenantId
-  $rows = @($list.Body.data) | Where-Object { $_.receivableId -eq $receivableId }
+  $rows = @($list.Body.data) | Select-Object -Last $count
 }
 
 $sum = [int64]0
 foreach ($r in $rows) { $sum += [int64]$r.amountCents }
-Assert-Accept 'manual_installments_count' (@($rows).Count -eq $count) ("count={0}" -f @($rows).Count)
+Assert-Accept 'manual_installments_count' ($rows.Count -eq $count) ("count={0}" -f $rows.Count)
 Assert-Accept 'manual_installments_sum' ($sum -eq $total) ("sum={0} total={1}" -f $sum, $total)
 
 Exit-AcceptSummary

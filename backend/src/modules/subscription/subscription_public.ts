@@ -66,6 +66,13 @@ export async function listTenantsWithAsaasSubscription(): Promise<string[]> {
   return asaasLinks.listTenantsWithSubscription();
 }
 
+const ADMIN_USER_ROLES = new Set(['OWNER', 'RECEPTION', 'ASSISTANT', 'FINANCE']);
+
+/** Convites de papéis administrativos contam no limite de usuários do plano. */
+export function countsTowardUserLimit(role: string): boolean {
+  return ADMIN_USER_ROLES.has(role);
+}
+
 export { asyncSubscriptionGuard, UsageMetric, PlanLimitGuard };
 
 export type { PlanSummary, SubscriptionSummary, UsageSummary } from './types/subscription.types.js';

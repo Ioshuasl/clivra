@@ -59,7 +59,7 @@ Assert-Accept 'reverse_closed_cash_423' ($rev.Status -eq 423) ("HTTP {0} code={1
 
 $move = Invoke-ApiJson -Method POST -Path ("/api/v1/cash-sessions/{0}/movements" -f $sid) `
   -Token $session.Token -TenantId $session.TenantId -IdempotencyKey (New-IdempotencyKey) `
-  -Body @{ kind = 'SUPPLY'; method = 'CASH'; amountCents = 100; reason = 'teste imutavel apos fechar' }
+  -Body @{ kind = 'SUPPLY'; method = 'CASH'; amountCents = 100; description = 'teste imutavel' }
 $moveCode = $null
 if ($move.Body.error) { $moveCode = $move.Body.error.code }
 Assert-Accept 'closed_session_immutable' ($move.Status -in @(404, 409, 422, 423)) ("HTTP {0} code={1}" -f $move.Status, $moveCode)

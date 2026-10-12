@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../shared/middlewares/error_handler.middleware.js';
-import { messagingSseHub } from '../helpers/sse_hub.helper.js';
+import { subscribeMessagingStream } from '../helpers/messaging_stream.helper.js';
+
+const HEARTBEAT_MS = 25_000;
 
 function requireCtx(req: Request) {
   if (!req.ctx) {
@@ -10,28 +12,30 @@ function requireCtx(req: Request) {
 }
 
 export class StreamController {
-  stream = async (req: Request, res: Response): Promise<void> => {
+  subscribe = async (req: Request, res: Response): Promise<void> => {
     const ctx = requireCtx(req);
 
     res.status(200);
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+    res.flushHeaders?.();
+    res.write(': connected\n\n');
 
-    res.write(`event: ready\ndata: ${JSON.stringify({ ok: true })}\n\n`);
-
-    const unsubscribe = messagingSseHub.subscribe(ctx.tenantId, (event) => {
-      res.write(`event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`);
+    const unsubscribe = subscribeMessagingStream(ctx.tenantId, (event) => {
+      res.write(`event: ${event.name}\n`);
+      res.write(`data: ${JSON.stringify(event.payload)}\n\n`);
     });
 
-    const ping = setInterval(() => {
-      res.write(`: ping\n\n`);
-    }, 25_000);
+    const heartbeat = setInterval(() => {
+      res.write(': ping\n\n');
+    }, HEARTBEAT_MS);
 
+    let closed = false;
     const cleanup = () => {
-      clearInterval(ping);
+      if (closed) return;
+      closed = true;
+      clearInterval(heartbeat);
       unsubscribe();
     };
 

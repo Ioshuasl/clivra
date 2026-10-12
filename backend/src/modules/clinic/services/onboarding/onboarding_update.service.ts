@@ -1,6 +1,5 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { AppError } from '../../../../shared/middlewares/error_handler.middleware.js';
-import { REQUIRED_ONBOARDING_STEPS } from '../../enum/onboarding/onboarding_step.enum.js';
 import {
   GetOnboardingRepository,
   UpdateOnboardingRepository,
@@ -20,16 +19,6 @@ export class UpdateService {
     ctx: RequestContext,
     onboardingSchema: OnboardingUpdateSchema,
   ): Promise<OnboardingStatus> {
-    if (
-      (REQUIRED_ONBOARDING_STEPS as readonly string[]).includes(onboardingSchema.skipStep)
-    ) {
-      throw new AppError(
-        'VALIDATION_ERROR',
-        'Este passo é obrigatório e não pode ser pulado. Complete a configuração.',
-        400,
-      );
-    }
-
     const state = await this.getOnboarding.execute(ctx);
     if (!state) {
       throw new AppError('NOT_FOUND', 'Clínica não encontrada.', 404);

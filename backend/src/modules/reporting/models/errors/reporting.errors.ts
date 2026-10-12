@@ -1,34 +1,27 @@
 import { AppError } from '../../../../shared/middlewares/error_handler.middleware.js';
 
-export class FinancialReportForbiddenError extends AppError {
+export class PeriodTooLongError extends AppError {
+  constructor(maxDays: number) {
+    super(
+      'PERIOD_TOO_LONG',
+      `Período máximo de ${maxDays} dias. Reduza o intervalo ou exporte o relatório.`,
+      422,
+    );
+    this.name = 'PeriodTooLongError';
+  }
+}
+
+export class PeriodInvalidError extends AppError {
   constructor() {
-    super('FORBIDDEN', 'Relatório financeiro exige permissão reports.financial.', 403);
-    this.name = 'FinancialReportForbiddenError';
+    super('PERIOD_INVALID', 'Data inicial não pode ser posterior à data final.', 422);
+    this.name = 'PeriodInvalidError';
   }
 }
 
 export class ReportScopeForbiddenError extends AppError {
-  constructor(message = 'Relatório disponível somente para o próprio profissional.') {
-    super('FORBIDDEN', message, 403);
-    this.name = 'ReportScopeForbiddenError';
-  }
-}
-
-export class ReportPeriodTooLongError extends AppError {
-  constructor(maxDays = 366) {
-    super(
-      'BUSINESS_RULE_VIOLATION',
-      `Período máximo de ${maxDays} dias excedido.`,
-      422,
-    );
-    this.name = 'ReportPeriodTooLongError';
-  }
-}
-
-export class ReportPeriodInvalidError extends AppError {
   constructor() {
-    super('VALIDATION_ERROR', 'Período inválido: from deve ser ≤ to.', 400);
-    this.name = 'ReportPeriodInvalidError';
+    super('FORBIDDEN', 'Relatório disponível somente para o próprio profissional.', 403);
+    this.name = 'ReportScopeForbiddenError';
   }
 }
 
@@ -39,9 +32,23 @@ export class ExportNotFoundError extends AppError {
   }
 }
 
-export class ExportPeriodRequiredError extends AppError {
+export class ExportFormatNotSupportedError extends AppError {
   constructor() {
-    super('VALIDATION_ERROR', 'Período from/to é obrigatório para este relatório.', 400);
-    this.name = 'ExportPeriodRequiredError';
+    super('NOT_IMPLEMENTED', 'Formato XLSX ainda não disponível. Use CSV.', 501);
+    this.name = 'ExportFormatNotSupportedError';
+  }
+}
+
+export class ReportExportForbiddenError extends AppError {
+  constructor() {
+    super('FORBIDDEN', 'Permissão insuficiente para exportar este relatório.', 403);
+    this.name = 'ReportExportForbiddenError';
+  }
+}
+
+export class UnknownExportReportError extends AppError {
+  constructor() {
+    super('VALIDATION_ERROR', 'Relatório de exportação inválido.', 400);
+    this.name = 'UnknownExportReportError';
   }
 }

@@ -13,7 +13,6 @@ export class ListService {
     const result = await this.list.execute(ctx, {
       search: query.search,
       cursor: query.cursor,
-      page: query.page,
       limit: query.limit ?? 20,
       active: query.active === undefined ? undefined : query.active === 'true',
     });

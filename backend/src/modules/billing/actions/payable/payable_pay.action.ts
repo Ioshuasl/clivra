@@ -8,7 +8,6 @@ import {
   PayableNotFoundError,
 } from '../../models/errors/billing.errors.js';
 import { dateOnly } from '../../helpers/money.helper.js';
-import { CASH_SESSION_LIFECYCLE_ENABLED } from '../../helpers/cash_session_lifecycle.helper.js';
 import { nextRecurrenceDueDate, parsePayableRecurrence } from '../../models/overdue.model.js';
 import { GetOpenRepository } from '../../repositories/cash_session/cash_session_get_open.repository.js';
 import {
@@ -80,10 +79,7 @@ export class PayAction {
           unitId: row.unitId,
           openedBy: ctx.userId,
         });
-        // Ciclo de caixa desativado: CASH sem sessão aberta é permitido.
-        if (CASH_SESSION_LIFECYCLE_ENABLED && method === 'CASH' && !session) {
-          throw new CashSessionRequiredError();
-        }
+        if (method === 'CASH' && !session) throw new CashSessionRequiredError();
         const cashSessionId = session?.id ?? null;
 
         const recurrence = parsePayableRecurrence(row.recurrence);

@@ -1,71 +1,60 @@
-/**
- * Ops: altera status da assinatura (ACTIVE/SUSPENDED/…) de forma auditada.
- * Uso: pnpm --filter @repo/backend exec tsx scripts/ops-subscription-status.ts <tenantId> <STATUS> [reason]
- * ADR-0010 — sem checkout/gateway.
- */
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 import { getPrismaClient } from '../src/shared/database/tenant_prisma.js';
-import { AuditAction, writeAuditLog } from '../src/shared/database/write_audit.js';
-import { disableAllAutomations } from '../src/modules/messaging/messaging_public.js';
-import {
-  OPS_SUBSCRIPTION_STATUSES,
-  READ_ONLY_SUBSCRIPTION_STATUSES,
-} from '../src/modules/subscription/enum/subscription/subscription_status.enum.js';
-import { UpdateStatusRepository } from '../src/modules/subscription/repositories/subscription/subscription_update_status.repository.js';
+import { OPS_SUBSCRIPTION_STATUSES } from '../src/modules/subscription/enum/subscription/subscription_status.enum.js';
+import { PLAN_CODES } from '../src/modules/subscription/enum/plan/plan_code.enum.js';
+import { UpdateService } from '../src/modules/subscription/services/subscription/subscription_ops.service.js';
+import type { PlanCode } from '../src/modules/subscription/enum/plan/plan_code.enum.js';
+import type { SubscriptionStatus } from '../src/modules/subscription/enum/subscription/subscription_status.enum.js';
 
 config({ path: resolve(process.cwd(), '../.env') });
 config({ path: resolve(process.cwd(), '.env') });
 
-async function main() {
-  const tenantId = process.argv[2];
-  const status = process.argv[3];
-  const reason = process.argv[4] ?? 'ops-cli';
+function arg(name: string): string | undefined {
+  const prefix = `--${name}=`;
+  const found = process.argv.find((item) => item.startsWith(prefix));
+  if (found) return found.slice(prefix.length);
+  const idx = process.argv.indexOf(`--${name}`);
+  if (idx >= 0) return process.argv[idx + 1];
+  return undefined;
+}
 
-  if (!tenantId || !status) {
+async function main(): Promise<void> {
+  const tenantId = arg('tenant');
+  const status = arg('status') as SubscriptionStatus | undefined;
+  const planCode = arg('plan') as PlanCode | undefined;
+
+  if (!tenantId || (!status && !planCode)) {
     console.error(
-      'Uso: tsx scripts/ops-subscription-status.ts <tenantId> <STATUS> [reason]',
+      'Uso: tsx scripts/ops-subscription-status.ts --tenant <uuid> --status ACTIVE|SUSPENDED|EXPIRED [--plan ESSENCIAL|CLINICA|REDE]',
     );
-    console.error(`STATUS ∈ ${OPS_SUBSCRIPTION_STATUSES.join('|')}`);
     process.exit(1);
   }
 
-  if (!(OPS_SUBSCRIPTION_STATUSES as readonly string[]).includes(status)) {
-    console.error(`Status inválido: ${status}`);
+  if (status && !(OPS_SUBSCRIPTION_STATUSES as readonly string[]).includes(status)) {
+    console.error('status inválido. Use ACTIVE, SUSPENDED ou EXPIRED.');
+    process.exit(1);
+  }
+  if (planCode && !(PLAN_CODES as readonly string[]).includes(planCode)) {
+    console.error('plan inválido. Use ESSENCIAL, CLINICA ou REDE.');
     process.exit(1);
   }
 
-  const ctx = {
-    tenantId,
-    userId: '00000000-0000-0000-0000-000000000000',
-    requestId: `ops-subscription-status:${Date.now()}`,
-  };
-
-  const update = new UpdateStatusRepository();
-  const updated = await update.execute(ctx, status);
-  if (!updated) {
-    console.error('Assinatura não encontrada para o tenant.');
-    process.exit(1);
-  }
-
-  if (READ_ONLY_SUBSCRIPTION_STATUSES.has(status)) {
-    await disableAllAutomations(ctx);
-  }
-
-  await writeAuditLog({
-    tenantId,
-    actorType: 'SYSTEM',
-    action: AuditAction.SUBSCRIPTION_STATUS_CHANGED,
-    resourceType: 'subscription',
-    resourceId: updated.id,
-    metadata: { status, reason, source: 'ops-cli' },
-  });
-
-  console.info(`OK: tenant ${tenantId} → ${status}`);
+  const updated = await new UpdateService().execute(
+    { tenantId, userId: '', requestId: 'ops-subscription' },
+    { status, planCode },
+  );
+  console.log(
+    JSON.stringify({
+      tenantId: updated.tenantId,
+      status: updated.status,
+      plan: updated.plan.code,
+    }),
+  );
   await getPrismaClient().$disconnect();
 }
 
-main().catch(async (err) => {
+void main().catch(async (err) => {
   console.error(err);
   await getPrismaClient().$disconnect();
   process.exit(1);

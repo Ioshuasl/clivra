@@ -2,7 +2,6 @@ import { Router, type NextFunction, type Request, type RequestHandler, type Resp
 import { authenticateMiddleware } from '../../../../shared/middlewares/authenticate.middleware.js';
 import { authorize, authorizeAny } from '../../../../shared/middlewares/authorize.middleware.js';
 import { tenantContextMiddleware } from '../../../../shared/middlewares/tenant_context.middleware.js';
-import { asyncSubscriptionGuard } from '../../../subscription/subscription_public.js';
 import { ProcedureController } from '../../controllers/procedure.controller.js';
 
 function asyncHandler(
@@ -22,7 +21,6 @@ const listStack: RequestHandler[] = [
 const writeStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
-  asyncSubscriptionGuard(),
   authorize('settings.write'),
 ];
 

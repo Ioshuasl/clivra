@@ -46,13 +46,9 @@ export async function appendOutboxEvents(
 export async function listPendingOutboxEvents(
   tx: DbTransaction,
   limit = 50,
-  tenantId?: string,
 ): Promise<OutboxEventRow[]> {
   const rows = await tx.outboxEvent.findMany({
-    where: {
-      processedAt: null,
-      ...(tenantId ? { tenantId } : {}),
-    },
+    where: { processedAt: null },
     orderBy: { occurredAt: 'asc' },
     take: limit,
   });

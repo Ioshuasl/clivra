@@ -50,16 +50,9 @@ export class PatientController {
       throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, parsed.error);
     }
     const result = await this.patientList.execute(ctx, parsed.data);
-    const totalPages = Math.max(1, Math.ceil(result.total / result.pageSize));
     res.status(200).json({
       data: result.items,
-      meta: {
-        nextCursor: result.nextCursor,
-        page: result.page,
-        pageSize: result.pageSize,
-        total: result.total,
-        totalPages,
-      },
+      meta: { nextCursor: result.nextCursor },
     });
   };
 
