@@ -48,6 +48,22 @@ export class PlanLimitGuard {
     }
   }
 
+  /** Troca de plano: o uso atual precisa caber nos limites do plano alvo (RF-E10-12). */
+  async assertFitsPlan(ctx: RequestContext, target: { limits: PlanLimits }): Promise<void> {
+    const metrics: UsageMetric[] = [
+      UsageMetric.PROFESSIONALS,
+      UsageMetric.ADMIN_USERS,
+      UsageMetric.UNITS,
+      UsageMetric.STORAGE_BYTES,
+    ];
+    for (const metric of metrics) {
+      const limit = limitForMetric(target.limits, metric);
+      if (limit === null) continue;
+      const current = await this.countLive.execute(ctx, metric);
+      if (current > limit) throw new PlanLimitExceededError(metric, limit, current);
+    }
+  }
+
   async getUsage(
     ctx: RequestContext,
     metric: UsageMetric,

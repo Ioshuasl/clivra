@@ -21,6 +21,10 @@ function isAllowedWrite(url: string): boolean {
   if (path.includes('/webhooks/')) return true;
   if (path.includes('/reports/') && path.includes('/export')) return true;
   if (path.includes('/privacy/')) return true;
+  // Quem está EXPIRED/SUSPENDED precisa conseguir pagar (ou cancelar) — ADR-0017.
+  if (path.endsWith('/subscription/checkout') || path.endsWith('/subscription/cancel')) return true;
+  // Contingência manual (BILLING_PROVIDER=manual): a operação precisa reativar quem está read-only.
+  if (path.includes('/subscription/ops/')) return true;
   if (path.includes('/users/invitations/accept')) return true;
   return false;
 }

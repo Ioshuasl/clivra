@@ -36,3 +36,13 @@ export function formatPhoneInputMask(value: string | null | undefined): string {
   }
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
+
+/** CPF (000.000.000-00) até 11 dígitos; acima disso, CNPJ. */
+export function formatCpfCnpjMask(value: string | null | undefined): string {
+  const digits = digitsOnly(value).slice(0, 14);
+  if (digits.length > 11) return formatCnpjMask(digits);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}

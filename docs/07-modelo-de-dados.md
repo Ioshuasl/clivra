@@ -899,8 +899,61 @@ CREATE TABLE subscription (
   external_customer_id text,
   external_subscription_id text,
   cancel_at          timestamptz,
+  billing_method     text,               -- PIX|BOLETO|CREDIT_CARD (null = manual) — ADR-0017
+  billing_provider   text NOT NULL DEFAULT 'MANUAL',   -- ASAAS|MANUAL
   created_at         timestamptz NOT NULL DEFAULT now(),
   updated_at         timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE subscription_payment (      -- espelho das cobranças do Asaas (RLS tenant) — S9
+  id                  uuid PRIMARY KEY,
+  tenant_id           uuid NOT NULL REFERENCES tenant(id),
+  subscription_id     uuid NOT NULL REFERENCES subscription(id) ON DELETE CASCADE,
+  external_payment_id text NOT NULL UNIQUE,
+  status              text NOT NULL,     -- status do Asaas (PENDING|CONFIRMED|RECEIVED|OVERDUE|REFUNDED|…)
+  value_cents         bigint NOT NULL,
+  due_date            date NOT NULL,
+  paid_at             timestamptz,
+  billing_type        text,
+  invoice_url         text,
+  bank_slip_url       text,
+  deleted             boolean NOT NULL DEFAULT false,
+  last_event_at       timestamptz,
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  updated_at          timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE subscription_checkout (     -- tentativa de checkout, idempotente por (tenant, chave) — S9
+  id                   uuid PRIMARY KEY,
+  tenant_id            uuid NOT NULL REFERENCES tenant(id),
+  idempotency_key      text NOT NULL,
+  plan_id              uuid NOT NULL REFERENCES plan(id),
+  billing_method       text NOT NULL,    -- PIX|BOLETO|CREDIT_CARD
+  status               text NOT NULL DEFAULT 'PENDING',   -- PENDING|PAID|CANCELED|EXPIRED|FAILED
+  external_checkout_id text UNIQUE,
+  url                  text,
+  expires_at           timestamptz,
+  UNIQUE (tenant_id, idempotency_key)
+);
+
+-- schema platform, SEM RLS de tenant (o webhook chega sem contexto de tenant):
+CREATE TABLE platform.asaas_link (       -- tenant ↔ ids do Asaas
+  tenant_id                uuid PRIMARY KEY REFERENCES tenant(id) ON DELETE CASCADE,
+  external_customer_id     text UNIQUE,
+  external_subscription_id text UNIQUE
+);
+
+CREATE TABLE platform.asaas_event (      -- inbox do webhook; UNIQUE(asaas_event_id) = idempotência
+  id             uuid PRIMARY KEY,
+  asaas_event_id text NOT NULL UNIQUE,
+  event          text NOT NULL,
+  tenant_id      uuid,
+  payload        jsonb NOT NULL,         -- sem dado de cartão
+  status         text NOT NULL DEFAULT 'PENDING',   -- PENDING|DONE|FAILED
+  attempts       int NOT NULL DEFAULT 0,
+  last_error     text,
+  received_at    timestamptz NOT NULL DEFAULT now(),
+  processed_at   timestamptz
 );
 
 CREATE TABLE usage_counter (

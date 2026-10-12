@@ -27,6 +27,16 @@ const ownerReadStack: RequestHandler[] = [
   authorize('subscription.manage'),
 ];
 
+/**
+ * Cobrança (checkout, cancelamento, faturas): sem `subscriptionGuard`, porque justamente quem está
+ * EXPIRED/SUSPENDED precisa conseguir pagar. Só o Owner (`subscription.manage`).
+ */
+const billingStack: RequestHandler[] = [
+  asyncHandler(authenticateMiddleware),
+  tenantContextMiddleware,
+  authorize('subscription.manage'),
+];
+
 /** Ops: OWNER da clínica alvo com subscription.manage (piloto manual). */
 const opsStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
@@ -41,7 +51,10 @@ export function buildSubscriptionRoutes(): Router {
   router.get('/', ...ownerReadStack, asyncHandler(controller.get));
   router.get('/plans', ...readStack, asyncHandler(controller.listPlans));
   router.get('/usage', ...ownerReadStack, asyncHandler(controller.getUsage));
-  router.post('/checkout', ...ownerReadStack, asyncHandler(controller.checkout));
+  router.post('/checkout', ...billingStack, asyncHandler(controller.checkout));
+  router.post('/cancel', ...billingStack, asyncHandler(controller.cancel));
+  router.get('/payments', ...billingStack, asyncHandler(controller.listPayments));
+  router.get('/payments/:id/pay', ...billingStack, asyncHandler(controller.payPayment));
   router.post('/ops/status', ...opsStack, asyncHandler(controller.opsUpdateStatus));
 
   return router;

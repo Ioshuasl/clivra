@@ -79,5 +79,10 @@ export const OUTBOX_ROUTES: Record<string, OutboxRouteTarget> = {
   'billing.cash_session_closed': 'emit-only',
   'billing.payable_paid': 'emit-only',
   'billing.installment_overdue': 'emit-only',
+  'subscription.checkout_created': 'emit-only',
+  'subscription.subscription_activated': 'emit-only',
+  'subscription.payment_failed': 'emit-only',
+  'subscription.subscription_suspended': 'emit-only',
+  'subscription.subscription_cancelled': 'emit-only',
   'reporting.export_requested': { queue: QUEUE.reporting, job: JOB.generateExport },
 };

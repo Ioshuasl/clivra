@@ -81,6 +81,8 @@ model Tenant {
   subscription    Subscription?
   usageCounters   UsageCounter[]
   dataSubjectRequests DataSubjectRequest[]
+  subscriptionPayments SubscriptionPayment[]
+  subscriptionCheckouts SubscriptionCheckout[]
 
   @@map("tenant")
 }
@@ -111,6 +113,10 @@ model Subscription {
   externalCustomerId     String?   @map("external_customer_id")
   externalSubscriptionId String?   @map("external_subscription_id")
   cancelAt               DateTime? @map("cancel_at") @db.Timestamptz
+  /// PIX | BOLETO | CREDIT_CARD (null = cobrança manual). ADR-0017
+  billingMethod          String?   @map("billing_method")
+  /// ASAAS | MANUAL. ADR-0017
+  billingProvider        String    @default("MANUAL") @map("billing_provider")
   createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   tenant                 Tenant    @relation(fields: [tenantId], references: [id])
@@ -118,6 +124,49 @@ model Subscription {
 
   @@index([status, trialEndsAt], map: "idx_subscription_status_trial")
   @@map("subscription")
+}
+
+/// Espelho local das cobranças geradas pelo Asaas para a assinatura. ADR-0017
+model SubscriptionPayment {
+  id                String    @id @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  subscriptionId    String    @map("subscription_id") @db.Uuid
+  externalPaymentId String    @unique @map("external_payment_id")
+  status            String
+  valueCents        BigInt    @map("value_cents")
+  dueDate           DateTime  @map("due_date") @db.Date
+  paidAt            DateTime? @map("paid_at") @db.Timestamptz
+  billingType       String?   @map("billing_type")
+  invoiceUrl        String?   @map("invoice_url")
+  bankSlipUrl       String?   @map("bank_slip_url")
+  deleted           Boolean   @default(false)
+  lastEventAt       DateTime? @map("last_event_at") @db.Timestamptz
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  tenant            Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, dueDate(sort: Desc)], map: "idx_subscription_payment_tenant_due")
+  @@index([subscriptionId], map: "idx_subscription_payment_subscription")
+  @@map("subscription_payment")
+}
+
+/// Sessão de checkout (cartão via Asaas Checkout; Pix/boleto registram a tentativa). ADR-0017
+model SubscriptionCheckout {
+  id                 String    @id @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  idempotencyKey     String    @map("idempotency_key")
+  planId             String    @map("plan_id") @db.Uuid
+  billingMethod      String    @map("billing_method")
+  status             String    @default("PENDING")
+  externalCheckoutId String?   @unique @map("external_checkout_id")
+  url                String?
+  expiresAt          DateTime? @map("expires_at") @db.Timestamptz
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  tenant             Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, idempotencyKey], map: "uq_subscription_checkout_idempotency")
+  @@map("subscription_checkout")
 }
 
 /// Contadores de uso vs limites do plano.

@@ -27,6 +27,11 @@ export type SubscriptionSummary = {
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAt: string | null;
+  /** PIX | BOLETO | CREDIT_CARD (null = cobrança manual). */
+  billingMethod: string | null;
+  billingProvider: string;
+  /** Há recorrência no gateway (habilita cancelar pelo app). */
+  hasRecurringBilling: boolean;
   plan: PlanSummary;
   createdAt: string;
   updatedAt: string;

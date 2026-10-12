@@ -1,21 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   READ_ONLY_SUBSCRIPTION_STATUSES,
   SUBSCRIPTION_STATUS_LABELS,
   type SubscriptionStatus,
 } from '@/packages/admin/enum/Subscription/SubscriptionStatusEnum';
+import { pluralDays, trialDaysLeft } from '@/packages/admin/helpers/SubscriptionFormat';
 import { useSubscriptionGetHook } from '@/packages/admin/hooks/Subscription/useSubscriptionGetHook';
 import { useAuth } from '@/shared/auth/AuthProvider';
 import { hasPermission } from '@/shared/auth/permissions';
-
-function trialDaysLeft(trialEndsAt: string | null): number | null {
-  if (!trialEndsAt) return null;
-  const end = new Date(trialEndsAt).getTime();
-  if (Number.isNaN(end)) return null;
-  return Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24));
-}
+import { buttonVariants } from '@/shared/ui/button';
+import { cn } from '@/shared/helpers/utils';
 
 function statusLabel(status: string): string {
   return SUBSCRIPTION_STATUS_LABELS[status as SubscriptionStatus] ?? status;
@@ -26,17 +23,22 @@ export function SubscriptionBanner() {
   const { me } = useAuth();
   const canManage = hasPermission(me, 'subscription.manage');
   const subscription = useSubscriptionGetHook(canManage);
+  const pathname = usePathname();
 
-  if (!canManage || !subscription.data) return null;
+  // Nas telas de assinatura o próprio conteúdo já explica o estado e traz o CTA (evita dois botões primários).
+  if (!canManage || !subscription.data || pathname.includes('/assinatura')) return null;
 
-  const { status, trialEndsAt } = subscription.data;
+  const { status, trialEndsAt, checkoutAvailable } = subscription.data;
   const daysLeft = trialDaysLeft(trialEndsAt);
   const isReadOnly = READ_ONLY_SUBSCRIPTION_STATUSES.has(status);
-  const trialWarning =
-    status === 'TRIAL' && daysLeft != null && daysLeft <= 3;
+  const trialWarning = status === 'TRIAL' && daysLeft != null && daysLeft <= 3;
   const pastDue = status === 'PAST_DUE';
 
   if (!isReadOnly && !trialWarning && !pastDue) return null;
+
+  // Atraso: a fatura em aberto é paga em Assinatura. Demais casos: direto ao checkout (se ligado).
+  const href = pastDue || !checkoutAvailable ? '/app/assinatura' : '/app/assinatura/checkout';
+  const cta = pastDue ? 'Pagar fatura' : isReadOnly ? 'Reativar assinatura' : 'Assinar agora';
 
   if (isReadOnly) {
     return (
@@ -53,11 +55,8 @@ export function SubscriptionBanner() {
             Consultas e exportações liberadas; alterações bloqueadas até reativar.
           </p>
         </div>
-        <Link
-          href="/app/assinatura"
-          className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-        >
-          Ver assinatura
+        <Link href={href} className={cn(buttonVariants({ size: 'sm' }), 'cursor-pointer')}>
+          {cta}
         </Link>
       </div>
     );
@@ -65,7 +64,7 @@ export function SubscriptionBanner() {
 
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3"
       data-testid="subscription-banner-trial"
       role="status"
     >
@@ -75,17 +74,16 @@ export function SubscriptionBanner() {
             ? 'Pagamento em atraso'
             : daysLeft != null && daysLeft <= 0
               ? 'Período de teste encerrado'
-              : `Teste termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`}
+              : `Teste termina em ${pluralDays(daysLeft ?? 0)}`}
         </p>
         <p className="text-xs text-muted-foreground">
-          Fale conosco para ativar o plano e evitar interrupção.
+          {pastDue
+            ? 'Pague a fatura em aberto para evitar a suspensão da conta.'
+            : 'Assine para manter o acesso completo sem interrupção.'}
         </p>
       </div>
-      <Link
-        href="/app/assinatura"
-        className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-      >
-        Ver assinatura
+      <Link href={href} className={cn(buttonVariants({ size: 'sm' }), 'cursor-pointer')}>
+        {cta}
       </Link>
     </div>
   );

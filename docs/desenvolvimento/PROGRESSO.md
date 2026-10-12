@@ -4,6 +4,93 @@ Append-only. Entradas mais recentes no topo.
 
 ---
 
+## 2026-10-13 — S9 Bloco 7: homologação no sandbox do Asaas
+
+### Feito
+
+- Homologação com o app real + Asaas sandbox + túnel Cloudflare: Pix, boleto, cartão, webhooks (`PAYMENT_*`, `SUBSCRIPTION_*`, `CHECKOUT_*`), ativação, cancelamento
+- Achados que mudaram o desenho: cartão sem `customer` (exige telefone+endereço), ligação ao tenant pelo id do checkout (`platform.asaas_checkout_link`), URLs de retorno públicas, cartão cobra só no fim do teste
+- Cancelar durante o teste só desfaz a cobrança agendada; `SUBSCRIPTION_DELETED` de recorrência antiga é ignorado; evento sem tenant espera 24 h por vínculo
+- UI: "cartão cadastrado, 1ª cobrança em dd/mm"; sem CPF/CNPJ no cartão; sem "Pagar" em fatura de cartão
+- Roteiro repetível `scripts/homolog-asaas-sandbox.ts`; runbook `docs/runbooks/billing-asaas.md`; ADR-0017 com emenda; DDT §16 respondida
+
+### Validação
+
+- Smokes `test:asaas-adapter`, `test:subscription-checkout`, `test:asaas-webhook`, `test:subscription` verdes; Playwright `subscription-checkout` 8/8 e `subscription` 3/3
+- Sandbox real: todos os cenários do roteiro passaram (o do cartão com pagamento manual de teste)
+
+### Pendente (produção)
+
+- Conta de produção/limites PF/NFS-e; chave e token de produção; cobrança real de baixo valor; alertas ativos; worker rodando (reparo da S8)
+
+---
+
+## 2026-10-13 — S9 Blocos 5–6: checkout e cobranças (frontend)
+
+### Feito
+
+- `/app/assinatura/checkout`: escolha de plano (3 colunas), forma de pagamento (Pix, cartão, boleto), CPF/CNPJ e resumo fixo; Pix/boleto na própria página, cartão via Asaas Checkout; confirmação por polling
+- `/app/assinatura/retorno`: sucesso/cancelado/expirado; o retorno do navegador nunca ativa a assinatura
+- `SubscriptionIndex` reescrito (plano, uso, faturas, CTA por estado, pagar fatura em aberto, cancelar com confirmação); `SubscriptionBanner` com CTA novo e oculto nas telas de assinatura
+- Camada Data/Service/Hook nova (checkout, cancelar, faturas, pagar) + FormHook + schema Zod; máscara de CPF/CNPJ
+- Backend: `GET /subscription` expõe `billingMethod`, `billingProvider`, `hasRecurringBilling`, `checkoutAvailable`
+- E2E `subscription-checkout.spec.ts` (7 cenários, API de assinatura simulada no navegador) + `subscription.spec.ts` ajustado (item Assinatura vive dentro de Configurações; textos novos)
+
+### Validação
+
+- Playwright: `subscription-checkout` 7/7 e `subscription` 3/3 numa pilha isolada (API 3433 + web 3012) — visual conferido em 1366×768
+- `tsc`/ESLint sem erros novos nos arquivos da S9; `test:subscription` (backend) verde
+
+### Achados do ambiente (não são da S9)
+
+- O `.env` só libera CORS para as portas 3000/3001, mas `pnpm dev:web` usa a **3002**: o login no navegador falha com "Não foi possível conectar à API". Foi preciso subir uma pilha isolada para validar
+- `next-themes` estava declarado mas não instalado (web respondia 500); rodei `pnpm install --frozen-lockfile`
+- O banco local não tinha o seed (`pnpm db:seed`)
+- `e2e/subscription.spec.ts` já falhava no HEAD (procurava o link "Assinatura" fora do grupo Configurações)
+
+### Pendente
+
+- Bloco 7 (sandbox real, runbooks, go-live); alertas ativos; upgrade/downgrade e troca de cartão (Should)
+- Cenário E2E de boleto; paginação das faturas
+
+---
+
+## 2026-10-13 — S9 Blocos 1–4: cobrança da assinatura via Asaas (backend)
+
+### Feito
+
+- Migração `20261013000000_s9_billing_asaas`: `subscription.billing_method|billing_provider`, `subscription_payment`, `subscription_checkout` (RLS) e `platform.asaas_link` / `platform.asaas_event` (sem RLS de tenant)
+- Env `BILLING_PROVIDER` (`manual` padrão = kill switch) + `ASAAS_*` com validação no boot (prefixo da chave × ambiente, token ≠ API key)
+- Port `SubscriptionBillingPort`; adapters Asaas e Manual; cliente HTTP em `shared/integrations/asaas/` (timeout 60 s, GET com retry, POST nunca repetido às cegas)
+- `POST /subscription/checkout` (Pix/boleto na resposta; cartão via Asaas Checkout), `POST /subscription/cancel`, `GET /subscription/payments[/:id/pay]`; Idempotency-Key; retry após timeout adota a assinatura existente
+- `POST /webhooks/asaas`: token em tempo constante, `UNIQUE` no id do evento, `200` sempre que válido; worker `process-asaas-event`; varredor de eventos presos
+- Status derivado das cobranças (`billing_state.model`): `PAST_DUE` por atraso, `ACTIVE` por pagamento, `CANCELLED` final; job `suspend-past-due` (7 dias) e `reconcile-asaas-subscriptions` + `ops-asaas-reconcile.ts`
+- Smokes novos com Asaas fake (`scripts/lib/asaas_fake_server.ts`): `test:asaas-adapter` (15), `test:subscription-checkout` (30), `test:asaas-webhook` (28); CI com 3 passos novos
+- Guard: `/subscription/checkout|cancel|ops/*` liberados em read-only (quem está EXPIRED/SUSPENDED precisa pagar ou ser reativado pela operação)
+
+### Validação
+
+- `test:asaas-adapter` · `test:subscription-checkout` · `test:asaas-webhook` · `test:subscription` · `test:rls` verdes; `arch:check` limpo; ESLint limpo nos arquivos novos; `tsc` sem erros novos
+- `test:subscription` (legado) estava falhando no HEAD (reativar tenant read-only por `ops/status` caía no guard); passa com a allowlist
+
+### Estado do repositório que impacta esta entrega (pré-existente, não corrigido aqui)
+
+- `backend/src/worker.ts` referencia jobs/nomes da S8 que não existem no HEAD (`tenantExportJob`, `JOB.tenantExport`, `anomalyClinicalReadJob`, `ANOMALY_INTERVAL_MS` etc.); o worker não sobe como está. Os jobs da S9 estão registrados lá, mas só rodam depois desse reparo
+- ~80 erros de `tsc` pré-existentes em reporting, messaging, platform, `AuditAction` (`CLINICAL_READ`, `NOTE_*`, `EXPORT_*`…) e `subscription_ops`/`usage` (arquivos legados duplicados)
+- O cliente Prisma gerado estava defasado do `schema.prisma` (`platform_role`); foi preciso `prisma generate`
+
+### Pendente
+
+- Blocos 5–6 (frontend) e 7 (sandbox real, runbooks, go-live)
+- Alertas ativos (Sentry/métricas); upgrade/downgrade e troca de cartão (Should)
+- Validar no sandbox: `customer` no Checkout, payload dos eventos `CHECKOUT_*`, URL do checkout sandbox
+
+### Próximo
+
+- Reparar o `worker.ts`/wiring da S8 e então S9 Bloco 5 (frontend de checkout)
+
+---
+
 ## 2026-09-12 — S7 fechada: aceite via skill tester
 
 ### Feito

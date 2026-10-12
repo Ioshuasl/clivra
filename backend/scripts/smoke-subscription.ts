@@ -4,10 +4,14 @@ import type { Server } from 'node:http';
 import { createApp } from '../src/app.js';
 import { getPrismaClient, getTenantPrisma } from '../src/shared/database/tenant_prisma.js';
 import { trialExpireJob } from '../src/modules/subscription/jobs/trial_expire.job.js';
+import { setBillingAdapter } from '../src/modules/subscription/adapters/billing_adapter.factory.js';
+import { ManualBillingAdapter } from '../src/modules/subscription/adapters/manual_billing.adapter.js';
 
 type Json = { status: number; body: Record<string, unknown> | null };
 
 async function main() {
+  // Este smoke cobre o fluxo manual (BILLING_PROVIDER=manual), mesmo que o .env local use o Asaas.
+  setBillingAdapter(new ManualBillingAdapter());
   const app = createApp();
   const server = app.listen(0) as Server;
   await once(server, 'listening');
@@ -92,11 +96,16 @@ async function main() {
 
   const checkout = await request('/api/v1/subscription/checkout', {
     method: 'POST',
-    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
-    body: '{}',
+    headers: {
+      ...authHeaders(token, tenantId),
+      'content-type': 'application/json',
+      'idempotency-key': `smoke-${stamp}`,
+    },
+    body: JSON.stringify({ planCode: 'CLINICA', billingMethod: 'PIX' }),
   });
   console.log('POST /checkout', checkout.status, errorCode(checkout));
-  if (checkout.status !== 501 || errorCode(checkout) !== 'NOT_IMPLEMENTED') failed = true;
+  // BILLING_PROVIDER=manual (padrão): checkout automático fica indisponível (ADR-0017, kill switch)
+  if (checkout.status !== 503 || errorCode(checkout) !== 'BILLING_UNAVAILABLE') failed = true;
 
   const pro1 = await request('/api/v1/clinic/professionals', {
     method: 'POST',

@@ -48,11 +48,46 @@ const envSchema = z.object({
   DSR_DUE_DAYS: z.coerce.number().int().min(1).max(90).default(15),
   CLINICAL_READ_ANOMALY_N: z.coerce.number().int().min(1).max(10_000).default(40),
   PLATFORM_OPERATOR_EMAILS: z.string().optional(),
+  BILLING_PROVIDER: z.enum(['asaas', 'manual']).default('manual'),
+  ASAAS_ENV: z.enum(['sandbox', 'production']).default('sandbox'),
+  ASAAS_BASE_URL: z.string().url().optional(),
+  ASAAS_CHECKOUT_BASE_URL: z.string().url().optional(),
+  ASAAS_API_KEY: z.string().min(1).optional(),
+  ASAAS_WEBHOOK_TOKEN: z
+    .string()
+    .min(32)
+    .max(255)
+    .regex(/^\S+$/, 'sem espaços em branco')
+    .optional(),
+  ASAAS_USER_AGENT: z.string().min(1).default('odonto-saas/1.0'),
 });
+
+const ASAAS_KEY_PREFIX = { sandbox: '$aact_hmlg_', production: '$aact_prod_' } as const;
 
 export type Env = z.infer<typeof envSchema>;
 
+/** ADR-0017: com BILLING_PROVIDER=asaas a chave e o token do webhook são obrigatórios e coerentes com o ambiente. */
+function assertAsaasConfig(parsed: Env): void {
+  if (parsed.BILLING_PROVIDER !== 'asaas') return;
+  const problems: string[] = [];
+  if (!parsed.ASAAS_API_KEY) problems.push('ASAAS_API_KEY ausente');
+  if (!parsed.ASAAS_WEBHOOK_TOKEN) problems.push('ASAAS_WEBHOOK_TOKEN ausente');
+  if (parsed.ASAAS_API_KEY && parsed.ASAAS_API_KEY === parsed.ASAAS_WEBHOOK_TOKEN) {
+    problems.push('ASAAS_WEBHOOK_TOKEN não pode ser a API key');
+  }
+  if (parsed.ASAAS_API_KEY && !parsed.ASAAS_API_KEY.startsWith(ASAAS_KEY_PREFIX[parsed.ASAAS_ENV])) {
+    problems.push(`ASAAS_API_KEY não pertence ao ambiente ${parsed.ASAAS_ENV}`);
+  }
+  if (parsed.ASAAS_BASE_URL && parsed.NODE_ENV === 'production') {
+    problems.push('ASAAS_BASE_URL só é permitido fora de production');
+  }
+  if (problems.length > 0) {
+    throw new Error(`Configuração Asaas inválida: ${problems.join('; ')}`);
+  }
+}
+
 export const env: Env = envSchema.parse(process.env);
+assertAsaasConfig(env);
 
 export const jwtPrivateKey = decodePemKey(env.JWT_PRIVATE_KEY);
 export const jwtPublicKey = decodePemKey(env.JWT_PUBLIC_KEY);
@@ -70,6 +105,28 @@ export function wahaHmacKey(): string {
 export function wahaWebhookUrl(): string {
   if (env.WAHA_WEBHOOK_URL) return env.WAHA_WEBHOOK_URL;
   return 'http://localhost:3333/api/v1/webhooks/whatsapp';
+}
+
+export type AsaasConfig = {
+  baseUrl: string;
+  checkoutBaseUrl: string;
+  apiKey: string;
+  webhookToken: string;
+  userAgent: string;
+};
+
+/** Config do Asaas (só válida com BILLING_PROVIDER=asaas; o boot já validou os campos). */
+export function asaasConfig(): AsaasConfig {
+  const sandbox = env.ASAAS_ENV === 'sandbox';
+  return {
+    baseUrl: env.ASAAS_BASE_URL ?? (sandbox ? 'https://api-sandbox.asaas.com/v3' : 'https://api.asaas.com/v3'),
+    checkoutBaseUrl:
+      env.ASAAS_CHECKOUT_BASE_URL ??
+      (sandbox ? 'https://sandbox.asaas.com' : 'https://asaas.com'),
+    apiKey: env.ASAAS_API_KEY ?? '',
+    webhookToken: env.ASAAS_WEBHOOK_TOKEN ?? '',
+    userAgent: env.ASAAS_USER_AGENT,
+  };
 }
 
 export function platformOperatorEmails(): string[] {

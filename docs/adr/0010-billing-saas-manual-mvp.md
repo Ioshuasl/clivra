@@ -1,7 +1,8 @@
 # ADR-0010 — Cobrança da assinatura SaaS: manual no MVP; gateways candidatos depois
 
-- **Status:** Aceito
+- **Status:** Supersedido
 - **Data:** 2026-08-11
+- **Supersedido em:** 2026-10-12 por [ADR-0017](./0017-billing-saas-asaas.md) (cobrança automática via Asaas). O texto abaixo é histórico; o fluxo **manual** permanece apenas como contingência (`BILLING_PROVIDER=manual`).
 - **Contexto:** Módulo `subscription` — cobrança **plataforma → clínica** (não confundir com financeiro da clínica)
 
 ## Contexto

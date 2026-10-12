@@ -17,6 +17,15 @@ import { generateReceiptPdfJob } from './modules/billing/jobs/generate_receipt_p
 import { generateExportJob } from './modules/reporting/jobs/report_export.job.js';
 import { trialExpireJob } from './modules/subscription/jobs/trial_expire.job.js';
 import { recalculateUsageCountersJob } from './modules/subscription/jobs/recalculate_usage_counters.job.js';
+import {
+  processAsaasEventJob,
+  sweepStuckAsaasEvents,
+} from './modules/subscription/jobs/process_asaas_event.job.js';
+import {
+  reconcileAsaasSubscriptionJob,
+  suspendPastDueJob,
+} from './modules/subscription/jobs/reconcile_asaas_subscriptions.job.js';
+import { listTenantsWithAsaasSubscription } from './modules/subscription/subscription_public.js';
 import { listTenantsForScheduledJobs } from './modules/clinic/clinic_public.js';
 import { todayInTimezone } from './modules/treatments/helpers/quote_valid_until.helper.js';
 import { hourInTimezone } from './modules/billing/helpers/civil_date.helper.js';
@@ -29,6 +38,30 @@ const DISPATCH_INTERVAL_MS = 5_000;
 const EXPIRE_QUOTES_INTERVAL_MS = 15 * 60_000;
 const MARK_OVERDUE_INTERVAL_MS = 15 * 60_000;
 const TRIAL_EXPIRE_INTERVAL_MS = 15 * 60_000;
+const ASAAS_BILLING_INTERVAL_MS = 15 * 60_000;
+const ASAAS_SWEEP_INTERVAL_MS = 5 * 60_000;
+
+/** ADR-0017: reconciliação diária e checagem horária de PAST_DUE → SUSPENDED, por tenant com Asaas. */
+async function enqueueAsaasBilling(queue: BullmqJobQueue): Promise<void> {
+  if (!queue.isConnected()) return;
+  const tenants = await listTenantsWithAsaasSubscription();
+  const day = new Date().toISOString().slice(0, 10);
+  const hour = `${day}T${String(new Date().getUTCHours()).padStart(2, '0')}`;
+  for (const tenantId of tenants) {
+    await queue.add(
+      QUEUE.platform,
+      JOB.reconcileAsaasSubscriptions,
+      { tenantId, requestId: `asaas-reconcile:${day}` },
+      { jobId: `asaas-reconcile-${tenantId}-${day}` },
+    );
+    await queue.add(
+      QUEUE.platform,
+      JOB.suspendPastDue,
+      { tenantId, requestId: `suspend-past-due:${hour}` },
+      { jobId: `suspend-past-due-${tenantId}-${hour}` },
+    );
+  }
+}
 
 async function enqueueMarkOverdue(queue: BullmqJobQueue): Promise<void> {
   if (!queue.isConnected()) return;
@@ -155,6 +188,9 @@ async function main(): Promise<void> {
   queue.register(QUEUE.platform, JOB.trialExpire, trialExpireJob);
   queue.register(QUEUE.platform, JOB.recalculateUsageCounters, recalculateUsageCountersJob);
   queue.register(QUEUE.billing, JOB.markOverdueInstallments, markOverdueInstallmentsJob);
+  queue.register(QUEUE.platform, JOB.processAsaasEvent, processAsaasEventJob);
+  queue.register(QUEUE.platform, JOB.reconcileAsaasSubscriptions, reconcileAsaasSubscriptionJob);
+  queue.register(QUEUE.platform, JOB.suspendPastDue, suspendPastDueJob);
   queue.register(QUEUE.platform, JOB.smokePing, async (payload: JobPayload) => {
     logger.info(
       { tenantId: payload.tenantId, requestId: payload.requestId, eventId: payload.eventId },
@@ -236,6 +272,21 @@ async function main(): Promise<void> {
     logger.error({ err }, 'trial_expire_enqueue_error');
   });
 
+  const asaasBillingInterval = setInterval(() => {
+    void enqueueAsaasBilling(queue).catch((err) => {
+      logger.error({ err }, 'asaas_billing_enqueue_error');
+    });
+  }, ASAAS_BILLING_INTERVAL_MS);
+  void enqueueAsaasBilling(queue).catch((err) => {
+    logger.error({ err }, 'asaas_billing_enqueue_error');
+  });
+
+  const asaasSweepInterval = setInterval(() => {
+    void sweepStuckAsaasEvents().catch((err) => {
+      logger.error({ err }, 'asaas_sweep_error');
+    });
+  }, ASAAS_SWEEP_INTERVAL_MS);
+
   const health = startWorkerHealth(() => ({
     status: 'ok',
     service: 'worker',
@@ -247,6 +298,8 @@ async function main(): Promise<void> {
     clearInterval(expireInterval);
     clearInterval(overdueInterval);
     clearInterval(trialInterval);
+    clearInterval(asaasBillingInterval);
+    clearInterval(asaasSweepInterval);
     health.close();
     await queue.close();
     await getPrismaClient().$disconnect();

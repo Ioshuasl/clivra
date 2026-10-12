@@ -521,7 +521,11 @@ GET    /api/v1/exports/:id                   status + downloadUrl assinada 15 mi
 ```
 GET    /api/v1/subscription
 GET    /api/v1/subscription/plans
-POST   /api/v1/subscription/checkout      → 501 NOT_IMPLEMENTED (“fale conosco”; ADR-0010)
+POST   /api/v1/subscription/checkout      → Pix/boleto (QR/linha digitável na resposta) ou cartão (redirectUrl do Asaas Checkout); Idempotency-Key obrigatória (ADR-0017)
+POST   /api/v1/subscription/cancel
+GET    /api/v1/subscription/payments       ?cursor=&limit=
+GET    /api/v1/subscription/payments/:id/pay
+POST   /api/v1/webhooks/asaas              → sem usuário/tenant; header asaas-access-token
 GET    /api/v1/subscription/usage
 POST   /api/v1/subscription/ops/status    → ops auditado (ACTIVE|SUSPENDED|…); sem gateway
 
@@ -568,7 +572,18 @@ Status: `TRIAL` | `ACTIVE` | `PAST_DUE` | `SUSPENDED` | `EXPIRED` | `CANCELLED`.
 
 **GET `/subscription/plans`:** catálogo ativo (Essencial / Clínica / Rede). **GET `/subscription/usage`:** `professionals` / `users` / `units` / `storageBytes` / `messagesMonth` com `{ metric, current, limit }` (`limit` nulo = ilimitado).
 
-**POST `/subscription/checkout`:** `501 NOT_IMPLEMENTED` — “Checkout não está disponível neste momento. Fale conosco para ativar o plano.” Ativação/suspensão: script ops auditado `backend/scripts/ops-subscription-status.ts`.
+**POST `/subscription/checkout`** ([ADR-0017](./adr/0017-billing-saas-asaas.md), `subscription.manage`; **não** passa pelo `subscriptionGuard`, para que EXPIRED/SUSPENDED consigam pagar): corpo `{ planCode: ESSENCIAL|CLINICA|REDE, billingMethod: PIX|BOLETO|CREDIT_CARD, cpfCnpj? }` (`cpfCnpj` só em Pix/boleto, quando o cliente ainda não existe no gateway e o tenant não tem `tax_id`; **no cartão não se envia**: a página do Asaas coleta os dados do titular). Header `Idempotency-Key` obrigatório. `201`:
+- Pix/boleto → `{ checkoutId, billingMethod, status, payment?: { id, dueDate, valueCents, status, invoiceUrl, pix?: { qrCodeBase64, payload, expiresAt }, boleto?: { digitableLine, url } } }`
+- cartão → `{ checkoutId, billingMethod, status, redirectUrl }` (página hospedada do Asaas; nenhum dado de cartão passa pelo app; o retorno do navegador **não** confirma pagamento).
+Erros: `400` (corpo/chave), `409 SUBSCRIPTION_ALREADY_ACTIVE` (ACTIVE/PAST_DUE), `409 IDEMPOTENCY_KEY_REUSED`, `422 PLAN_NOT_FOUND` / `CPF_CNPJ_REQUIRED` / `PLAN_LIMIT_EXCEEDED` (uso atual não cabe no plano), `502 BILLING_GATEWAY_ERROR` (`details.inconclusive` = pode ter sido processado; repetir com a mesma chave), `503 BILLING_UNAVAILABLE` (`BILLING_PROVIDER=manual`), `503 BILLING_MISCONFIGURED` (cartão com `APP_PUBLIC_URL` em localhost: o Asaas exige URL pública). A assinatura só vira `ACTIVE` quando o webhook confirma o pagamento.
+
+**GET `/subscription`** também devolve `billingMethod`, `billingProvider` (`ASAAS`|`MANUAL`), `hasRecurringBilling` (há recorrência no gateway: habilita cancelar) e `checkoutAvailable` (pagamento online ligado no servidor). A tela usa esses campos para decidir CTA, cancelamento e o aviso de "pagamento online indisponível".
+
+**GET `/subscription/payments`:** cobranças espelhadas (`{ id, externalPaymentId, status, valueCents, dueDate, paidAt, billingType, invoiceUrl, bankSlipUrl }`), cursor por id. **GET `/subscription/payments/:id/pay`:** QR Pix atualizado ou boleto da cobrança em aberto. **POST `/subscription/cancel`:** `{ reason? }` — remove a recorrência no Asaas (apaga cobranças pendentes/vencidas) e leva a `CANCELLED`; **durante o teste (`TRIAL`)** só desfaz a cobrança agendada e a clínica continua em `TRIAL` (`200 { status: "TRIAL" }`); `409 NO_BILLING_SUBSCRIPTION` se não houver recorrência.
+
+**POST `/webhooks/asaas`:** valida `asaas-access-token` (tempo constante; `401 INVALID_WEBHOOK_TOKEN`), persiste o evento em `platform.asaas_event` (UNIQUE no `id` do evento) e responde **exatamente** `200` (o Asaas trata qualquer outro código como falha e pausa a fila após 15). Processamento assíncrono no worker; evento duplicado/desconhecido/de tenant inexistente também responde `200`. Mapeamento de eventos e derivação de status: [DDT §7](./desenvolvimento/DDT-integracao-asaas.md).
+
+Ativação/suspensão manual (contingência, `BILLING_PROVIDER=manual`): script `backend/scripts/ops-subscription-status.ts` ou `POST /subscription/ops/status`. Reconciliação sob demanda: `backend/scripts/ops-asaas-reconcile.ts`.
 
 Estouro de limite (profissionais, usuários administrativos, unidades, storage no upload): `402 PLAN_LIMIT_EXCEEDED` com mensagem acionável (`details.href` = `/app/assinatura`). `messages_month` é observado, não bloqueia envio da inbox.
 
@@ -663,15 +678,15 @@ Script ops: `backend/scripts/ops-support-access.ts` (`request` / `approve` / `ge
 { "data": { "db": true, "redis": true, "storage": true } }
 ```
 
-**Assinatura (E10 — S7, cobrança manual):** `subscription.manage` (OWNER) para GET subscription/plans/usage e ops. Envelope `{ data }`.
+**Assinatura (E10 — S7 base; S9 cobrança automática):** `subscription.manage` (OWNER) para GET subscription/plans/usage e ops. Envelope `{ data }`.
 
 - `GET /subscription` — assinatura atual + plano (`status`: TRIAL|ACTIVE|PAST_DUE|SUSPENDED|EXPIRED|CANCELLED; `trialEndsAt`; `plan.limits`).
 - `GET /subscription/plans` — catálogo ativo (Essencial / Clínica / Rede).
 - `GET /subscription/usage` — métricas ao vivo vs limites (`professionals`, `admin_users`, `units`, `storage_bytes`, `messages_month`, `patients`).
-- `POST /subscription/checkout` — **não** implementa pagamento; `501 NOT_IMPLEMENTED` com mensagem para falar conosco ([ADR-0010](./adr/0010-billing-saas-manual-mvp.md)).
+- `POST /subscription/checkout`, `POST /subscription/cancel`, `GET /subscription/payments[/:id/pay]`, `POST /webhooks/asaas` — cobrança automática via Asaas ([ADR-0017](./adr/0017-billing-saas-asaas.md)); detalhes acima.
 - `POST /subscription/ops/status` — `{ "status", "reason"? }` no tenant autenticado; audita `SUBSCRIPTION_STATUS_CHANGED`; em SUSPENDED/EXPIRED/CANCELLED desliga automações de messaging. Alternativa CLI: `backend/scripts/ops-subscription-status.ts`.
 
-**Guards:** `subscriptionGuard` bloqueia escrita HTTP (`402 SUBSCRIPTION_REQUIRED`) quando SUSPENDED/EXPIRED/CANCELLED; GET e `POST /reports/:report/export` liberados. `PlanLimitGuard` → `402 PLAN_LIMIT_EXCEEDED` em novo profissional, convite de usuário admin, unidade e upload de storage.
+**Guards:** `subscriptionGuard` bloqueia escrita HTTP (`402 SUBSCRIPTION_REQUIRED`) quando SUSPENDED/EXPIRED/CANCELLED; GET, `POST /reports/:report/export`, `POST /subscription/checkout|cancel|ops/*` e `/webhooks/*` liberados. `PlanLimitGuard` → `402 PLAN_LIMIT_EXCEEDED` em novo profissional, convite de usuário admin, unidade e upload de storage.
 ## 3. Contratos detalhados dos fluxos críticos
 
 ### 3.1 Criar agendamento

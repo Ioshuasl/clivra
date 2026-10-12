@@ -35,4 +35,7 @@ export const adminQueryKeys = {
   subscription: ['subscription'] as const,
   subscriptionPlans: ['subscription', 'plans'] as const,
   subscriptionUsage: ['subscription', 'usage'] as const,
+  subscriptionPayments: ['subscription', 'payments'] as const,
+  subscriptionPaymentPay: (paymentId: string) =>
+    ['subscription', 'payments', 'pay', paymentId] as const,
 };

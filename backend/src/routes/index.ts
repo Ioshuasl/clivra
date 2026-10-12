@@ -18,7 +18,10 @@ import {
 import { buildTreatmentsRouter, buildPublicQuotesRouter } from '../modules/treatments/treatments.module.js';
 import { buildBillingRouter } from '../modules/billing/billing.module.js';
 import { buildReportingRouter } from '../modules/reporting/reporting.module.js';
-import { buildSubscriptionRouter } from '../modules/subscription/subscription.module.js';
+import {
+  buildAsaasWebhookRouter,
+  buildSubscriptionRouter,
+} from '../modules/subscription/subscription.module.js';
 import { buildPlatformRouter } from '../modules/platform/platform.module.js';
 
 /** Monta rotas versionadas em `/api/v1`. Módulos de domínio entram aqui. */
@@ -32,6 +35,7 @@ export function buildApiRouter(): Router {
   api.use(buildSchedulingRouter());
   api.use(buildMessagingRouter());
   api.use('/webhooks/whatsapp', buildWhatsappWebhookRouter());
+  api.use('/webhooks/asaas', buildAsaasWebhookRouter());
   api.use(buildTreatmentsRouter());
   api.use(buildBillingRouter());
   api.use(buildReportingRouter());

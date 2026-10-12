@@ -24,3 +24,7 @@ backend/src/docs/openapi.yaml
 scripts/odontogram/_*.png
 frontend/src/packages/clinico/assets/odontogram/_work-full.png
 frontend/src/packages/clinico/assets/odontogram/glyphs/*.png
+
+# Claude Code
+.claude/settings.local.json
+.claude/skills/*/.run/

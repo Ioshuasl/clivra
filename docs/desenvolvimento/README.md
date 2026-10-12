@@ -20,8 +20,9 @@ Pasta **somente** para acompanhamento do desenvolvimento (scaffold, sprints, dec
 
 ## Status atual
 
-- **Fase:** Sprint 7 — Inbox / relatórios / billing SaaS (E8b + E9 + E10) — **fechada** (código + aceite local; `pnpm tester` verde 2026-09-12)
-- **Próxima:** Sprint 8 — Endurecimento / LGPD / piloto
+- **Fase:** Sprint 8 — Endurecimento / LGPD / piloto — código frontend Must fechado (aceite residual em aberto)
+- **Próxima (em andamento — Blocos 1–4 backend prontos):** Sprint 9 — Cobrança automática via Asaas (E10) — [`sprints/S9-billing-asaas.md`](./sprints/S9-billing-asaas.md) · design em [`DDT-integracao-asaas.md`](./DDT-integracao-asaas.md) · decisão [ADR-0017](../adr/0017-billing-saas-asaas.md)
+- **Sprint 7:** Inbox / relatórios / billing SaaS (E8b + E9 + E10) — **fechada** (código + aceite local; `pnpm tester` verde 2026-09-12); cobrança manual até a S9
 - **Anterior:** Sprint 6 — Financeiro (E7) — **fechada** (código + aceite local; M4 demo local)
 - **Sprint 5:** Orçamento → tratamento (E6) — **fechada**
 - **Sprint 4:** Prontuário (E5) — **código Must fechado** (M3 uso real pendente)

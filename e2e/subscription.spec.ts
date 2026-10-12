@@ -15,13 +15,13 @@ test.describe('Assinatura (E10)', () => {
     await ensureSubscriptionActive();
     await loginAs(page, OWNER);
 
-    await expect(page.getByRole('link', { name: 'Assinatura' })).toBeVisible();
+    // O item "Assinatura" fica dentro do grupo Configurações (expandido na própria rota).
     await page.goto('/app/assinatura');
+    await expect(page.getByRole('link', { name: 'Assinatura' })).toBeVisible();
     await expect(page.getByTestId('subscription-page')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Assinatura' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Uso atual' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Planos disponíveis' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Falar para ativar' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Faturas' })).toBeVisible();
   });
 
   test('ASB e DENTIST não veem nav Assinatura', async ({ page }) => {
