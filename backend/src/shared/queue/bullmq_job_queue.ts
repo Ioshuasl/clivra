@@ -87,9 +87,15 @@ export class BullmqJobQueue implements JobQueue {
     };
     try {
       const q = this.getQueue(queue);
-      await q.add(jobName, payload, opts);
+      await q.add(jobName, payload, {
+        ...opts,
+        jobId: sanitizeBullmqJobId(opts.jobId),
+      });
     } catch (err) {
-      throw new RedisUnavailableError(err);
+      if (isRedisConnectivityError(err)) {
+        throw new RedisUnavailableError(err);
+      }
+      throw err;
     }
   }
 
@@ -190,4 +196,22 @@ export class BullmqJobQueue implements JobQueue {
     }
     this.probe = null;
   }
+}
+
+/** BullMQ rejeita `:` em custom jobId — normaliza ids legados (`event:job`, `mark-overdue:…`). */
+function sanitizeBullmqJobId(jobId: string | undefined): string | undefined {
+  if (!jobId) return undefined;
+  return jobId.replace(/:/g, '__');
+}
+
+function isRedisConnectivityError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const message = err instanceof Error ? err.message : String(err);
+  if (/Custom Id cannot contain/i.test(message)) return false;
+  const code = 'code' in err ? String((err as { code?: unknown }).code ?? '') : '';
+  return (
+    /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNRESET|READONLY|LOADING|NR_CLOSED|Connection is closed/i.test(
+      message,
+    ) || /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNRESET/.test(code)
+  );
 }

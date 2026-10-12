@@ -1,7 +1,6 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { listPatientTimelineAppointments } from '../../../scheduling/scheduling_public.js';
 import { listQuotesForTimeline } from '../../../treatments/treatments_public.js';
-import { listPatientMessagesForTimeline } from '../../../messaging/messaging_public.js';
 import { GetService as PatientGetService } from '../patient/patient_get.service.js';
 import { PatientNotFoundError } from '../../models/errors/patients.errors.js';
 import type {
@@ -75,25 +74,6 @@ export class GetService {
     }
     if (hasPermission(ctx, 'messaging.read')) {
       includedSources.push('MESSAGE');
-      const messages = await listPatientMessagesForTimeline(ctx, patientId, 20);
-      for (const message of messages) {
-        const preview =
-          message.body?.trim() ||
-          (message.type === 'IMAGE' ? 'Imagem' : message.type === 'DOCUMENT' ? 'Documento' : 'Mensagem');
-        items.push({
-          id: `message:${message.id}`,
-          source: 'MESSAGE',
-          occurredAt: message.occurredAt,
-          title: message.direction === 'INBOUND' ? 'Mensagem recebida' : 'Mensagem enviada',
-          summary: preview.length > 120 ? `${preview.slice(0, 117)}…` : preview,
-          refId: message.conversationId,
-          meta: {
-            messageId: message.id,
-            direction: message.direction,
-            type: message.type,
-          },
-        });
-      }
     }
 
     items.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));

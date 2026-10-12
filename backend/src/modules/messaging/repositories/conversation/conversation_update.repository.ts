@@ -1,7 +1,7 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
-import { mapConversation } from '../../helpers/messaging_mapper.helper.js';
-import type { ConversationSummary } from '../../types/conversation/conversation.types.js';
+import type { ConversationSummary } from '../../types/messaging.types.js';
+import { mapConversation } from './mappers/conversation.mapper.js';
 
 export class UpdateRepository {
   async execute(
@@ -20,6 +20,7 @@ export class UpdateRepository {
         select: { id: true },
       });
       if (!existing) return null;
+
       const row = await tx.conversation.update({
         where: { id: conversationId },
         data: {
@@ -27,7 +28,9 @@ export class UpdateRepository {
             ? { assignedTo: conversationSchema.assignedToUserId }
             : {}),
           ...(conversationSchema.status !== undefined ? { status: conversationSchema.status } : {}),
-          ...(conversationSchema.patientId !== undefined ? { patientId: conversationSchema.patientId } : {}),
+          ...(conversationSchema.patientId !== undefined
+            ? { patientId: conversationSchema.patientId }
+            : {}),
         },
       });
       return mapConversation(row);

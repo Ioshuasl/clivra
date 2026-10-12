@@ -9,15 +9,12 @@ import {
   type NotificationScheduleInput,
   type NotificationScheduler,
 } from './services/notification/notification_schedule.service.js';
-import { ListTimelineByPatientRepository } from './repositories/message/message_timeline_by_patient.repository.js';
 import type { WhatsappAccountSummary } from './types/messaging.types.js';
-import type { PatientMessageTimelineItem } from './types/message/message_timeline.types.js';
 
 const onboarding = new MessagingOnboardingRepository();
 const getAccount = new GetAccountRepository();
 const scheduleService = new ScheduleService();
 const disableAutomationsRepo = new DisableAllAutomationsRepository();
-const listPatientMessages = new ListTimelineByPatientRepository();
 
 /** Seed automations D-1/H-3/waitlist + créditos de cortesia no signup. */
 export async function seedMessagingOnSignup(
@@ -63,15 +60,5 @@ export async function scheduleAppointmentNotifications(
   await scheduleService.execute(ctx, input, scheduler);
 }
 
-/** Histórico de mensagens do paciente para timeline (RF-E8-09). */
-export async function listPatientMessagesForTimeline(
-  ctx: RequestContext,
-  patientId: string,
-  limit = 20,
-): Promise<PatientMessageTimelineItem[]> {
-  return listPatientMessages.execute(ctx, patientId, limit);
-}
-
 export type { NotificationScheduleInput, NotificationScheduler } from './services/notification/notification_schedule.service.js';
 export type { WhatsappAccountSummary } from './types/messaging.types.js';
-export type { PatientMessageTimelineItem } from './types/message/message_timeline.types.js';

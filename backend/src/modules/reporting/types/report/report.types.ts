@@ -1,43 +1,36 @@
 import type { RevenueGroupBy } from '../../enum/report/revenue_group_by.enum.js';
 
-export type MoneyCount = {
-  count: number;
-  amountCents: number;
-};
-
-export type DashboardAgenda = {
-  total: number;
-  byStatus: Record<string, number>;
-};
+export type DashboardAgendaByStatus = Record<string, number>;
 
 export type DashboardDto = {
   date: string;
   timezone: string;
-  agenda: DashboardAgenda;
-  receivableToday: MoneyCount | null;
-  receivedToday: MoneyCount | null;
-  noShowsMonth: { count: number };
-  productionMonth: { executedCents: number };
-  hrefs: {
+  agendaByStatus: DashboardAgendaByStatus;
+  receivableTodayCents: number;
+  receivableTodayCount: number;
+  noShowsMonthCount: number;
+  productionMonthCents: number;
+  drillDown: {
     agenda: string;
     receivableToday: string;
-    receivedToday: string;
-    noShowsMonth: string;
-    productionMonth: string;
+    noShows: string;
+    production: string;
   };
 };
 
 export type NoShowItemDto = {
   appointmentId: string;
-  status: string;
-  startsAt: string;
+  patientId: string;
+  patientCode: number;
   professionalId: string;
   professionalName: string;
   procedureName: string | null;
+  status: string;
+  startsAt: string;
   estimatedLossCents: number;
 };
 
-export type NoShowReportDto = {
+export type NoShowsReportDto = {
   from: string;
   to: string;
   noShowCount: number;
@@ -46,12 +39,11 @@ export type NoShowReportDto = {
   items: NoShowItemDto[];
 };
 
-export type RevenueItemDto = {
+export type RevenueBucketDto = {
   key: string;
+  label: string;
   amountCents: number;
   count: number;
-  professionalId?: string;
-  professionalName?: string;
 };
 
 export type RevenueReportDto = {
@@ -59,33 +51,19 @@ export type RevenueReportDto = {
   to: string;
   groupBy: RevenueGroupBy;
   totalCents: number;
-  count: number;
-  items: RevenueItemDto[];
+  buckets: RevenueBucketDto[];
 };
 
 export type ProcedureReportItemDto = {
   procedureId: string;
+  procedureCode: string;
   procedureName: string;
   count: number;
-  executedCents: number;
+  totalCents: number;
 };
 
-export type ProcedureReportDto = {
+export type ProceduresReportDto = {
   from: string;
   to: string;
   items: ProcedureReportItemDto[];
-};
-
-export type ReportPeriod = {
-  from: string;
-  to: string;
-  start: Date;
-  endExclusive: Date;
-};
-
-export type DashboardQuery = {
-  date: string;
-  unitId?: string;
-  professionalId?: string;
-  includeFinancial: boolean;
 };

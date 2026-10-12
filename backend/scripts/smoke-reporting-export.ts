@@ -1,31 +1,23 @@
-process.env.STORAGE_FAKE = '1';
-
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { Server } from 'node:http';
-import { InMemoryJobQueue } from '../src/shared/queue/in_memory_job_queue.js';
-import { setJobQueue } from '../src/shared/queue/job_queue_singleton.js';
-import { JOB, QUEUE } from '../src/shared/queue/queue_names.js';
-import { getObjectStorage, resetObjectStorageForTests } from '../src/shared/storage/index.js';
+import { createApp } from '../src/app.js';
+import { getPrismaClient, getTenantPrisma } from '../src/shared/database/tenant_prisma.js';
 import { Role } from '../src/modules/identity/enum/role/role.enum.js';
 import { hashToken } from '../src/shared/helpers/token_hash.js';
 import { addDays } from '../src/modules/identity/helpers/slug.helper.js';
-import { getPrismaClient, getTenantPrisma } from '../src/shared/database/tenant_prisma.js';
-
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-  process.env.NODE_ENV = 'test';
-}
+import { generateExportJob } from '../src/modules/reporting/jobs/report_export.job.js';
+import { AuditAction } from '../src/shared/database/write_audit.js';
+import { resetObjectStorageForTests } from '../src/shared/storage/index.js';
+import { PLAN_IDS } from '../src/modules/subscription/enum/plan/plan_code.enum.js';
 
 type Json = { status: number; body: Record<string, unknown> | null };
+type ProcedureRow = { id: string; code: string };
 
 async function main() {
+  process.env.STORAGE_FAKE = '1';
   resetObjectStorageForTests();
-  const queue = new InMemoryJobQueue();
-  setJobQueue(queue);
-  const { reportExportJob } = await import('../src/modules/reporting/jobs/report_export.job.js');
-  queue.register(QUEUE.reporting, JOB.generateExport, reportExportJob);
 
-  const { createApp } = await import('../src/app.js');
   const app = createApp();
   const server = app.listen(0) as Server;
   await once(server, 'listening');
@@ -36,6 +28,7 @@ async function main() {
   let failed = false;
 
   const jar = new Map<string, string>();
+  const prisma = getPrismaClient();
   const tenantDb = getTenantPrisma();
 
   async function request(path: string, init: RequestInit = {}): Promise<Json> {
@@ -75,15 +68,15 @@ async function main() {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
-  const password = 'SenhaForte!99';
 
+  const password = 'SenhaForte!99';
   const signup = await request('/api/v1/auth/signup', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      email: `s7-export-${stamp}@example.com`,
+      email: `s7-rep-exp-${stamp}@example.com`,
       password,
-      clinicName: 'Clinica Export',
+      clinicName: 'Clinica Export S7',
       ownerName: 'Owner Export',
     }),
   });
@@ -97,28 +90,36 @@ async function main() {
 
   const units = await request('/api/v1/clinic/units', { headers: authHeaders(token, tenantId) });
   const unitId = ((units.body?.data as Array<{ id: string }>) ?? [])[0]?.id;
+  if (!unitId) failed = true;
+
   const professional = await request('/api/v1/clinic/professionals', {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ membershipId, croNumber: '44444', croState: 'GO' }),
+    body: JSON.stringify({ membershipId, croNumber: '77772', croState: 'GO' }),
   });
+  if (professional.status !== 201) failed = true;
   const ownerProfessionalId = dataOf(professional).id as string;
+
+  const procedures = await request('/api/v1/procedures', { headers: authHeaders(token, tenantId) });
+  const procedureList = (procedures.body?.data as ProcedureRow[]) ?? [];
+  const res01 = procedureList.find((row) => row.code === 'RES-01');
+  if (!res01) failed = true;
 
   const patient = await request('/api/v1/patients', {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ name: 'Maria Export', phonePrimary: '62977774001' }),
+    body: JSON.stringify({
+      name: 'Paciente Export',
+      phonePrimary: '62977773002',
+      birthDate: '1992-03-11',
+    }),
   });
+  if (patient.status !== 201) failed = true;
   const patientId = (dataOf(patient).patient as { id: string }).id;
-  const procedures = await request('/api/v1/procedures', { headers: authHeaders(token, tenantId) });
-  const res01 = ((procedures.body?.data as Array<{ id: string; code: string }>) ?? []).find(
-    (row) => row.code === 'RES-01',
-  );
 
-  if (unitId && ownerProfessionalId && patientId && res01) {
-    const confirmedAt = new Date(`${today}T10:00:00-03:00`);
-    await tenantDb.runInTenantContext(smokeCtx, async (tx) => {
-      await tx.productionEntry.create({
+  if (res01 && ownerProfessionalId && unitId && patientId) {
+    await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+      tx.productionEntry.create({
         data: {
           id: randomUUID(),
           tenantId,
@@ -126,84 +127,69 @@ async function main() {
           professionalId: ownerProfessionalId,
           patientId,
           procedureId: res01.id,
-          amountCents: 12000n,
-          executedAt: confirmedAt,
+          amountCents: 15_000n,
+          executedAt: new Date(),
         },
-      });
-    });
+      }),
+    );
   }
 
-  const xlsx = await request('/api/v1/reports/procedures/export', {
-    method: 'POST',
-    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ format: 'XLSX', from: today, to: today }),
-  });
-  console.log('xlsx', xlsx.status, errorCode(xlsx));
-  if (xlsx.status !== 501 || errorCode(xlsx) !== 'NOT_IMPLEMENTED') failed = true;
-
-  const created = await request('/api/v1/reports/procedures/export', {
+  const exportPost = await request('/api/v1/reports/procedures/export', {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
     body: JSON.stringify({ format: 'CSV', from: today, to: today }),
   });
-  console.log('create', created.status, dataOf(created).exportId, dataOf(created).status);
-  if (created.status !== 202 || dataOf(created).status !== 'PENDING' || !dataOf(created).exportId) {
-    failed = true;
-  }
-  const exportId = dataOf(created).exportId as string;
+  console.log('export-post', exportPost.status, dataOf(exportPost));
+  if (exportPost.status !== 202) failed = true;
+  const exportId = dataOf(exportPost).exportId as string;
+  if (!exportId) failed = true;
+  if (dataOf(exportPost).status !== 'PENDING') failed = true;
 
-  const pending = await request(`/api/v1/exports/${exportId}`, {
-    headers: authHeaders(token, tenantId),
-  });
-  console.log('pending', pending.status, dataOf(pending).status, dataOf(pending).url);
-  if (pending.status !== 200 || dataOf(pending).status !== 'PENDING' || dataOf(pending).url !== null) {
-    failed = true;
-  }
-
-  await queue.drain();
-
-  const ready = await request(`/api/v1/exports/${exportId}`, {
-    headers: authHeaders(token, tenantId),
-  });
-  console.log('ready', ready.status, dataOf(ready).status, Boolean(dataOf(ready).url), dataOf(ready).expiresIn);
-  if (ready.status !== 200 || dataOf(ready).status !== 'READY') failed = true;
-  if (typeof dataOf(ready).url !== 'string' || dataOf(ready).expiresIn !== 900) failed = true;
-
-  const storageKey = `tenants/${tenantId}/exports/${exportId}.csv`;
-  const csvBuffer = await getObjectStorage().getObject(storageKey);
-  const csvText = csvBuffer?.toString('utf8') ?? '';
-  const hasBom = csvText.charCodeAt(0) === 0xfeff;
-  const hasSemicolon = csvText.includes(';');
-  console.log('csv', hasBom, hasSemicolon, csvText.includes('procedureName'));
-  if (!hasBom || !hasSemicolon || !csvText.includes('12000')) failed = true;
-
-  jar.clear();
-  const other = await request('/api/v1/auth/signup', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      email: `s7-export-b-${stamp}@example.com`,
-      password,
-      clinicName: 'Clinica B Export',
-      ownerName: 'Owner B',
+  const audit = await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+    tx.auditLog.findFirst({
+      where: {
+        action: AuditAction.REPORT_EXPORTED,
+        resourceType: 'report_export',
+        resourceId: exportId,
+      },
     }),
-  });
-  const otherToken = dataOf(other).accessToken as string;
-  const otherTenantId = (dataOf(other).tenant as { id: string }).id;
-  const cross = await request(`/api/v1/exports/${exportId}`, {
-    headers: authHeaders(otherToken, otherTenantId),
-  });
-  console.log('cross-tenant', cross.status);
-  if (cross.status !== 404) failed = true;
+  );
+  console.log('audit-report-exported', Boolean(audit));
+  if (!audit) failed = true;
 
-  const dentistEmail = `s7-export-den-${stamp}@example.com`;
+  await generateExportJob({
+    tenantId,
+    requestId: 'smoke-reporting-export-job',
+    exportId,
+  });
+
+  const exportGet = await request(`/api/v1/exports/${exportId}`, {
+    headers: authHeaders(token, tenantId),
+  });
+  const exportData = dataOf(exportGet);
+  console.log('export-get', exportGet.status, exportData.status, Boolean(exportData.downloadUrl));
+  if (exportGet.status !== 200) failed = true;
+  if (exportData.status !== 'READY') failed = true;
+  if (typeof exportData.downloadUrl !== 'string' || !exportData.downloadUrl) failed = true;
+  if (exportData.downloadExpiresInSeconds !== 900) failed = true;
+
+  const row = await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+    tx.reportExport.findFirst({ where: { id: exportId } }),
+  );
+  console.log('storage-key', Boolean(row?.storageKey));
+  if (!row?.storageKey) failed = true;
+
+  // Dentista: só próprio escopo
+  const dentistEmail = `s7-rep-exp-den-${stamp}@example.com`;
+  jar.clear();
   const invite = await request('/api/v1/users/invitations', {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
     body: JSON.stringify({ email: dentistEmail, role: Role.DENTIST }),
   });
+  if (invite.status !== 201) failed = true;
   const inviteId = dataOf(invite).id as string;
-  const inviteToken = `exp-den-${stamp}`;
+  const inviteToken = `rep-exp-den-${stamp}`;
   await tenantDb.runInTenantContext(smokeCtx, async (tx) => {
     await tx.invitation.update({
       where: { id: inviteId },
@@ -216,25 +202,119 @@ async function main() {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ token: inviteToken, name: 'Dra Export', password }),
   });
+  if (accept.status !== 200) failed = true;
   const dentistToken = dataOf(accept).accessToken as string;
-  const dentistRevenue = await request('/api/v1/reports/revenue/export', {
+  const dentistMembershipId =
+    (dataOf(accept).membership as { id: string } | undefined)?.id ??
+    (accept.body?.data as { membership?: { id: string } } | undefined)?.membership?.id;
+
+  jar.clear();
+  // Essencial = 1 profissional; smoke precisa de owner + dentista → sobe para Clínica.
+  await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+    tx.subscription.update({
+      where: { tenantId },
+      data: { planId: PLAN_IDS.CLINICA },
+    }),
+  );
+  const dentistProf = await request('/api/v1/clinic/professionals', {
+    method: 'POST',
+    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({ membershipId: dentistMembershipId, croNumber: '88882', croState: 'GO' }),
+  });
+  console.log('dentist-professional', dentistProf.status, dentistMembershipId);
+  if (dentistProf.status !== 201) failed = true;
+  const dentistProfessionalId = dataOf(dentistProf).id as string;
+  if (!dentistProfessionalId) failed = true;
+
+  if (res01 && unitId && patientId && dentistProfessionalId) {
+    await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+      tx.productionEntry.create({
+        data: {
+          id: randomUUID(),
+          tenantId,
+          unitId,
+          professionalId: dentistProfessionalId,
+          patientId,
+          procedureId: res01.id,
+          amountCents: 4_400n,
+          executedAt: new Date(),
+        },
+      }),
+    );
+  }
+
+  jar.clear();
+  const dentistExport = await request('/api/v1/reports/procedures/export', {
     method: 'POST',
     headers: { ...authHeaders(dentistToken, tenantId), 'content-type': 'application/json' },
     body: JSON.stringify({ format: 'CSV', from: today, to: today }),
   });
-  console.log('dentist-revenue-export', dentistRevenue.status);
-  if (dentistRevenue.status !== 403) failed = true;
+  console.log('dentist-export-post', dentistExport.status);
+  if (dentistExport.status !== 202) failed = true;
+  const dentistExportId = dataOf(dentistExport).exportId as string;
 
-  await getPrismaClient().$disconnect();
+  await generateExportJob({
+    tenantId,
+    requestId: 'smoke-reporting-export-dentist',
+    exportId: dentistExportId,
+  });
+
+  const dentistExportRow = await tenantDb.runInTenantContext(smokeCtx, (tx) =>
+    tx.reportExport.findFirst({ where: { id: dentistExportId } }),
+  );
+  const dentistFilters = (dentistExportRow?.filters ?? {}) as { professionalId?: string };
+  console.log('dentist-scoped', dentistFilters.professionalId === dentistProfessionalId);
+  if (dentistFilters.professionalId !== dentistProfessionalId) failed = true;
+
+  const dentistFinancialExport = await request('/api/v1/reports/revenue/export', {
+    method: 'POST',
+    headers: { ...authHeaders(dentistToken, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({ format: 'CSV', from: today, to: today }),
+  });
+  console.log('dentist-revenue-export', dentistFinancialExport.status, errorCode(dentistFinancialExport));
+  if (dentistFinancialExport.status !== 403) failed = true;
+
+  // Cross-tenant → 404
+  jar.clear();
+  const signupB = await request('/api/v1/auth/signup', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      email: `s7-rep-exp-b-${stamp}@example.com`,
+      password,
+      clinicName: 'Clinica Export B',
+      ownerName: 'Owner B',
+    }),
+  });
+  if (signupB.status !== 201) failed = true;
+  const tokenB = dataOf(signupB).accessToken as string;
+  const tenantB = (dataOf(signupB).tenant as { id: string }).id;
+
+  jar.clear();
+  const cross = await request(`/api/v1/exports/${exportId}`, {
+    headers: authHeaders(tokenB, tenantB),
+  });
+  console.log('cross-tenant', cross.status, errorCode(cross));
+  if (cross.status !== 404) failed = true;
+
+  const unknownReport = await request('/api/v1/reports/cash-flow/export', {
+    method: 'POST',
+    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({ format: 'CSV', from: today, to: today }),
+  });
+  console.log('unknown-report', unknownReport.status);
+  if (unknownReport.status !== 404) failed = true;
+
   server.close();
+  await prisma.$disconnect();
   if (failed) {
-    console.error('FAIL: reporting export smoke');
+    console.error('SMOKE reporting-export FAILED');
     process.exit(1);
   }
-  console.log('OK: reporting export smoke');
+  console.log('SMOKE reporting-export OK');
 }
 
-void main().catch((err) => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

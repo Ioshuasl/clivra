@@ -19,11 +19,10 @@ export type SendTextInput = {
 export type SendMediaInput = {
   sessionName: string;
   to: string;
-  kind: 'IMAGE' | 'DOCUMENT';
   fileUrl: string;
   mimeType: string;
   fileName: string;
-  caption?: string | null;
+  caption?: string;
 };
 
 export type SendResult = {
@@ -33,7 +32,8 @@ export type SendResult = {
 export type MessagingProvider = {
   sendTemplate(input: SendTemplateInput): Promise<SendResult>;
   sendText(input: SendTextInput): Promise<SendResult>;
-  sendMedia(input: SendMediaInput): Promise<SendResult>;
+  sendImage(input: SendMediaInput): Promise<SendResult>;
+  sendFile(input: SendMediaInput): Promise<SendResult>;
 };
 
 export type WahaSessionPort = {

@@ -3,20 +3,18 @@ import { AppError } from '../../../shared/middlewares/error_handler.middleware.j
 import {
   conversationIdParamSchema,
   conversationListQuerySchema,
-  conversationMediaPresignSchema,
-  conversationMessageCreateSchema,
-  conversationMessageListQuerySchema,
-  conversationUpdateSchema,
-  patientMessageListQuerySchema,
-} from '../schemas/conversation.schema.js';
+  conversationMessagesQuerySchema,
+  conversationPatchSchema,
+  mediaPresignSchema,
+  messageSendSchema,
+} from '../schemas/messaging.schema.js';
 import { ListService as ConversationListService } from '../services/conversation/conversation_list.service.js';
 import { GetService as ConversationGetService } from '../services/conversation/conversation_get.service.js';
 import { UpdateService as ConversationUpdateService } from '../services/conversation/conversation_update.service.js';
-import { ReadService as ConversationReadService } from '../services/conversation/conversation_read.service.js';
+import { MarkReadService } from '../services/conversation/conversation_mark_read.service.js';
+import { PresignService as MediaPresignService } from '../services/media/media_presign.service.js';
 import { ListService as MessageListService } from '../services/message/message_list.service.js';
-import { ListByPatientService } from '../services/message/message_list_by_patient.service.js';
-import { PresignService as MessageMediaPresignService } from '../services/message/message_media_presign.service.js';
-import { CreateService as MessageCreateService } from '../services/message/message_create.service.js';
+import { SendService as MessageSendService } from '../services/message/message_send.service.js';
 
 function requireCtx(req: Request) {
   if (!req.ctx) {
@@ -27,59 +25,62 @@ function requireCtx(req: Request) {
 
 export class ConversationController {
   constructor(
-    private readonly conversationList = new ConversationListService(),
-    private readonly conversationGet = new ConversationGetService(),
-    private readonly conversationUpdate = new ConversationUpdateService(),
-    private readonly conversationRead = new ConversationReadService(),
+    private readonly listConversations = new ConversationListService(),
+    private readonly getConversation = new ConversationGetService(),
+    private readonly updateConversation = new ConversationUpdateService(),
+    private readonly markRead = new MarkReadService(),
     private readonly messageList = new MessageListService(),
-    private readonly messageListByPatient = new ListByPatientService(),
-    private readonly messageMediaPresign = new MessageMediaPresignService(),
-    private readonly messageCreate = new MessageCreateService(),
+    private readonly messageSend = new MessageSendService(),
+    private readonly mediaPresign = new MediaPresignService(),
   ) {}
 
   list = async (req: Request, res: Response): Promise<void> => {
     const parsed = conversationListQuerySchema.safeParse(req.query);
     if (!parsed.success) {
-      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, parsed.error);
+      throw new AppError('VALIDATION_ERROR', 'Filtros inválidos.', 400, parsed.error);
     }
-    const result = await this.conversationList.execute(requireCtx(req), parsed.data);
+    const result = await this.listConversations.execute(requireCtx(req), parsed.data);
     res.status(200).json({ data: result.items, meta: { nextCursor: result.nextCursor } });
   };
 
   get = async (req: Request, res: Response): Promise<void> => {
     const params = conversationIdParamSchema.safeParse(req.params);
     if (!params.success) {
-      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, params.error);
+      throw new AppError('VALIDATION_ERROR', 'ID inválido.', 400, params.error);
     }
-    const data = await this.conversationGet.execute(requireCtx(req), params.data.id);
+    const data = await this.getConversation.execute(requireCtx(req), params.data.id);
     res.status(200).json({ data });
   };
 
   update = async (req: Request, res: Response): Promise<void> => {
     const params = conversationIdParamSchema.safeParse(req.params);
-    const body = conversationUpdateSchema.safeParse(req.body);
+    const body = conversationPatchSchema.safeParse(req.body);
     if (!params.success || !body.success) {
       throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, {
         params: params.success ? undefined : params.error,
         body: body.success ? undefined : body.error,
       });
     }
-    const data = await this.conversationUpdate.execute(requireCtx(req), params.data.id, body.data);
+    const data = await this.updateConversation.execute(
+      requireCtx(req),
+      params.data.id,
+      body.data,
+    );
     res.status(200).json({ data });
   };
 
-  read = async (req: Request, res: Response): Promise<void> => {
+  markAsRead = async (req: Request, res: Response): Promise<void> => {
     const params = conversationIdParamSchema.safeParse(req.params);
     if (!params.success) {
-      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, params.error);
+      throw new AppError('VALIDATION_ERROR', 'ID inválido.', 400, params.error);
     }
-    const data = await this.conversationRead.execute(requireCtx(req), params.data.id);
+    const data = await this.markRead.execute(requireCtx(req), params.data.id);
     res.status(200).json({ data });
   };
 
   listMessages = async (req: Request, res: Response): Promise<void> => {
     const params = conversationIdParamSchema.safeParse(req.params);
-    const query = conversationMessageListQuerySchema.safeParse(req.query);
+    const query = conversationMessagesQuerySchema.safeParse(req.query);
     if (!params.success || !query.success) {
       throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, {
         params: params.success ? undefined : params.error,
@@ -90,9 +91,9 @@ export class ConversationController {
     res.status(200).json({ data: result.items, meta: { nextCursor: result.nextCursor } });
   };
 
-  createMessage = async (req: Request, res: Response): Promise<void> => {
+  sendMessage = async (req: Request, res: Response): Promise<void> => {
     const params = conversationIdParamSchema.safeParse(req.params);
-    const body = conversationMessageCreateSchema.safeParse(req.body);
+    const body = messageSendSchema.safeParse(req.body ?? {});
     if (!params.success || !body.success) {
       throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, {
         params: params.success ? undefined : params.error,
@@ -100,34 +101,21 @@ export class ConversationController {
       });
     }
     const idempotencyKey = req.header('idempotency-key') ?? req.header('Idempotency-Key');
-    const data = await this.messageCreate.execute(
+    const data = await this.messageSend.execute(
       requireCtx(req),
       params.data.id,
       body.data,
-      idempotencyKey,
+      idempotencyKey ?? undefined,
     );
     res.status(201).json({ data });
   };
 
-  listPatientMessages = async (req: Request, res: Response): Promise<void> => {
-    const parsed = patientMessageListQuerySchema.safeParse(req.query);
-    if (!parsed.success) {
-      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, parsed.error);
-    }
-    const result = await this.messageListByPatient.execute(requireCtx(req), parsed.data);
-    res.status(200).json({ data: result.items, meta: { nextCursor: result.nextCursor } });
-  };
-
   presignMedia = async (req: Request, res: Response): Promise<void> => {
-    const params = conversationIdParamSchema.safeParse(req.params);
-    const body = conversationMediaPresignSchema.safeParse(req.body);
-    if (!params.success || !body.success) {
-      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, {
-        params: params.success ? undefined : params.error,
-        body: body.success ? undefined : body.error,
-      });
+    const body = mediaPresignSchema.safeParse(req.body ?? {});
+    if (!body.success) {
+      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, body.error);
     }
-    const data = await this.messageMediaPresign.execute(requireCtx(req), params.data.id, body.data);
+    const data = await this.mediaPresign.execute(requireCtx(req), body.data);
     res.status(200).json({ data });
   };
 }

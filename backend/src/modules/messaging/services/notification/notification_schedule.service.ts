@@ -15,7 +15,6 @@ import {
   reminderH3At,
 } from '../../helpers/quiet_hours.helper.js';
 import { parseAutomationConfig } from '../../helpers/messaging_mapper.helper.js';
-import { canAutomate } from '../../../subscription/subscription_public.js';
 
 export type NotificationScheduleInput = {
   eventName: string;
@@ -49,8 +48,6 @@ export class ScheduleService {
     input: NotificationScheduleInput,
     scheduler: NotificationScheduler,
   ): Promise<void> {
-    if (!(await canAutomate(ctx))) return;
-
     if (input.eventName === 'scheduling.waitlist_offer_sent') {
       await this.scheduleWaitlist(ctx, input, scheduler);
       return;

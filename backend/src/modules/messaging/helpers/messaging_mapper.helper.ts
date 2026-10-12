@@ -1,6 +1,3 @@
-import type { ConversationStatus } from '../enum/message/message.enum.js';
-import type { ConversationSummary } from '../types/conversation/conversation.types.js';
-import type { InboxMessage } from '../types/message/message.types.js';
 import type {
   AutomationConfig,
   AutomationSummary,
@@ -108,54 +105,6 @@ export function mapLogItem(row: {
     errorCode: row.errorCode,
     relatedType: row.relatedType,
     relatedId: row.relatedId,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
-export function mapConversation(row: {
-  id: string;
-  patientId: string | null;
-  contactPhone: string;
-  contactName: string | null;
-  status: string;
-  assignedTo: string | null;
-  lastMessageAt: Date | null;
-  unreadCount: number;
-  createdAt: Date;
-}): ConversationSummary {
-  return {
-    id: row.id,
-    patientId: row.patientId,
-    contactPhone: row.contactPhone,
-    contactName: row.contactName,
-    status: row.status as ConversationStatus,
-    assignedToUserId: row.assignedTo,
-    lastMessageAt: row.lastMessageAt?.toISOString() ?? null,
-    unreadCount: row.unreadCount,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
-export function mapInboxMessage(row: {
-  id: string;
-  conversationId: string;
-  direction: string;
-  type: string;
-  body: string | null;
-  mediaKey: string | null;
-  status: string;
-  sentBy: string | null;
-  createdAt: Date;
-}): InboxMessage {
-  return {
-    id: row.id,
-    conversationId: row.conversationId,
-    direction: row.direction,
-    type: row.type,
-    body: row.body,
-    mediaKey: row.mediaKey,
-    status: row.status,
-    sentBy: row.sentBy,
     createdAt: row.createdAt.toISOString(),
   };
 }

@@ -13,6 +13,7 @@ export class CreateMessageRepository {
       type: string;
       templateId?: string | null;
       body?: string | null;
+      mediaKey?: string | null;
       providerMessageId?: string | null;
       status?: string;
       errorCode?: string | null;
@@ -22,7 +23,6 @@ export class CreateMessageRepository {
       relatedId?: string | null;
       sentBy?: string | null;
       idempotencyKey?: string | null;
-      mediaKey?: string | null;
     },
   ): Promise<{ id: string; created: boolean }> {
     const tenantPrisma = getTenantPrisma();
@@ -30,6 +30,13 @@ export class CreateMessageRepository {
       if (input.providerMessageId) {
         const existing = await tx.message.findFirst({
           where: { providerMessageId: input.providerMessageId },
+          select: { id: true },
+        });
+        if (existing) return { id: existing.id, created: false };
+      }
+      if (input.idempotencyKey) {
+        const existing = await tx.message.findFirst({
+          where: { tenantId: ctx.tenantId, idempotencyKey: input.idempotencyKey },
           select: { id: true },
         });
         if (existing) return { id: existing.id, created: false };
@@ -44,6 +51,7 @@ export class CreateMessageRepository {
             type: input.type,
             templateId: input.templateId ?? null,
             body: input.body ?? null,
+            mediaKey: input.mediaKey ?? null,
             providerMessageId: input.providerMessageId ?? null,
             status: input.status ?? 'QUEUED',
             errorCode: input.errorCode ?? null,
@@ -53,18 +61,26 @@ export class CreateMessageRepository {
             relatedId: input.relatedId ?? null,
             sentBy: input.sentBy ?? null,
             idempotencyKey: input.idempotencyKey ?? null,
-            mediaKey: input.mediaKey ?? null,
           },
         });
         return { id: row.id, created: true };
       } catch (err) {
         const code = String((err as { code?: string }).code ?? '');
-        if (code === 'P2002' && input.providerMessageId) {
-          const existing = await tx.message.findFirst({
-            where: { providerMessageId: input.providerMessageId },
-            select: { id: true },
-          });
-          if (existing) return { id: existing.id, created: false };
+        if (code === 'P2002') {
+          if (input.providerMessageId) {
+            const existing = await tx.message.findFirst({
+              where: { providerMessageId: input.providerMessageId },
+              select: { id: true },
+            });
+            if (existing) return { id: existing.id, created: false };
+          }
+          if (input.idempotencyKey) {
+            const existing = await tx.message.findFirst({
+              where: { tenantId: ctx.tenantId, idempotencyKey: input.idempotencyKey },
+              select: { id: true },
+            });
+            if (existing) return { id: existing.id, created: false };
+          }
         }
         throw err;
       }

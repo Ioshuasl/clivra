@@ -8,12 +8,7 @@ export function buildMessagingRouter(): Router {
   const router = Router();
   router.use('/messaging', buildMessagingRoutes());
   router.use('/messaging', buildConversationRoutes());
-  return router;
-}
-
-export function buildStreamRouter(): Router {
-  const router = Router();
-  router.use('/stream', buildStreamRoutes());
+  router.use(buildStreamRoutes());
   return router;
 }
 

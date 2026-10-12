@@ -21,8 +21,10 @@ export class OutboxDispatcher {
   ) {}
 
   /** Lê pendentes, enfileira (jobId = event.id) e marca processed. Redis down → deixa pendente. */
-  async dispatchOnce(limit = 50): Promise<number> {
-    const pending = await this.db.runOutboxDispatch((tx) => listPendingOutboxEvents(tx, limit));
+  async dispatchOnce(limit = 50, filter?: { tenantId?: string }): Promise<number> {
+    const pending = await this.db.runOutboxDispatch((tx) =>
+      listPendingOutboxEvents(tx, limit, filter?.tenantId),
+    );
     let dispatched = 0;
 
     for (const event of pending) {

@@ -69,3 +69,39 @@ export type MessageLogList = {
   items: MessageLogItem[];
   nextCursor: string | null;
 };
+
+export type ConversationSummary = {
+  id: string;
+  whatsappAccountId: string;
+  patientId: string | null;
+  contactPhone: string;
+  contactName: string | null;
+  status: string;
+  assignedToUserId: string | null;
+  unreadCount: number;
+  lastMessageAt: string | null;
+  serviceWindowExpiresAt: string | null;
+  createdAt: string;
+};
+
+export type ConversationList = {
+  items: ConversationSummary[];
+  nextCursor: string | null;
+};
+
+export type InboxMessage = {
+  id: string;
+  conversationId: string;
+  direction: string;
+  type: string;
+  body: string | null;
+  mediaKey: string | null;
+  status: string;
+  sentBy: string | null;
+  createdAt: string;
+};
+
+export type InboxMessageList = {
+  items: InboxMessage[];
+  nextCursor: string | null;
+};

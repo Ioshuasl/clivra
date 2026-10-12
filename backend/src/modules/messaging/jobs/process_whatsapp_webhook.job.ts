@@ -9,6 +9,7 @@ import {
   applyWaitlistAcceptByOfferId,
 } from '../../scheduling/scheduling_public.js';
 import { findPatientIdByPhone, toE164Br } from '../../patients/patients_public.js';
+import { messagingSseHub } from '../helpers/sse_hub.helper.js';
 import { GetAccountRepository } from '../repositories/whatsapp_account/whatsapp_account.repository.js';
 import { UpdateAccountRepository } from '../repositories/whatsapp_account/whatsapp_account.repository.js';
 import { GetLastRelatedRepository } from '../repositories/message/message_last_related.repository.js';
@@ -17,7 +18,7 @@ import {
   UpsertConversationRepository,
 } from '../repositories/conversation/conversation.repository.js';
 import { IncrementUnreadRepository } from '../repositories/conversation/conversation_increment_unread.repository.js';
-import { publishMessagingStreamEvent } from '../helpers/messaging_stream.helper.js';
+import { GetRepository as GetConversationRepository } from '../repositories/conversation/conversation_get.repository.js';
 import {
   CreateMessageRepository,
   UpdateMessageByProviderIdRepository,
@@ -27,8 +28,9 @@ import { parseButtonAction, parseWhatsappWebhook } from '../helpers/webhook.help
 const getAccount = new GetAccountRepository();
 const updateAccount = new UpdateAccountRepository();
 const upsertConversation = new UpsertConversationRepository();
-const incrementUnread = new IncrementUnreadRepository();
+const getConversation = new GetConversationRepository();
 const updateConversation = new UpdateConversationStatusRepository();
+const incrementUnread = new IncrementUnreadRepository();
 const createMessage = new CreateMessageRepository();
 const updateByProvider = new UpdateMessageByProviderIdRepository();
 const lastRelated = new GetLastRelatedRepository();
@@ -98,17 +100,27 @@ export async function processWhatsappWebhookJob(payload: JobPayload): Promise<vo
     if (!created.created) continue;
 
     await incrementUnread.execute(ctx, conversation.id);
+    const refreshed = await getConversation.execute(ctx, conversation.id);
+    const unreadCount = refreshed?.unreadCount ?? 1;
+
     await publish(ctx, 'messaging.message_received', {
       conversationId: conversation.id,
       messageId: created.id,
-      patientId,
+      unreadCount,
     });
-    publishMessagingStreamEvent(ctx.tenantId, {
-      name: 'message_received',
-      payload: {
+    messagingSseHub.publish(ctx.tenantId, {
+      type: 'message_received',
+      data: {
         conversationId: conversation.id,
         messageId: created.id,
-        patientId,
+        unreadCount,
+      },
+    });
+    messagingSseHub.publish(ctx.tenantId, {
+      type: 'unread_updated',
+      data: {
+        conversationId: conversation.id,
+        unreadCount,
       },
     });
 

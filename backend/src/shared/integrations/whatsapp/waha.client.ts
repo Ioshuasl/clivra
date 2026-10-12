@@ -89,9 +89,8 @@ export class WahaClient implements MessagingProvider, WahaSessionPort {
     return { providerMessageId: this.messageId(sent.json) };
   }
 
-  async sendMedia(input: SendMediaInput): Promise<SendResult> {
-    const path = input.kind === 'IMAGE' ? '/api/sendImage' : '/api/sendFile';
-    const sent = await this.request('POST', path, {
+  async sendImage(input: SendMediaInput): Promise<SendResult> {
+    const sent = await this.request('POST', '/api/sendImage', {
       session: input.sessionName,
       chatId: toWahaChatId(input.to),
       file: {
@@ -99,9 +98,24 @@ export class WahaClient implements MessagingProvider, WahaSessionPort {
         mimetype: input.mimeType,
         filename: input.fileName,
       },
-      ...(input.caption ? { caption: input.caption } : {}),
+      caption: input.caption,
     });
-    if (!sent.ok) throw new Error(sent.error ?? `WAHA ${path} HTTP ${sent.status}`);
+    if (!sent.ok) throw new Error(sent.error ?? `WAHA sendImage HTTP ${sent.status}`);
+    return { providerMessageId: this.messageId(sent.json) };
+  }
+
+  async sendFile(input: SendMediaInput): Promise<SendResult> {
+    const sent = await this.request('POST', '/api/sendFile', {
+      session: input.sessionName,
+      chatId: toWahaChatId(input.to),
+      file: {
+        url: input.fileUrl,
+        mimetype: input.mimeType,
+        filename: input.fileName,
+      },
+      caption: input.caption,
+    });
+    if (!sent.ok) throw new Error(sent.error ?? `WAHA sendFile HTTP ${sent.status}`);
     return { providerMessageId: this.messageId(sent.json) };
   }
 

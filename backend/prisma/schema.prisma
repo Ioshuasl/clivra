@@ -1339,22 +1339,24 @@ model CashMovement {
   @@map("cash_movement")
 }
 
-/// Export assíncrono de relatórios (S7 Bloco 4).
+/// Export assíncrono de relatório (E9). docs/07 · S7 Bloco 4
 model ReportExport {
-  id          String   @id @db.Uuid
-  tenantId    String   @map("tenant_id") @db.Uuid
+  id          String    @id @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
   report      String
   format      String
-  status      String   @default("PENDING")
-  filters     Json     @default("{}")
-  storageKey  String?  @map("storage_key")
-  requestedBy String   @map("requested_by") @db.Uuid
+  status      String    @default("PENDING")
+  filters     Json      @default("{}")
+  storageKey  String?   @map("storage_key")
+  requestedBy String    @map("requested_by") @db.Uuid
   error       String?
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, createdAt(sort: Desc)], map: "idx_report_export_tenant_created")
+  @@index([tenantId, status], map: "idx_report_export_tenant_status")
   @@map("report_export")
 }
 

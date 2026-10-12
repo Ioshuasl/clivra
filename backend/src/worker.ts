@@ -1,6 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { env } from './shared/config/env.js';
 import { logger } from './shared/config/logger.js';
+import { isOutboxDispatchPaused } from './shared/database/outbox_dispatch_pause.js';
 import { OutboxDispatcher } from './shared/database/outbox_dispatcher.js';
 import { getPrismaClient } from './shared/database/tenant_prisma.js';
 import { scheduleAppointmentNotificationsJob } from './modules/scheduling/jobs/schedule_appointment_notifications.job.js';
@@ -13,7 +14,7 @@ import { generateQuotePdfJob } from './modules/treatments/jobs/generate_quote_pd
 import { expireQuotesJob } from './modules/treatments/jobs/expire_quotes.job.js';
 import { markOverdueInstallmentsJob } from './modules/billing/jobs/mark_overdue_installments.job.js';
 import { generateReceiptPdfJob } from './modules/billing/jobs/generate_receipt_pdf.job.js';
-import { reportExportJob } from './modules/reporting/jobs/report_export.job.js';
+import { generateExportJob } from './modules/reporting/jobs/report_export.job.js';
 import { tenantExportJob } from './modules/platform/jobs/tenant_export.job.js';
 import { patientPackageJob } from './modules/platform/jobs/patient_package.job.js';
 import { patientAnonymizeJob } from './modules/platform/jobs/patient_anonymize.job.js';
@@ -160,7 +161,7 @@ async function main(): Promise<void> {
   queue.register(QUEUE.platform, JOB.ensureMedicalRecord, ensureMedicalRecordJob);
   queue.register(QUEUE.platform, JOB.generateAttachmentThumbnail, generateAttachmentThumbnailJob);
   queue.register(QUEUE.platform, JOB.generateQuotePdf, generateQuotePdfJob);
-  queue.register(QUEUE.reporting, JOB.generateExport, reportExportJob);
+  queue.register(QUEUE.reporting, JOB.generateExport, generateExportJob);
   queue.register(QUEUE.platform, JOB.tenantExport, tenantExportJob);
   queue.register(QUEUE.platform, JOB.patientPackage, patientPackageJob);
   queue.register(QUEUE.platform, JOB.patientAnonymize, patientAnonymizeJob);
@@ -204,6 +205,7 @@ async function main(): Promise<void> {
 
   const tick = async (): Promise<void> => {
     try {
+      if (await isOutboxDispatchPaused()) return;
       const n = await dispatcher.dispatchOnce();
       if (n > 0) logger.info({ dispatched: n }, 'outbox_dispatched');
     } catch (err) {

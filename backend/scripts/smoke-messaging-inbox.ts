@@ -1,11 +1,15 @@
 import { createHmac } from 'node:crypto';
 import { once } from 'node:events';
 import type { Server } from 'node:http';
-import { getPrismaClient } from '../src/shared/database/tenant_prisma.js';
+import { getPrismaClient, getTenantPrisma } from '../src/shared/database/tenant_prisma.js';
 import { InMemoryJobQueue } from '../src/shared/queue/in_memory_job_queue.js';
 import { setJobQueue } from '../src/shared/queue/job_queue_singleton.js';
 import { JOB, QUEUE } from '../src/shared/queue/queue_names.js';
+import { idGenerator } from '../src/shared/helpers/id_generator.js';
+import { getObjectStorage } from '../src/shared/storage/index.js';
+import { getMessagingProvider, FakeMessagingProvider } from '../src/shared/integrations/whatsapp/index.js';
 
+process.env.STORAGE_FAKE = '1';
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
   process.env.NODE_ENV = 'test';
 }
@@ -17,8 +21,9 @@ async function main() {
   setJobQueue(queue);
 
   const { createApp } = await import('../src/app.js');
-  const { processWhatsappWebhookJob } = await import('../src/modules/messaging/jobs/process_whatsapp_webhook.job.js');
-  const { wahaHmacKey } = await import('../src/shared/config/env.js');
+  const { processWhatsappWebhookJob } = await import(
+    '../src/modules/messaging/jobs/process_whatsapp_webhook.job.js'
+  );
 
   queue.register(QUEUE.messaging, JOB.processWhatsappWebhook, processWhatsappWebhookJob);
 
@@ -56,10 +61,6 @@ async function main() {
     return (json.body?.data ?? {}) as Record<string, unknown>;
   }
 
-  function itemsOf(json: Json): Array<Record<string, unknown>> {
-    return Array.isArray(json.body?.data) ? (json.body?.data as Array<Record<string, unknown>>) : [];
-  }
-
   function authHeaders(token: string, tenantId: string, extra?: HeadersInit): HeadersInit {
     return {
       authorization: `Bearer ${token}`,
@@ -68,226 +69,308 @@ async function main() {
     };
   }
 
-  const signup = await request('/api/v1/auth/signup', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      email: `s7-inbox-${stamp}@example.com`,
-      password: 'SenhaForte!99',
-      clinicName: 'Clinica Inbox',
-      ownerName: 'Owner Inbox',
-    }),
-  });
-  console.log('signup', signup.status);
-  if (signup.status !== 201) failed = true;
-  const accessToken = dataOf(signup).accessToken as string;
-  const tenantId = (dataOf(signup).tenant as { id: string }).id;
-  const userId = (dataOf(signup).user as { id: string }).id;
+  try {
+    const signup = await request('/api/v1/auth/signup', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: `s7-inbox-${stamp}@example.com`,
+        password: 'SenhaForte!99',
+        clinicName: 'Clinica Inbox',
+        ownerName: 'Owner Inbox',
+      }),
+    });
+    console.log('signup', signup.status);
+    if (signup.status !== 201) failed = true;
+    const accessToken = dataOf(signup).accessToken as string;
+    const tenantId = (dataOf(signup).tenant as { id: string }).id;
 
-  const connect = await request('/api/v1/messaging/account', {
-    method: 'POST',
-    headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ riskAccepted: true }),
-  });
-  console.log('account_connect', connect.status, dataOf(connect).status);
-  if (connect.status !== 201) failed = true;
+    const connect = await request('/api/v1/messaging/account', {
+      method: 'POST',
+      headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
+      body: JSON.stringify({ riskAccepted: true }),
+    });
+    console.log('account_connect', connect.status, dataOf(connect).status);
+    if (connect.status !== 201) failed = true;
 
-  const test = await request('/api/v1/messaging/account/test', {
-    method: 'POST',
-    headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
-  });
-  console.log('account_test', test.status, dataOf(test).status);
-  if (test.status !== 200 || dataOf(test).status !== 'CONNECTED') failed = true;
+    const test = await request('/api/v1/messaging/account/test', {
+      method: 'POST',
+      headers: {
+        ...authHeaders(accessToken, tenantId),
+        'content-type': 'application/json',
+        'Idempotency-Key': `inbox-test-${stamp}`,
+      },
+    });
+    console.log('account_test', test.status, dataOf(test).status);
+    if (test.status !== 200 || dataOf(test).status !== 'CONNECTED') failed = true;
 
-  const patientPhone = `62981${String(stamp).slice(-6)}`;
-  const patient = await request('/api/v1/patients', {
-    method: 'POST',
-    headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ name: 'Maria Inbox', phonePrimary: patientPhone }),
-  });
-  console.log('patient', patient.status);
-  if (patient.status !== 201) failed = true;
-  const patientId = (dataOf(patient).patient as { id: string }).id;
-  const patientE164 = `55${patientPhone}`;
+    const patientPhone = `62982${String(stamp).slice(-6)}`;
+    const patient = await request('/api/v1/patients', {
+      method: 'POST',
+      headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Maria Inbox', phonePrimary: patientPhone }),
+    });
+    console.log('patient', patient.status);
+    if (patient.status !== 201) failed = true;
+    const patientId = (dataOf(patient).patient as { id: string }).id;
+    const patientE164 = `55${patientPhone}`;
 
-  const sessionName = `t${tenantId.replace(/-/g, '')}`;
-  const wamid = `wamid.inbox.${stamp}`;
-  const webhookRaw = JSON.stringify({
-    event: 'message',
-    session: sessionName,
-    payload: {
-      id: wamid,
-      timestamp: 1755701234,
-      from: `${patientE164}@c.us`,
-      fromMe: false,
-      type: 'text',
-      body: 'Oi, quero remarcar',
-    },
-  });
-  const hmac = createHmac('sha512', wahaHmacKey()).update(webhookRaw).digest('hex');
-  const webhook = await fetch(`${origin}/api/v1/webhooks/whatsapp`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-webhook-hmac': hmac },
-    body: webhookRaw,
-  });
-  console.log('webhook_inbound', webhook.status);
-  if (webhook.status !== 200) failed = true;
-  await queue.drain();
+    const sessionName = `t${tenantId.replace(/-/g, '')}`;
+    const wamid = `wamid.inbox.${stamp}`;
+    const webhookRaw = JSON.stringify({
+      event: 'message',
+      session: sessionName,
+      payload: {
+        id: wamid,
+        timestamp: Math.floor(Date.now() / 1000),
+        from: `${patientE164}@c.us`,
+        fromMe: false,
+        type: 'chat',
+        body: 'Oi, preciso remarcar',
+      },
+    });
+    const hmac = createHmac('sha512', process.env.WAHA_HMAC_KEY ?? process.env.WHATSAPP_APP_SECRET ?? '')
+      .update(webhookRaw)
+      .digest('hex');
 
-  const listed = await request('/api/v1/messaging/conversations?unread=true', {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  const conversations = itemsOf(listed);
-  const conversation = conversations.find((item) => item.contactPhone === patientE164);
-  console.log(
-    'list',
-    listed.status,
-    conversations.length,
-    conversation?.patientId,
-    conversation?.unreadCount,
-    conversation?.status,
-  );
-  if (
-    listed.status !== 200 ||
-    !conversation ||
-    conversation.patientId !== patientId ||
-    Number(conversation.unreadCount) < 1
-  ) {
-    failed = true;
+    const webhook = await fetch(`${origin}/api/v1/webhooks/whatsapp`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-webhook-hmac': hmac },
+      body: webhookRaw,
+    });
+    console.log('webhook_inbound', webhook.status);
+    if (webhook.status !== 200) failed = true;
+    await queue.drain();
+
+    const list = await request('/api/v1/messaging/conversations?status=OPEN&unread=true', {
+      headers: authHeaders(accessToken, tenantId),
+    });
+    const items = Array.isArray(list.body?.data)
+      ? (list.body?.data as Array<Record<string, unknown>>)
+      : [];
+    console.log('conversations_list', list.status, items.length);
+    if (list.status !== 200 || items.length < 1) failed = true;
+
+    const conversation = items.find((c) => c.contactPhone === patientE164) ?? items[0];
+    const conversationId = conversation?.id as string | undefined;
+    if (!conversationId) {
+      console.error('FAIL: conversa não encontrada');
+      failed = true;
+    } else {
+      if (Number(conversation.unreadCount) < 1) {
+        console.error('FAIL: unreadCount deveria incrementar no inbound');
+        failed = true;
+      }
+      if (conversation.patientId !== patientId) {
+        console.error('FAIL: patientId deveria vincular por telefone', conversation.patientId, patientId);
+        failed = true;
+      }
+
+      const get = await request(`/api/v1/messaging/conversations/${conversationId}`, {
+        headers: authHeaders(accessToken, tenantId),
+      });
+      console.log('conversation_get', get.status);
+      if (get.status !== 200 || dataOf(get).id !== conversationId) failed = true;
+
+      const messagesBefore = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+        headers: authHeaders(accessToken, tenantId),
+      });
+      const inboundMsgs = Array.isArray(messagesBefore.body?.data)
+        ? (messagesBefore.body?.data as Array<{ direction?: string }>)
+        : [];
+      console.log('messages_list', messagesBefore.status, inboundMsgs.length);
+      if (messagesBefore.status !== 200 || !inboundMsgs.some((m) => m.direction === 'INBOUND')) {
+        failed = true;
+      }
+
+      const missingKey = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
+        body: JSON.stringify({ text: 'Sem chave' }),
+      });
+      console.log('send_missing_idempotency', missingKey.status);
+      if (missingKey.status !== 400) failed = true;
+
+      const sendKey = `inbox-send-${stamp}`;
+      const send1 = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders(accessToken, tenantId),
+          'content-type': 'application/json',
+          'Idempotency-Key': sendKey,
+        },
+        body: JSON.stringify({ text: 'Olá Maria, podemos remarcar amanhã?' }),
+      });
+      const send2 = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders(accessToken, tenantId),
+          'content-type': 'application/json',
+          'Idempotency-Key': sendKey,
+        },
+        body: JSON.stringify({ text: 'Olá Maria, podemos remarcar amanhã?' }),
+      });
+      console.log('send_idempotent', send1.status, send2.status, dataOf(send1).id, dataOf(send2).id);
+      if (send1.status !== 201 || send2.status !== 201) failed = true;
+      if (dataOf(send1).id !== dataOf(send2).id) {
+        console.error('FAIL: duplo POST deveria devolver a mesma mensagem');
+        failed = true;
+      }
+
+      const conflict = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders(accessToken, tenantId),
+          'content-type': 'application/json',
+          'Idempotency-Key': sendKey,
+        },
+        body: JSON.stringify({ text: 'Payload diferente' }),
+      });
+      console.log('send_idempotency_conflict', conflict.status, (conflict.body?.error as { code?: string } | undefined)?.code);
+      if (conflict.status !== 409) failed = true;
+
+      const patch = await request(`/api/v1/messaging/conversations/${conversationId}`, {
+        method: 'PATCH',
+        headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
+        body: JSON.stringify({ status: 'PENDING' }),
+      });
+      console.log('conversation_patch', patch.status, dataOf(patch).status);
+      if (patch.status !== 200 || dataOf(patch).status !== 'PENDING') failed = true;
+
+      const pendingList = await request('/api/v1/messaging/conversations?status=PENDING', {
+        headers: authHeaders(accessToken, tenantId),
+      });
+      const pendingItems = Array.isArray(pendingList.body?.data)
+        ? (pendingList.body?.data as Array<{ id?: string }>)
+        : [];
+      console.log('conversations_pending', pendingList.status, pendingItems.length);
+      if (pendingList.status !== 200 || !pendingItems.some((c) => c.id === conversationId)) {
+        failed = true;
+      }
+
+      const read = await request(`/api/v1/messaging/conversations/${conversationId}/read`, {
+        method: 'POST',
+        headers: authHeaders(accessToken, tenantId),
+      });
+      console.log('conversation_read', read.status, dataOf(read).unreadCount);
+      if (read.status !== 200 || Number(dataOf(read).unreadCount) !== 0) failed = true;
+
+      const search = await request(
+        `/api/v1/messaging/conversations?q=${encodeURIComponent('Maria Inbox')}`,
+        { headers: authHeaders(accessToken, tenantId) },
+      );
+      const searchItems = Array.isArray(search.body?.data)
+        ? (search.body?.data as Array<{ id?: string }>)
+        : [];
+      console.log('conversations_search', search.status, searchItems.length);
+      if (search.status !== 200 || !searchItems.some((c) => c.id === conversationId)) {
+        failed = true;
+      }
+
+      const byPatient = await request(
+        `/api/v1/messaging/conversations?patientId=${encodeURIComponent(patientId)}`,
+        { headers: authHeaders(accessToken, tenantId) },
+      );
+      const byPatientItems = Array.isArray(byPatient.body?.data)
+        ? (byPatient.body?.data as Array<{ id?: string; patientId?: string }>)
+        : [];
+      console.log('conversations_by_patient', byPatient.status, byPatientItems.length);
+      if (
+        byPatient.status !== 200 ||
+        !byPatientItems.some((c) => c.id === conversationId && c.patientId === patientId)
+      ) {
+        failed = true;
+      }
+
+      const presign = await request('/api/v1/messaging/media/presign', {
+        method: 'POST',
+        headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
+        body: JSON.stringify({
+          fileName: 'receita.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 128,
+        }),
+      });
+      const storageKey = dataOf(presign).storageKey as string | undefined;
+      console.log('media_presign', presign.status, Boolean(storageKey));
+      if (presign.status !== 200 || !storageKey) failed = true;
+      else {
+        await getObjectStorage().putObject(storageKey, Buffer.from('%PDF-1.4 smoke'), 'application/pdf');
+        const mediaKey = `inbox-media-${stamp}`;
+        const mediaSend = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
+          method: 'POST',
+          headers: {
+            ...authHeaders(accessToken, tenantId),
+            'content-type': 'application/json',
+            'Idempotency-Key': mediaKey,
+          },
+          body: JSON.stringify({ text: 'Segue receita', mediaStorageKey: storageKey }),
+        });
+        console.log('media_send', mediaSend.status, dataOf(mediaSend).type, dataOf(mediaSend).mediaKey);
+        if (
+          mediaSend.status !== 201 ||
+          dataOf(mediaSend).type !== 'DOCUMENT' ||
+          dataOf(mediaSend).mediaKey !== storageKey
+        ) {
+          failed = true;
+        }
+        const provider = getMessagingProvider();
+        if (provider instanceof FakeMessagingProvider && provider.sentFiles.length < 1) {
+          console.error('FAIL: fake WAHA deveria registrar sendFile');
+          failed = true;
+        }
+      }
+
+      const streamRes = await fetch(`${origin}/api/v1/stream`, {
+        headers: authHeaders(accessToken, tenantId),
+      });
+      console.log('stream_open', streamRes.status, streamRes.headers.get('content-type'));
+      if (streamRes.status !== 200 || !String(streamRes.headers.get('content-type') ?? '').includes('text/event-stream')) {
+        failed = true;
+      } else {
+        const reader = streamRes.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const deadline = Date.now() + 3000;
+        while (reader && Date.now() < deadline && !buffer.includes('event: ready')) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+        }
+        console.log('stream_ready', buffer.includes('event: ready'));
+        if (!buffer.includes('event: ready')) failed = true;
+        await reader?.cancel().catch(() => undefined);
+      }
+    }
+
+    const prisma = getPrismaClient();
+    await getTenantPrisma().runInTenantContext(
+      { tenantId, userId: '', requestId: idGenerator.next() },
+      async (tx) => {
+        const count = await tx.message.count({
+          where: { tenantId, direction: 'OUTBOUND', body: 'Olá Maria, podemos remarcar amanhã?' },
+        });
+        console.log('outbound_persisted', count);
+        if (count !== 1) {
+          console.error('FAIL: deveria persistir exatamente 1 outbound idempotente');
+          failed = true;
+        }
+      },
+    );
+
+    await prisma.$disconnect().catch(() => undefined);
+  } finally {
+    server.close();
   }
-  const conversationId = conversation?.id as string | undefined;
-  if (!conversationId) {
-    console.error('FAIL: conversa inbound não encontrada');
-    failed = true;
+
+  if (failed) {
+    console.error('smoke-messaging-inbox FAILED');
+    process.exit(1);
   }
-
-  const got = await request(`/api/v1/messaging/conversations/${conversationId}`, {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  console.log('get', got.status, dataOf(got).id);
-  if (got.status !== 200 || dataOf(got).id !== conversationId) failed = true;
-
-  const messages = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  const inbound = itemsOf(messages).find((item) => item.direction === 'INBOUND' && item.body === 'Oi, quero remarcar');
-  console.log('messages', messages.status, itemsOf(messages).length, inbound?.id);
-  if (messages.status !== 200 || !inbound) failed = true;
-
-  const missingKey = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    method: 'POST',
-    headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ text: 'Horário confirmado.' }),
-  });
-  console.log('send_missing_key', missingKey.status);
-  if (missingKey.status !== 400) failed = true;
-
-  const idempotencyKey = `inbox-send-${stamp}`;
-  const send1 = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    method: 'POST',
-    headers: {
-      ...authHeaders(accessToken, tenantId),
-      'content-type': 'application/json',
-      'Idempotency-Key': idempotencyKey,
-    },
-    body: JSON.stringify({ text: 'Horário confirmado.' }),
-  });
-  const send2 = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    method: 'POST',
-    headers: {
-      ...authHeaders(accessToken, tenantId),
-      'content-type': 'application/json',
-      'Idempotency-Key': idempotencyKey,
-    },
-    body: JSON.stringify({ text: 'Horário confirmado.' }),
-  });
-  console.log('send', send1.status, send2.status, dataOf(send1).id, dataOf(send2).id);
-  if (
-    send1.status !== 201 ||
-    send2.status !== 201 ||
-    dataOf(send1).id !== dataOf(send2).id ||
-    dataOf(send1).direction !== 'OUTBOUND'
-  ) {
-    failed = true;
-  }
-
-  const reused = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    method: 'POST',
-    headers: {
-      ...authHeaders(accessToken, tenantId),
-      'content-type': 'application/json',
-      'Idempotency-Key': idempotencyKey,
-    },
-    body: JSON.stringify({ text: 'Outro texto.' }),
-  });
-  const reusedCode = (reused.body?.error as { code?: string } | undefined)?.code;
-  console.log('send_reused', reused.status, reusedCode);
-  if (reused.status !== 409 || reusedCode !== 'IDEMPOTENCY_KEY_REUSED') failed = true;
-
-  const afterSend = await request(`/api/v1/messaging/conversations/${conversationId}/messages`, {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  const outboundCount = itemsOf(afterSend).filter((item) => item.direction === 'OUTBOUND' && item.body === 'Horário confirmado.').length;
-  console.log('outbound_count', outboundCount);
-  if (outboundCount !== 1) failed = true;
-
-  const read = await request(`/api/v1/messaging/conversations/${conversationId}/read`, {
-    method: 'POST',
-    headers: authHeaders(accessToken, tenantId),
-  });
-  console.log('read', read.status, dataOf(read).unreadCount);
-  if (read.status !== 200 || Number(dataOf(read).unreadCount) !== 0) failed = true;
-
-  const patched = await request(`/api/v1/messaging/conversations/${conversationId}`, {
-    method: 'PATCH',
-    headers: { ...authHeaders(accessToken, tenantId), 'content-type': 'application/json' },
-    body: JSON.stringify({ status: 'PENDING', assignedToUserId: userId }),
-  });
-  console.log('patch', patched.status, dataOf(patched).status, dataOf(patched).assignedToUserId);
-  if (patched.status !== 200 || dataOf(patched).status !== 'PENDING' || dataOf(patched).assignedToUserId !== userId) {
-    failed = true;
-  }
-
-  const pending = await request('/api/v1/messaging/conversations?status=PENDING', {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  const pendingHit = itemsOf(pending).some((item) => item.id === conversationId);
-  console.log('filter_pending', pending.status, pendingHit);
-  if (pending.status !== 200 || !pendingHit) failed = true;
-
-  const search = await request(`/api/v1/messaging/conversations?q=${patientPhone}`, {
-    headers: authHeaders(accessToken, tenantId),
-  });
-  const searchHit = itemsOf(search).some((item) => item.id === conversationId);
-  console.log('search', search.status, searchHit);
-  if (search.status !== 200 || !searchHit) failed = true;
-
-  const other = await request('/api/v1/auth/signup', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      email: `s7-inbox-b-${stamp}@example.com`,
-      password: 'SenhaForte!99',
-      clinicName: 'Clinica Inbox B',
-      ownerName: 'Owner B',
-    }),
-  });
-  const otherToken = dataOf(other).accessToken as string;
-  const otherTenantId = (dataOf(other).tenant as { id: string }).id;
-  const cross = await request(`/api/v1/messaging/conversations/${conversationId}`, {
-    headers: authHeaders(otherToken, otherTenantId),
-  });
-  console.log('cross_tenant', other.status, cross.status);
-  if (other.status !== 201 || cross.status !== 404) failed = true;
-
-  server.close();
-  await getPrismaClient().$disconnect();
-
-  if (failed) process.exit(1);
-  console.log('OK: messaging inbox smoke passed');
+  console.log('smoke-messaging-inbox OK');
 }
 
-void main().catch((err) => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

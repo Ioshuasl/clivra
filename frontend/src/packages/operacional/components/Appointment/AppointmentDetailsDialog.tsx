@@ -89,7 +89,7 @@ export function AppointmentDetailsDialog({
       status === 'REQUESTED' ||
       status === 'SCHEDULED' ||
       (clinical && (status === 'CONFIRMED' || status === 'IN_SERVICE'));
-    setOtherOpen(!hasPrimary && (status === 'SCHEDULED' || status === 'CONFIRMED'));
+    setOtherOpen(!hasPrimary && status === 'CONFIRMED');
   }, [appointment, me]);
 
   const { sheetOpen, requestClose, onOpenChange, onOpenChangeComplete } = useSheetOpenState(

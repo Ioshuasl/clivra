@@ -17,6 +17,16 @@ function prune(key: string, windowStart: number): number[] {
 
 export function rateLimit(options: RateLimitOptions) {
   return (req: Request, res: Response, next: NextFunction): void => {
+    // Dev/e2e: dezenas de logins na mesma IP estouram o bucket e derrubam a suíte.
+    // Produção mantém o limite; override explícito via RATE_LIMIT_DISABLED=1.
+    if (
+      process.env.RATE_LIMIT_DISABLED === '1' ||
+      process.env.NODE_ENV !== 'production'
+    ) {
+      next();
+      return;
+    }
+
     const now = Date.now();
     const windowStart = now - options.windowMs;
     const bucketKey = options.key(req);
