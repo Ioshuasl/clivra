@@ -6,7 +6,7 @@ import { RECEPTION, SEED_PATIENT } from './helpers/credentials';
 async function openSeedPatient(page: Page) {
   await page.goto('/app/pacientes');
   await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-  await page.getByRole('button', { name: 'Abrir' }).first().click();
+  await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
   await ownerExpect(page).toHaveURL(/\/app\/pacientes\//);
   await ownerExpect(page.getByRole('heading', { name: SEED_PATIENT })).toBeVisible();
 }
@@ -71,7 +71,7 @@ test.describe('Anamnese (recepção)', () => {
     await loginAs(page, RECEPTION);
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await expect(page).toHaveURL(/\/app\/pacientes\//);
     await expect(page.getByRole('heading', { name: SEED_PATIENT })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Dados' })).toBeVisible();

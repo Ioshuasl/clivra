@@ -55,7 +55,7 @@ ownerTest.describe('Orçamentos (operacional)', () => {
   ownerTest('ficha tem aba Orçamentos e timeline QUOTE após criar', async ({ page }) => {
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await ownerExpect(page).toHaveURL(/\/app\/pacientes\//);
     await ownerExpect(page.getByRole('tab', { name: 'Orçamentos' })).toBeVisible();
     await page.getByRole('tab', { name: 'Orçamentos' }).click();
@@ -71,7 +71,7 @@ test.describe('Orçamentos (recepção)', () => {
     await expect(page.getByRole('link', { name: 'Orçamentos' })).toBeVisible();
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await expect(page).toHaveURL(/\/app\/pacientes\//);
     await expect(page.getByRole('tab', { name: 'Orçamentos' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Prontuário' })).toHaveCount(0);

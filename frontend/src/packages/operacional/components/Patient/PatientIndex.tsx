@@ -39,6 +39,8 @@ export function PatientIndex() {
   );
   const [createOpen, setCreateOpen] = useState(false);
   const skipFilterReset = useRef(true);
+  // Buscas que esta tela já gravou na URL: ecos atrasados do router não devem sobrescrever o campo.
+  const writtenSearches = useRef(new Set<string>([searchParams.get('search') ?? '']));
 
   const listQuery = usePatientListHook(deferredSearch, { page, active });
 
@@ -50,8 +52,11 @@ export function PatientIndex() {
     const urlPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 
     const writingSearch =
-      urlSearch === deferredSearch.trim() || urlSearch === search.trim();
+      writtenSearches.current.has(urlSearch) ||
+      urlSearch === deferredSearch.trim() ||
+      urlSearch === search.trim();
     if (!writingSearch) {
+      writtenSearches.current = new Set([urlSearch]);
       setSearch(urlSearch);
       setPage(1);
     } else if (urlPage !== page) {
@@ -77,6 +82,7 @@ export function PatientIndex() {
     if (page > 1) params.set('page', String(page));
     if (active !== 'all') params.set('active', active);
     const qs = params.toString();
+    writtenSearches.current.add(deferredSearch.trim());
     const next = qs ? `/app/pacientes?${qs}` : '/app/pacientes';
     const current = `${window.location.pathname}${window.location.search}`;
     if (current === next) return;

@@ -7,7 +7,7 @@ ownerTest.describe('Auditoria (owner)', () => {
   ownerTest('filtra a paciente seed e vê leitura clínica', async ({ page }) => {
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await ownerExpect(page).toHaveURL(/\/app\/pacientes\//);
     await ownerExpect(page.getByRole('heading', { name: SEED_PATIENT })).toBeVisible();
 

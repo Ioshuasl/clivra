@@ -57,7 +57,7 @@ export async function signupClinic(
   await page.getByLabel('Nome da clínica').fill(clinicName);
   await page.getByLabel('Seu nome').fill(ownerName);
   await page.getByLabel('E-mail').fill(email);
-  await page.getByLabel('Senha').fill(OWNER.password);
+  await page.getByLabel('Senha', { exact: true }).fill(OWNER.password);
   await page.getByRole('button', { name: 'Criar conta' }).click();
   await expect(page).toHaveURL(/\/app(\/|$|\?)/, { timeout: 60_000 });
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 30_000 });

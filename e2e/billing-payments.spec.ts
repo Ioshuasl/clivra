@@ -82,7 +82,7 @@ test.describe('Financeiro (papéis)', () => {
     await loginAs(page, RECEPTION);
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await expect(page).toHaveURL(/\/app\/pacientes\//);
     await expect(page.getByRole('tab', { name: 'Financeiro' })).toBeVisible();
     await page.getByRole('tab', { name: 'Financeiro' }).click();

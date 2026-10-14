@@ -11,13 +11,13 @@ test.describe('Patients (E3)', () => {
     await page.getByLabel('Buscar pacientes').fill('Maria');
     await expect(page.getByText(SEED_PATIENT)).toBeVisible();
     await page.getByLabel('Buscar pacientes').fill('zzz-nao-existe');
-    await expect(page.getByText('Nenhum paciente encontrado.')).toBeVisible();
+    await expect(page.getByText('Nenhum paciente encontrado')).toBeVisible();
   });
 
   test('abre ficha com timeline', async ({ page }) => {
     await page.goto('/app/pacientes');
     await page.getByLabel('Buscar pacientes').fill(SEED_PATIENT);
-    await page.getByRole('button', { name: 'Abrir' }).first().click();
+    await page.getByRole('link', { name: /^Abrir paciente/ }).first().click();
     await expect(page).toHaveURL(/\/app\/pacientes\//);
     await expect(page.getByRole('heading', { name: SEED_PATIENT })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Dados' })).toBeVisible();
@@ -34,10 +34,10 @@ test.describe('Patients (E3)', () => {
 
     await page.goto('/app/pacientes');
     await page.getByRole('button', { name: 'Novo paciente' }).click();
-    await expect(page.getByText('Novo paciente', { exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('Novo paciente', { exact: true })).toBeVisible();
     await page.getByLabel('Nome completo').fill(name);
-    await page.getByLabel('Telefone').fill(phone);
-    await page.getByRole('button', { name: 'Criar' }).click();
+    await page.getByLabel('Telefone', { exact: true }).fill(phone);
+    await page.getByRole('button', { name: 'Criar paciente' }).click();
 
     await expect(page).toHaveURL(/\/app\/pacientes\//, { timeout: 30_000 });
     await expect(page.getByRole('heading', { name })).toBeVisible();

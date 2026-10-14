@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { expectLoginPage, loginAs, signupClinic } from './helpers/auth';
-import { OWNER, RECEPTION, SEED_CLINIC } from './helpers/credentials';
+import { OWNER, RECEPTION } from './helpers/credentials';
 
 test.describe('Identity (E1)', () => {
   test('login com credenciais inválidas mostra erro', async ({ page }) => {
     await page.goto('/login');
     await expectLoginPage(page);
     await page.getByLabel('E-mail').fill('nao-existe@example.com');
-    await page.getByLabel('Senha').fill('senha-errada');
+    await page.getByLabel('Senha', { exact: true }).fill('senha-errada');
     await page.getByRole('button', { name: 'Entrar' }).click();
     // Evita o announcer do Next (`#__next-route-announcer__` também é role=alert).
     await expect(page.locator('[data-slot="alert"]')).toBeVisible();
@@ -16,8 +16,9 @@ test.describe('Identity (E1)', () => {
 
   test('owner entra e vê o dashboard', async ({ page }) => {
     await loginAs(page, OWNER);
-    await expect(page.getByRole('heading', { name: new RegExp(OWNER.name) })).toBeVisible();
-    await expect(page.getByText(new RegExp(`Resumo do dia.*${SEED_CLINIC}`))).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByText(/(Bom dia|Boa tarde|Boa noite), Dr\. Owner/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Menu do usuário' })).toContainText(OWNER.name);
   });
 
   test('recepção entra', async ({ page }) => {
@@ -28,9 +29,9 @@ test.describe('Identity (E1)', () => {
   });
 
   test('signup cria clínica e entra no app', async ({ page }) => {
-    const { clinicName } = await signupClinic(page);
+    await signupClinic(page);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(new RegExp(`Resumo do dia.*${clinicName}`))).toBeVisible();
+    await expect(page.getByText(/(Bom dia|Boa tarde|Boa noite), /)).toBeVisible();
   });
 
   test('forgot password não enumera e-mail', async ({ page }) => {
