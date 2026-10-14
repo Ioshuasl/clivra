@@ -162,8 +162,9 @@ async function main() {
     },
     body: JSON.stringify({ unitId, openingCents: 0 }),
   });
-  console.log('cash-open', openCash.status);
-  if (openCash.status !== 201) failed = true;
+  console.log('cash-open', openCash.status, errorCode(openCash));
+  // Ciclo desativado: abertura retorna FEATURE_DISABLED; PIX não depende de caixa.
+  if (openCash.status !== 501 || errorCode(openCash) !== 'FEATURE_DISABLED') failed = true;
 
   const pay = await request(`/api/v1/installments/${futureInst}/payments`, {
     method: 'POST',

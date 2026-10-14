@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { Server } from 'node:http';
 import { createApp } from '../src/app.js';
+import { CASH_SESSION_LIFECYCLE_ENABLED } from '../src/modules/billing/helpers/cash_session_lifecycle.helper.js';
 import { getPrismaClient } from '../src/shared/database/tenant_prisma.js';
 
 type Json = { status: number; body: Record<string, unknown> | null };
@@ -75,6 +76,30 @@ async function main() {
   });
   console.log('current-empty', emptyCurrent.status, emptyCurrent.body?.data);
   if (emptyCurrent.status !== 200 || emptyCurrent.body?.data !== null) failed = true;
+
+  if (!CASH_SESSION_LIFECYCLE_ENABLED) {
+    const disabledOpen = await request('/api/v1/cash-sessions', {
+      method: 'POST',
+      headers: {
+        ...authHeaders(token, tenantId, {
+          'content-type': 'application/json',
+          'Idempotency-Key': randomUUID(),
+        }),
+      },
+      body: JSON.stringify({ unitId, openingCents: 0 }),
+    });
+    console.log('open-disabled', disabledOpen.status, errorCode(disabledOpen));
+    if (disabledOpen.status !== 501 || errorCode(disabledOpen) !== 'FEATURE_DISABLED') failed = true;
+
+    await prisma.$disconnect();
+    server.close();
+    if (failed) {
+      console.error('FAIL: billing cash smoke (lifecycle disabled)');
+      process.exit(1);
+    }
+    console.log('OK: billing cash smoke (lifecycle disabled)');
+    return;
+  }
 
   const mismatch = await request('/api/v1/cash-sessions', {
     method: 'POST',

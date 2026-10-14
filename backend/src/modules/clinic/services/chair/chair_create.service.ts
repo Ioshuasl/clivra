@@ -5,12 +5,14 @@ import {
   FindChairByNameRepository,
 } from '../../repositories/chair/chair.repository.js';
 import { GetUnitRepository } from '../../repositories/unit/unit.repository.js';
+import { GetProfileRepository } from '../../repositories/tenant/tenant.repository.js';
 import { DuplicateNameError } from '../../models/errors/clinic.errors.js';
 import type { ChairCreateSchema } from '../../schemas/clinic.schema.js';
 import type { ChairSummary } from '../../types/clinic.types.js';
 
 export class CreateService {
   constructor(
+    private readonly getProfile = new GetProfileRepository(),
     private readonly getUnit = new GetUnitRepository(),
     private readonly findByName = new FindChairByNameRepository(),
     private readonly create = new CreateChairRepository(),
@@ -21,6 +23,15 @@ export class CreateService {
     unitId: string,
     chairSchema: ChairCreateSchema,
   ): Promise<ChairSummary> {
+    const profile = await this.getProfile.execute(ctx);
+    if (!profile?.chairsEnabled) {
+      throw new AppError(
+        'FEATURE_DISABLED',
+        'Agenda por cadeira está desativada nesta clínica. Ative em Configurações → Clínica.',
+        400,
+      );
+    }
+
     const unit = await this.getUnit.execute(ctx, unitId);
     if (!unit) {
       throw new AppError('NOT_FOUND', 'Unidade não encontrada.', 404);

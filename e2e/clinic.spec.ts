@@ -1,3 +1,4 @@
+import { setChairsEnabled } from './helpers/clinic';
 import { expect, test } from './helpers/fixtures';
 import { DENTIST, SEED_CHAIR, SEED_CLINIC } from './helpers/credentials';
 
@@ -15,17 +16,26 @@ test.describe('Clinic (E2)', () => {
     await expect(page.getByRole('button', { name: 'Adicionar slot' })).toBeVisible();
   });
 
-  test('cadeiras: lista seed e cria nova', async ({ page }) => {
+  test('cadeiras: desligadas redirecionam; ligadas listam seed e criam nova', async ({ page }) => {
+    await setChairsEnabled(false);
     await page.goto('/app/configuracoes/cadeiras');
-    await expect(page.getByRole('heading', { name: 'Cadeiras' })).toBeVisible();
-    await expect(page.getByRole('cell', { name: SEED_CHAIR })).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/configuracoes\/clinica/, { timeout: 30_000 });
 
-    const name = `Cadeira E2E ${Date.now()}`;
-    await page.getByRole('button', { name: 'Nova cadeira' }).click();
-    await expect(page.getByText('Nova cadeira', { exact: true })).toBeVisible();
-    await page.locator('#chair-name').fill(name);
-    await page.getByRole('button', { name: 'Criar' }).click();
-    await expect(page.getByText(name, { exact: true })).toBeVisible();
+    await setChairsEnabled(true);
+    try {
+      await page.goto('/app/configuracoes/cadeiras');
+      await expect(page.getByRole('heading', { name: 'Cadeiras' })).toBeVisible();
+      await expect(page.getByRole('cell', { name: SEED_CHAIR })).toBeVisible();
+
+      const name = `Cadeira E2E ${Date.now()}`;
+      await page.getByRole('button', { name: 'Nova cadeira' }).click();
+      await expect(page.getByRole('dialog').getByText('Nova cadeira', { exact: true })).toBeVisible();
+      await page.locator('#chair-name').fill(name);
+      await page.getByRole('button', { name: 'Criar' }).click();
+      await expect(page.getByText(name, { exact: true })).toBeVisible();
+    } finally {
+      await setChairsEnabled(false);
+    }
   });
 
   test('profissionais', async ({ page }) => {
@@ -48,8 +58,9 @@ test.describe('Clinic (E2)', () => {
     await expect(page.getByText(DENTIST.name)).toBeVisible();
   });
 
-  test('onboarding', async ({ page }) => {
+  test('onboarding (rota antiga redireciona para Primeiros passos)', async ({ page }) => {
     await page.goto('/app/onboarding');
-    await expect(page.getByRole('heading', { name: 'Onboarding' })).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/primeiros-passos/);
+    await expect(page.getByRole('heading', { name: 'Primeiros passos', level: 1 })).toBeVisible();
   });
 });

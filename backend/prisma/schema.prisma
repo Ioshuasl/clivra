@@ -19,6 +19,8 @@ model Tenant {
   acceptedPaymentMethods String[]    @default(["CASH", "PIX", "CREDIT_CARD", "DEBIT_CARD"]) @map("accepted_payment_methods")
   onboarding      Json               @default("{\"skippedSteps\":[]}")
   bookingSettings Json               @default("{\"minLeadMinutes\":120,\"maxLeadDays\":60,\"publicStatus\":\"REQUESTED\",\"courtesyTransactionalMessages\":50}") @map("booking_settings")
+  /// Agenda por cadeira (visão + cadastro). Default off — clínicas simples usam só profissional.
+  chairsEnabled   Boolean            @default(false) @map("chairs_enabled")
   status          String             @default("TRIAL")
   trialEndsAt     DateTime?          @map("trial_ends_at") @db.Timestamptz
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz

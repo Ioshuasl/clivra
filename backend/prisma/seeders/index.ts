@@ -37,7 +37,7 @@ async function main() {
 
   try {
     const { tenant, owner, ownerMembership } = await seedIdentity(prisma, passwordHash);
-    await seedSubscription(prisma, tenant);
+    await seedSubscription(prisma, tenant.id);
     const unit = await seedClinic(prisma, tenant.id);
     await prisma.membership.update({
       where: { id: ownerMembership.id },
@@ -95,6 +95,8 @@ async function main() {
     console.info('  S5: categoria Procedimentos + orçamento DRAFT da Maria (3 itens)');
     console.info('  S7: inbox seed — conversa PENDING da Maria (Oi, quero remarcar)');
     console.info('  S7: subscription TRIAL no plano Essencial (se ainda não existia)');
+    console.info('  S6: categorias E7 + parcelas OPEN da Maria (aceite billing)');
+    console.info('  Agenda: 16 agendamentos (todos os status) + 7 entradas na fila de espera');
   } finally {
     await prisma.$disconnect();
   }

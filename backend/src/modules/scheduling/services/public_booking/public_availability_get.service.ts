@@ -4,7 +4,11 @@ import { getPublicClinicCatalog } from '../../../clinic/clinic_public.js';
 import { AvailabilityService } from '../availability/availability_get.service.js';
 import type { PublicAvailabilityQuerySchema } from '../../schemas/public_booking.schema.js';
 import type { AvailabilityResult } from '../../types/scheduling.types.js';
-import { addDaysYmd, isWithinLeadWindow } from '../../helpers/public_booking.helper.js';
+import {
+  addDaysYmd,
+  isWithinLeadWindow,
+  resolvePublicSlotMinutes,
+} from '../../helpers/public_booking.helper.js';
 import { formatYmdInTz } from '../../helpers/scheduling.helper.js';
 
 export class GetService {
@@ -17,13 +21,17 @@ export class GetService {
     const catalog = await getPublicClinicCatalog(ctx);
     if (!catalog) throw new AppError('NOT_FOUND', 'Clínica não encontrada.', 404);
 
-    const publicProcedure = catalog.procedures.find((p) => p.id === query.procedureId);
-    if (!publicProcedure) {
-      throw new AppError(
-        'BUSINESS_RULE_VIOLATION',
-        'Procedimento não disponível no agendamento público.',
-        422,
-      );
+    let durationMinutes = resolvePublicSlotMinutes(catalog.procedures);
+    if (query.procedureId) {
+      const publicProcedure = catalog.procedures.find((p) => p.id === query.procedureId);
+      if (!publicProcedure) {
+        throw new AppError(
+          'BUSINESS_RULE_VIOLATION',
+          'Procedimento não disponível no agendamento público.',
+          422,
+        );
+      }
+      durationMinutes = publicProcedure.defaultMinutes;
     }
 
     const professional = catalog.professionals.find((p) => p.id === query.professionalId);
@@ -45,7 +53,8 @@ export class GetService {
       const day = await this.availability.execute(ctx, {
         professionalId: query.professionalId,
         date: ymd,
-        procedureId: query.procedureId,
+        durationMinutes,
+        ...(query.procedureId ? { procedureId: query.procedureId } : {}),
       });
       days.push({
         ...day,

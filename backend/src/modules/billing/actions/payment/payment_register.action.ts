@@ -22,6 +22,7 @@ import {
 import { GetOpenRepository } from '../../repositories/cash_session/cash_session_get_open.repository.js';
 import { BalanceRepository } from '../../repositories/credit_ledger/credit_ledger_balance.repository.js';
 import { HasOverdueRepository } from '../../repositories/installment/installment_overdue.repository.js';
+import { CASH_SESSION_LIFECYCLE_ENABLED } from '../../helpers/cash_session_lifecycle.helper.js';
 import { tenantToday } from '../../helpers/tenant_today.helper.js';
 import { setPatientHasOverdue } from '../../../patients/patients_public.js';
 import {
@@ -152,7 +153,10 @@ export class RegisterAction {
           unitId: installment.unitId,
           openedBy: ctx.userId,
         });
-        if (hasCashSplit(splits) && !session) throw new CashSessionRequiredError();
+        // Ciclo de caixa desativado: CASH sem sessão aberta é permitido.
+        if (CASH_SESSION_LIFECYCLE_ENABLED && hasCashSplit(splits) && !session) {
+          throw new CashSessionRequiredError();
+        }
 
         const creditNeeded = patientCreditCents(splits);
         if (creditNeeded > 0n) {

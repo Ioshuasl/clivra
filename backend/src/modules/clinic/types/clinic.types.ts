@@ -17,6 +17,8 @@ export type ClinicProfile = {
   responsibleCro: string | null;
   timezone: string;
   acceptedPaymentMethods: string[];
+  /** Quando false, UI/API de cadeira ficam ocultas/bloqueadas. */
+  chairsEnabled: boolean;
   defaultUnit: {
     id: string;
     name: string;

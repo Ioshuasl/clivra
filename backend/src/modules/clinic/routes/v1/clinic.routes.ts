@@ -2,6 +2,7 @@ import { Router, type NextFunction, type Request, type RequestHandler, type Resp
 import { authenticateMiddleware } from '../../../../shared/middlewares/authenticate.middleware.js';
 import { authorize, authorizeAny } from '../../../../shared/middlewares/authorize.middleware.js';
 import { tenantContextMiddleware } from '../../../../shared/middlewares/tenant_context.middleware.js';
+import { asyncSubscriptionGuard } from '../../../subscription/subscription_public.js';
 import { ClinicController } from '../../controllers/clinic.controller.js';
 
 function asyncHandler(
@@ -15,6 +16,7 @@ function asyncHandler(
 const readStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('settings.read'),
 ];
 
@@ -28,6 +30,7 @@ const agendaCatalogReadStack: RequestHandler[] = [
 const writeStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('settings.write'),
 ];
 

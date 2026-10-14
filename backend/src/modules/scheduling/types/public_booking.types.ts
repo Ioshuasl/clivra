@@ -37,6 +37,7 @@ export type PublicBookingTokenMeta = {
   professionalId?: string;
   startsAt?: string;
   endsAt?: string;
+  patientNote?: string | null;
   unitId?: string;
   waitlistEntryId?: string;
   cancelledAppointmentId?: string;

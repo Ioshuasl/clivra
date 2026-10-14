@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expect as ownerExpect, test as ownerTest } from './helpers/fixtures';
-import { loginAs } from './helpers/auth';
+import { loginAs, openSettingsNav } from './helpers/auth';
 import { DENTIST, RECEPTION, SEED_PATIENT } from './helpers/credentials';
 
 ownerTest.describe('Auditoria (owner)', () => {
@@ -12,16 +12,17 @@ ownerTest.describe('Auditoria (owner)', () => {
     await ownerExpect(page.getByRole('heading', { name: SEED_PATIENT })).toBeVisible();
 
     await page.getByRole('tab', { name: 'Prontuário' }).click();
-    await ownerExpect(page.getByRole('heading', { name: 'Prontuário' })).toBeVisible();
+    await ownerExpect(page.getByText('Prontuário clínico')).toBeVisible();
 
-    await page.getByRole('link', { name: 'Ver acessos' }).click();
+    await page.getByText('Ver acessos').click();
     await ownerExpect(page).toHaveURL(/\/app\/configuracoes\/auditoria\?patientId=/);
     await ownerExpect(page.getByRole('heading', { name: 'Auditoria' })).toBeVisible();
+    await openSettingsNav(page);
     await ownerExpect(page.getByRole('link', { name: 'Auditoria' })).toBeVisible();
-    await ownerExpect(page.getByText('Leitura clínica').first()).toBeVisible();
+    await ownerExpect(page.getByRole('cell', { name: 'Leitura clínica' }).first()).toBeVisible();
 
-    await page.getByLabel('Ação').selectOption('CLINICAL_READ');
-    await ownerExpect(page.getByText('Leitura clínica').first()).toBeVisible();
+    await page.getByLabel('Ação', { exact: true }).selectOption('CLINICAL_READ');
+    await ownerExpect(page.getByRole('cell', { name: 'Leitura clínica' }).first()).toBeVisible();
   });
 });
 

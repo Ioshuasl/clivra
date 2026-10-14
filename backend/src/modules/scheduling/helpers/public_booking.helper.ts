@@ -4,6 +4,17 @@ import type { BookingSettings } from '../../clinic/clinic_public.js';
 
 export const OTP_TTL_SECONDS = 300;
 export const OTP_MAX_ATTEMPTS = 3;
+/** Duração padrão do pedido público (consulta/avaliação) — procedimento clínico fica para o dentista. */
+export const PUBLIC_EVALUATION_MINUTES = 30;
+
+export function resolvePublicSlotMinutes(
+  procedures: Array<{ name: string; defaultMinutes: number }>,
+): number {
+  const evaluation = procedures.find((p) => /avalia|consulta/i.test(p.name));
+  if (evaluation?.defaultMinutes) return evaluation.defaultMinutes;
+  if (procedures[0]?.defaultMinutes) return procedures[0].defaultMinutes;
+  return PUBLIC_EVALUATION_MINUTES;
+}
 
 export function assertLeadTime(startsAt: Date, settings: BookingSettings, now = new Date()): void {
   const minMs = settings.minLeadMinutes * 60_000;

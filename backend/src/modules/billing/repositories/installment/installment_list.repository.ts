@@ -32,7 +32,8 @@ export class ListRepository {
               ? { status: 'OPEN', dueDate: { gte: todayDate } }
               : query.status
                 ? { status: query.status }
-                : {}),
+                : // Sem status: só pagáveis (senão dueDate asc afoga OPEN atrás de PAID antigas).
+                  { status: { in: ['OPEN', 'PARTIALLY_PAID', 'OVERDUE'] } }),
           ...(dueFrom || dueTo
             ? {
                 dueDate: {

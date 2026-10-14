@@ -1,5 +1,6 @@
 import { expect, test } from './helpers/fixtures';
 import type { Page } from '@playwright/test';
+import { setChairsEnabled } from './helpers/clinic';
 import { SEED_CHAIR, SEED_PATIENT } from './helpers/credentials';
 
 async function closeOpenDialog(page: Page): Promise<void> {
@@ -28,21 +29,30 @@ async function closeOpenDialog(page: Page): Promise<void> {
 }
 
 test.describe('Agenda (E4a)', () => {
-  test('visão dia/semana por profissional e cadeira', async ({ page }) => {
+  test('visão dia/semana por profissional (cadeira desligada por padrão)', async ({ page }) => {
     await page.goto('/app/agenda');
     await expect(page.getByRole('heading', { name: 'Agenda' })).toBeVisible({ timeout: 45_000 });
     await expect(page.getByRole('button', { name: 'Dia' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Semana' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Profissional' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Cadeira' })).toBeVisible();
     await expect(page.getByLabel('Profissional')).toBeVisible();
-
-    await page.getByRole('button', { name: 'Cadeira' }).click();
-    await expect(page.getByLabel('Cadeira')).toBeVisible();
-    await expect(page.getByLabel('Cadeira')).toContainText(SEED_CHAIR);
+    // Sem "agenda por cadeira" ligada na clínica, o alternador Profissional/Cadeira não aparece.
+    await expect(page.getByRole('button', { name: 'Cadeira' })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Dia' }).click();
     await expect(page.getByRole('gridcell').first()).toBeVisible();
+  });
+
+  test('visão por cadeira quando a clínica liga "agenda por cadeira"', async ({ page }) => {
+    await setChairsEnabled(true);
+    try {
+      await page.goto('/app/agenda');
+      await expect(page.getByRole('button', { name: 'Profissional' })).toBeVisible({ timeout: 45_000 });
+      await page.getByRole('button', { name: 'Cadeira' }).click();
+      await expect(page.getByLabel('Cadeira')).toBeVisible();
+      await expect(page.getByLabel('Cadeira')).toContainText(SEED_CHAIR);
+    } finally {
+      await setChairsEnabled(false);
+    }
   });
 
   test('cria agendamento em ≤3 interações e confirma status', async ({ page }) => {
@@ -87,16 +97,10 @@ test.describe('Agenda (E4a)', () => {
       await closeOpenDialog(page);
     }
     expect(opened).toBe(true);
-    await expect(page.getByText('Novo agendamento', { exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('Novo agendamento', { exact: true })).toBeVisible();
 
     await page.getByPlaceholder('Buscar paciente…').fill('Maria');
-    await expect(page.locator('#appt-patient')).toContainText(SEED_PATIENT, { timeout: 15_000 });
-    const patientValue = await page
-      .locator('#appt-patient option')
-      .filter({ hasText: SEED_PATIENT })
-      .first()
-      .getAttribute('value');
-    await page.locator('#appt-patient').selectOption(patientValue ?? '');
+    await page.getByRole('option', { name: new RegExp(SEED_PATIENT) }).first().click();
 
     const professional = page.locator('#appt-professional');
     if (await professional.isVisible().catch(() => false)) {
@@ -108,7 +112,7 @@ test.describe('Agenda (E4a)', () => {
     const agendar = page.getByRole('button', { name: 'Agendar' });
     await expect(agendar).toBeEnabled({ timeout: 10_000 });
     await agendar.click();
-    const stillOpen = page.getByText('Novo agendamento', { exact: true });
+    const stillOpen = page.getByRole('dialog').getByText('Novo agendamento', { exact: true });
     try {
       await expect(stillOpen).toBeHidden({ timeout: 20_000 });
     } catch {
@@ -121,9 +125,7 @@ test.describe('Agenda (E4a)', () => {
     });
 
     await page.getByRole('button', { name: new RegExp(SEED_PATIENT) }).first().click();
-    await expect(page.getByLabel('Status')).toBeVisible();
-    await page.getByLabel('Status').selectOption({ label: 'Confirmado' });
-    await page.getByRole('button', { name: 'Atualizar status' }).click();
+    await page.getByRole('button', { name: 'Confirmar presença' }).click();
     await expect(page.getByText('Confirmado').first()).toBeVisible();
   });
 

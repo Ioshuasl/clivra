@@ -5,26 +5,19 @@ test.describe('Waitlist (E4b ops)', () => {
   test('adiciona e remove entrada na fila da agenda', async ({ page }) => {
     await page.goto('/app/agenda');
     await expect(page.getByRole('heading', { name: 'Agenda' })).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole('heading', { name: 'Fila de espera' })).toBeVisible();
-    await expect(page.getByText('Solicitado')).toBeVisible();
-    await expect(page.getByText('Confirmado')).toBeVisible();
+    await page.getByRole('button', { name: 'Fila de espera' }).click();
+    await expect(page.getByRole('button', { name: 'Adicionar', exact: true })).toBeVisible();
 
     while ((await page.getByRole('button', { name: 'Remover' }).count()) > 0) {
       await page.getByRole('button', { name: 'Remover' }).first().click();
       await page.waitForTimeout(400);
     }
 
-    await page.getByRole('button', { name: 'Adicionar' }).click();
+    await page.getByRole('button', { name: 'Adicionar', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Adicionar à fila' })).toBeVisible();
 
     await page.getByPlaceholder('Buscar paciente…').fill('Maria');
-    await expect(page.locator('#waitlist-patient')).toContainText(SEED_PATIENT, { timeout: 15_000 });
-    const patientValue = await page
-      .locator('#waitlist-patient option')
-      .filter({ hasText: SEED_PATIENT })
-      .first()
-      .getAttribute('value');
-    await page.locator('#waitlist-patient').selectOption(patientValue ?? '');
+    await page.getByRole('option', { name: new RegExp(SEED_PATIENT) }).first().click();
 
     const procedureValue = await page
       .locator('#waitlist-procedure option')

@@ -12,6 +12,7 @@ const tenantSelect = {
   responsibleCro: true,
   timezone: true,
   acceptedPaymentMethods: true,
+  chairsEnabled: true,
   onboarding: true,
 } as const;
 
@@ -44,6 +45,7 @@ export class GetProfileRepository {
         responsibleCro: tenant.responsibleCro,
         timezone: tenant.timezone,
         acceptedPaymentMethods: tenant.acceptedPaymentMethods,
+        chairsEnabled: tenant.chairsEnabled,
         defaultUnit: defaultUnit
           ? {
               id: defaultUnit.id,
@@ -67,6 +69,7 @@ export class UpdateProfileRepository {
       responsibleCro?: string | null;
       timezone?: string;
       acceptedPaymentMethods?: string[];
+      chairsEnabled?: boolean;
     },
   ): Promise<void> {
     const tenantPrisma = getTenantPrisma();

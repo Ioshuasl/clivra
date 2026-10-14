@@ -14,6 +14,7 @@ import {
   OTP_TTL_SECONDS,
   assertLeadTime,
   generateOtp,
+  resolvePublicSlotMinutes,
 } from '../../helpers/public_booking.helper.js';
 import { formatYmdInTz } from '../../helpers/scheduling.helper.js';
 import { AvailabilityService } from '../../services/availability/availability_get.service.js';
@@ -40,13 +41,20 @@ export class CreateAction {
     const catalog = await getPublicClinicCatalog(ctx);
     if (!catalog) throw new AppError('NOT_FOUND', 'Clínica não encontrada.', 404);
 
-    if (!catalog.procedures.some((p) => p.id === bookingSchema.procedureId)) {
-      throw new AppError(
-        'BUSINESS_RULE_VIOLATION',
-        'Procedimento não disponível no agendamento público.',
-        422,
-      );
+    const procedureId = bookingSchema.procedureId ?? null;
+    let durationMinutes = resolvePublicSlotMinutes(catalog.procedures);
+    if (procedureId) {
+      const publicProcedure = catalog.procedures.find((p) => p.id === procedureId);
+      if (!publicProcedure) {
+        throw new AppError(
+          'BUSINESS_RULE_VIOLATION',
+          'Procedimento não disponível no agendamento público.',
+          422,
+        );
+      }
+      durationMinutes = publicProcedure.defaultMinutes;
     }
+
     if (!catalog.professionals.some((p) => p.id === bookingSchema.professionalId)) {
       throw new AppError('BUSINESS_RULE_VIOLATION', 'Profissional indisponível.', 422);
     }
@@ -72,7 +80,8 @@ export class CreateAction {
     const avail = await this.availability.execute(ctx, {
       professionalId: bookingSchema.professionalId,
       date: dateYmd,
-      procedureId: bookingSchema.procedureId,
+      durationMinutes,
+      ...(procedureId ? { procedureId } : {}),
     });
     const slotOk = avail.slots.some(
       (s) => s.available && Math.abs(new Date(s.startsAt).getTime() - startsAt.getTime()) < 1000,
@@ -82,6 +91,8 @@ export class CreateAction {
       throw new SlotUnavailableError({ suggestedSlots: suggested });
     }
 
+    const endsAt = new Date(startsAt.getTime() + durationMinutes * 60_000);
+    const patientNote = bookingSchema.patientNote?.trim() || null;
     const otp = generateOtp();
     const rawBookingId = randomBytes(24).toString('base64url');
     const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000);
@@ -96,9 +107,11 @@ export class CreateAction {
         name: bookingSchema.name.trim().replace(/\s+/g, ' '),
         phone,
         email,
-        procedureId: bookingSchema.procedureId,
+        procedureId: procedureId ?? undefined,
         professionalId: bookingSchema.professionalId,
         startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+        patientNote,
         consentDataProcessing: bookingSchema.consentDataProcessing,
         consentTerms: bookingSchema.consentTerms,
         consentWhatsappMarketing: bookingSchema.consentWhatsappMarketing,

@@ -1,6 +1,7 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { AuditAction, writeAuditLogSafe } from '../../../../shared/database/write_audit.js';
 import { AppError } from '../../../../shared/middlewares/error_handler.middleware.js';
+import { assertPlanLimit, UsageMetric } from '../../../subscription/subscription_public.js';
 import { CreateAction } from '../../actions/invitation/invitation_create.action.js';
 import {
   GetByUserAndTenantRepository,
@@ -9,7 +10,8 @@ import {
 import { GetPendingByEmailRepository } from '../../repositories/invitation/invitation.repository.js';
 import type { InvitationCreateSchema } from '../../schemas/invitation.schema.js';
 import type { InvitationSummary } from '../../types/auth.types.js';
-import { assertCanAdd, countsTowardUserLimit, UsageMetric } from '../../../subscription/subscription_public.js';
+
+const ADMIN_ROLES = new Set(['OWNER', 'RECEPTION', 'ASSISTANT', 'FINANCE']);
 
 export class CreateService {
   constructor(
@@ -46,8 +48,8 @@ export class CreateService {
     const actor = await this.getMembership.execute(ctx.userId, ctx.tenantId);
     const clinicName = actor?.tenant.name ?? 'sua clínica';
 
-    if (countsTowardUserLimit(invitationSchema.role)) {
-      await assertCanAdd(ctx, UsageMetric.ADMIN_USERS);
+    if (ADMIN_ROLES.has(invitationSchema.role)) {
+      await assertPlanLimit(ctx, UsageMetric.ADMIN_USERS);
     }
 
     const created = await this.createAction.execute(

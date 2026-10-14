@@ -64,13 +64,15 @@ export class VerifyAction {
 
     const name = token.meta.name ?? '';
     const phone = token.meta.phone ?? '';
-    const procedureId = token.meta.procedureId;
+    const procedureId = token.meta.procedureId ?? null;
     const professionalId = token.meta.professionalId;
     const startsAt = token.meta.startsAt;
-    if (!procedureId || !professionalId || !startsAt || !name || !phone) {
+    const endsAt = token.meta.endsAt;
+    const patientNote = token.meta.patientNote?.trim() || null;
+    if (!professionalId || !startsAt || !name || !phone) {
       throw new AppError('VALIDATION_ERROR', 'Pedido de agendamento incompleto.', 400);
     }
-    if (!catalog.procedures.some((p) => p.id === procedureId)) {
+    if (procedureId && !catalog.procedures.some((p) => p.id === procedureId)) {
       throw new AppError(
         'BUSINESS_RULE_VIOLATION',
         'Procedimento não disponível no agendamento público.',
@@ -100,7 +102,9 @@ export class VerifyAction {
         professionalId,
         procedureId,
         startsAt,
+        endsAt: endsAt ?? undefined,
         chairId: null,
+        notes: patientNote,
       },
       null,
       {

@@ -81,6 +81,14 @@ async function main() {
   if (professional.status !== 201) failed = true;
   const professionalId = dataOf(professional).id as string;
 
+  const enableChairs = await request('/api/v1/clinic', {
+    method: 'PATCH',
+    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({ chairsEnabled: true }),
+  });
+  console.log('chairs-enable', enableChairs.status);
+  if (enableChairs.status !== 200) failed = true;
+
   const chair = await request(`/api/v1/clinic/units/${unitId}/chairs`, {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },

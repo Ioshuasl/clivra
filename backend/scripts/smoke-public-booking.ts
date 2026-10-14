@@ -126,13 +126,12 @@ async function main() {
   if (missing.status !== 404 || errorCode(missing) !== 'NOT_FOUND') failed = true;
 
   const clinic = await request(`/api/v1/public/clinics/${slug}`);
-  console.log('public_clinic', clinic.status, (dataOf(clinic).procedures as unknown[])?.length);
+  console.log('public_clinic', clinic.status, (dataOf(clinic).professionals as unknown[])?.length);
   if (clinic.status !== 200) failed = true;
-  const procedures = (dataOf(clinic).procedures ?? []) as Array<{ id: string; name: string }>;
+  const publicProcedures = (dataOf(clinic).procedures ?? []) as Array<{ id: string; name: string }>;
+  const publicProcedureIds = new Set(publicProcedures.map((p) => p.id));
   const professionals = (dataOf(clinic).professionals ?? []) as Array<{ id: string; name: string }>;
-  if (procedures.length < 1 || !professionals.some((p) => p.id === professionalId)) failed = true;
-  const procedureId = procedures[0]?.id;
-  if (!procedureId) failed = true;
+  if (!professionals.some((p) => p.id === professionalId)) failed = true;
 
   const allProcedures = await request('/api/v1/procedures', {
     headers: authHeaders(accessToken, tenantId),
@@ -140,20 +139,26 @@ async function main() {
   const procList = Array.isArray(allProcedures.body?.data)
     ? (allProcedures.body?.data as Array<{ id: string; code?: string }>)
     : [];
-  const privateProcedure = procList.find((p) => p.id !== procedureId);
+  const privateProcedure = procList.find((p) => !publicProcedureIds.has(p.id));
 
   const day = spYmdWeekday(2);
+  // Fluxo padrão: sem procedureId → duração consulta/avaliação
   const avail = await request(
-    `/api/v1/public/clinics/${slug}/availability?procedureId=${procedureId}&professionalId=${professionalId}&from=${day}&to=${day}`,
+    `/api/v1/public/clinics/${slug}/availability?professionalId=${professionalId}&from=${day}&to=${day}`,
   );
   console.log('availability', avail.status, (dataOf(avail).days as unknown[])?.length);
   if (avail.status !== 200) failed = true;
   const days = (dataOf(avail).days ?? []) as Array<{
     slots: Array<{ startsAt: string; available: boolean }>;
+    slotMinutes?: number;
   }>;
   const slot = days[0]?.slots.find((s) => s.available);
   if (!slot) {
     console.error('FAIL: sem slot público disponível em', day);
+    failed = true;
+  }
+  if (days[0]?.slotMinutes && days[0].slotMinutes < 15) {
+    console.error('FAIL: slotMinutes inválido', days[0].slotMinutes);
     failed = true;
   }
 
@@ -161,7 +166,6 @@ async function main() {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      procedureId,
       professionalId,
       startsAt: slot?.startsAt,
       name: 'Joao Paciente',
@@ -197,7 +201,6 @@ async function main() {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      procedureId,
       professionalId,
       startsAt: new Date(Date.now() + 30 * 60_000).toISOString(),
       name: 'Joao Paciente',
@@ -210,17 +213,17 @@ async function main() {
   console.log('lead_time', tooSoon.status, errorCode(tooSoon));
   if (tooSoon.status !== 422) failed = true;
 
-  async function bookAndVerify(phone: string, email: string) {
+  async function bookAndVerify(phone: string, email: string, patientNote?: string) {
     const created = await request(`/api/v1/public/clinics/${slug}/bookings`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        procedureId,
         professionalId,
         startsAt: slot?.startsAt,
         name: 'Joao Paciente',
         phone,
         email,
+        ...(patientNote ? { patientNote } : {}),
         consentDataProcessing: true,
         consentTerms: true,
       }),
@@ -252,7 +255,11 @@ async function main() {
   console.log('otp_fail', wrong1.status, wrong2.status, wrong3.status);
   if (wrong1.status !== 422 || wrong3.status !== 409) failed = true;
 
-  const secondBook = await bookAndVerify('62999990011', `ok-${stamp}@example.com`);
+  const secondBook = await bookAndVerify(
+    '62999990011',
+    `ok-${stamp}@example.com`,
+    'Dor no dente de trás',
+  );
   console.log('booking2', secondBook.status);
   const bookingId2 = dataOf(secondBook).bookingId as string;
   const otp2 = dataOf(secondBook).debugOtp as string;
@@ -267,10 +274,15 @@ async function main() {
     id: string;
     origin: string;
     status: string;
+    procedureId: string | null;
   };
   const patient = dataOf(verifyOk).patient as { origin?: string; needsDataReview?: boolean };
   if (appointment?.origin !== 'PUBLIC_BOOKING' || patient?.origin !== 'PUBLIC_BOOKING') failed = true;
   if (appointment?.status !== 'REQUESTED') failed = true;
+  if (appointment?.procedureId != null) {
+    console.error('FAIL: procedureId deveria ser null no booking público sem procedimento');
+    failed = true;
+  }
 
   const confirmRequested = await request(
     `/api/v1/public/appointments/${dataOf(verifyOk).confirmationToken as string}/confirm`,
@@ -298,7 +310,7 @@ async function main() {
 
   const day3 = nextWeekdayAfter(day);
   const avail2 = await request(
-    `/api/v1/public/clinics/${slug}/availability?procedureId=${procedureId}&professionalId=${professionalId}&from=${day3}&to=${day3}`,
+    `/api/v1/public/clinics/${slug}/availability?professionalId=${professionalId}&from=${day3}&to=${day3}`,
   );
   const slot2 = (
     (dataOf(avail2).days ?? []) as Array<{ slots: Array<{ startsAt: string; available: boolean }> }>
@@ -307,7 +319,6 @@ async function main() {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      procedureId,
       professionalId,
       startsAt: slot2?.startsAt ?? slot?.startsAt,
       name: 'Maria Paciente',

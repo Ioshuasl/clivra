@@ -135,19 +135,27 @@ async function main() {
     body: JSON.stringify({ method: 'CASH' }),
   });
   console.log('pay-cash-no-session', cashPay.status, errorCode(cashPay));
-  if (cashPay.status !== 422 || errorCode(cashPay) !== 'CASH_SESSION_REQUIRED') failed = true;
+  // Ciclo de caixa desativado: CASH sem sessão aberta é permitido — cria outro título para o fluxo PIX.
+  if (cashPay.status !== 200) failed = true;
 
-  const opened = await request('/api/v1/cash-sessions', {
+  const payable2 = await request('/api/v1/payables', {
     method: 'POST',
-    headers: {
-      ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': randomUUID() }),
-    },
-    body: JSON.stringify({ unitId, openingCents: 0 }),
+    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({
+      unitId,
+      categoryId: rent?.id,
+      description: 'Aluguel setembro',
+      amountCents: 250000,
+      dueDate: '2026-08-10',
+      supplier: 'Imobiliaria Centro',
+      recurrence: { frequency: 'MONTHLY', until: '2027-12-31' },
+    }),
   });
-  if (opened.status !== 201) failed = true;
+  if (payable2.status !== 201) failed = true;
+  const payablePixId = dataOf(payable2).id as string;
 
   const payKey = randomUUID();
-  const paid = await request(`/api/v1/payables/${payableId}/pay`, {
+  const paid = await request(`/api/v1/payables/${payablePixId}/pay`, {
     method: 'POST',
     headers: {
       ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': payKey }),
@@ -160,7 +168,7 @@ async function main() {
   if (!dataOf(paid).spawnedPayableId) failed = true;
   const spawnedId = dataOf(paid).spawnedPayableId as string;
 
-  const replay = await request(`/api/v1/payables/${payableId}/pay`, {
+  const replay = await request(`/api/v1/payables/${payablePixId}/pay`, {
     method: 'POST',
     headers: {
       ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': payKey }),
@@ -169,7 +177,7 @@ async function main() {
   });
   console.log('payable-pay-replay', replay.status);
   if (replay.status !== 200) failed = true;
-  if (dataOf(replay).payableId !== payableId) failed = true;
+  if (dataOf(replay).payableId !== payablePixId) failed = true;
 
   const spawned = await request(`/api/v1/payables/${spawnedId}`, {
     headers: authHeaders(token, tenantId),
@@ -179,7 +187,7 @@ async function main() {
   if (dataOf(spawned).dueDate !== '2026-09-10') failed = true;
   if (dataOf(spawned).status !== 'OPEN') failed = true;
 
-  const patchPaid = await request(`/api/v1/payables/${payableId}`, {
+  const patchPaid = await request(`/api/v1/payables/${payablePixId}`, {
     method: 'PATCH',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
     body: JSON.stringify({ description: 'nao pode' }),

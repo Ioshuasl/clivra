@@ -27,6 +27,7 @@ export class UpdateService {
       responsibleCro: clinicSchema.responsibleCro,
       timezone: clinicSchema.timezone,
       acceptedPaymentMethods: clinicSchema.acceptedPaymentMethods,
+      chairsEnabled: clinicSchema.chairsEnabled,
     });
 
     if (clinicSchema.phone !== undefined || clinicSchema.address !== undefined) {

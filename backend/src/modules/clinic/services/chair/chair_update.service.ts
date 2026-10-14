@@ -6,11 +6,13 @@ import {
   GetChairRepository,
   UpdateChairRepository,
 } from '../../repositories/chair/chair.repository.js';
+import { GetProfileRepository } from '../../repositories/tenant/tenant.repository.js';
 import type { ChairUpdateSchema } from '../../schemas/clinic.schema.js';
 import type { ChairSummary } from '../../types/clinic.types.js';
 
 export class UpdateService {
   constructor(
+    private readonly getProfile = new GetProfileRepository(),
     private readonly getChair = new GetChairRepository(),
     private readonly findByName = new FindChairByNameRepository(),
     private readonly update = new UpdateChairRepository(),
@@ -22,6 +24,15 @@ export class UpdateService {
     chairId: string,
     chairSchema: ChairUpdateSchema,
   ): Promise<ChairSummary> {
+    const profile = await this.getProfile.execute(ctx);
+    if (!profile?.chairsEnabled) {
+      throw new AppError(
+        'FEATURE_DISABLED',
+        'Agenda por cadeira está desativada nesta clínica. Ative em Configurações → Clínica.',
+        400,
+      );
+    }
+
     const existing = await this.getChair.execute(ctx, unitId, chairId);
     if (!existing) {
       throw new AppError('NOT_FOUND', 'Cadeira não encontrada.', 404);

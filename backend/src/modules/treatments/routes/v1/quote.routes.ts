@@ -2,6 +2,7 @@ import { Router, type NextFunction, type Request, type RequestHandler, type Resp
 import { authenticateMiddleware } from '../../../../shared/middlewares/authenticate.middleware.js';
 import { authorize } from '../../../../shared/middlewares/authorize.middleware.js';
 import { tenantContextMiddleware } from '../../../../shared/middlewares/tenant_context.middleware.js';
+import { asyncSubscriptionGuard } from '../../../subscription/subscription_public.js';
 import { QuoteController } from '../../controllers/quote.controller.js';
 
 function asyncHandler(
@@ -15,12 +16,14 @@ function asyncHandler(
 const readStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('quotes.read'),
 ];
 
 const writeStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('quotes.write'),
 ];
 

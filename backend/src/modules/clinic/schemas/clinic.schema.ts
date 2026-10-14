@@ -23,6 +23,7 @@ export const clinicUpdateSchema = z
     responsibleCro: z.string().max(20).optional().nullable(),
     timezone: z.string().min(3).max(64).optional(),
     acceptedPaymentMethods: z.array(z.enum(PAYMENT_METHODS as [string, ...string[]])).min(1).optional(),
+    chairsEnabled: z.boolean().optional(),
     phone: z.string().max(30).optional().nullable(),
     address: addressSchema.nullable(),
   })

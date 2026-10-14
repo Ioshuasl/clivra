@@ -120,6 +120,7 @@ async function main() {
   });
   if (emptyTitle.status !== 201) failed = true;
   const emptyId = dataOf(emptyTitle).id as string;
+  const emptyInst = ((dataOf(emptyTitle).installments as Array<{ id: string }>) ?? [])[0]?.id;
 
   const listed = await request(`/api/v1/receivables?patientId=${patientId}`, {
     headers: authHeaders(token, tenantId),
@@ -139,11 +140,11 @@ async function main() {
   if (instList.status !== 200) failed = true;
 
   const cashBody = {
-    amountCents: 10000,
+    amountCents: 5000,
     notes: null,
-    splits: [{ method: 'CASH', amountCents: 10000 }],
+    splits: [{ method: 'CASH', amountCents: 5000 }],
   };
-  const cashNoSession = await request(`/api/v1/installments/${inst1}/payments`, {
+  const cashNoSession = await request(`/api/v1/installments/${emptyInst}/payments`, {
     method: 'POST',
     headers: {
       ...authHeaders(token, tenantId, { 'content-type': 'application/json', 'Idempotency-Key': randomUUID() }),
@@ -151,7 +152,8 @@ async function main() {
     body: JSON.stringify(cashBody),
   });
   console.log('cash-no-session', cashNoSession.status, errorCode(cashNoSession));
-  if (cashNoSession.status !== 422 || errorCode(cashNoSession) !== 'CASH_SESSION_REQUIRED') failed = true;
+  // Ciclo de caixa desativado: CASH sem sessão aberta é permitido.
+  if (cashNoSession.status !== 201) failed = true;
 
   const sessionId = randomUUID();
   await tenantDb.runInTenantContext(smokeCtx, async (tx) => {
@@ -296,7 +298,8 @@ async function main() {
     body: JSON.stringify({ reason: 'título lançado por engano' }),
   });
   console.log('cancel-empty', cancelEmpty.status);
-  if (cancelEmpty.status !== 200) failed = true;
+  // O título "vazio" recebeu o CASH sem sessão (ciclo de caixa desativado): já tem pagamento ativo.
+  if (cancelEmpty.status !== 422) failed = true;
 
   const payClosed = await request(`/api/v1/installments/${inst1}/payments`, {
     method: 'POST',

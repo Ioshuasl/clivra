@@ -64,3 +64,11 @@ export async function signupClinic(
 
   return { email, clinicName };
 }
+
+/** Expande o grupo "Configurações" da barra lateral (itens ficam recolhidos por padrão). */
+export async function openSettingsNav(page: Page): Promise<void> {
+  const group = page.getByRole('button', { name: 'Configurações' }).first();
+  if ((await group.getAttribute('aria-expanded').catch(() => null)) !== 'true') {
+    await group.click();
+  }
+}

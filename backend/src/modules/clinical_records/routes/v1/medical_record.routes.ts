@@ -3,6 +3,7 @@ import { authenticateMiddleware } from '../../../../shared/middlewares/authentic
 import { authorize } from '../../../../shared/middlewares/authorize.middleware.js';
 import { auditRead } from '../../../../shared/middlewares/audit_read.middleware.js';
 import { tenantContextMiddleware } from '../../../../shared/middlewares/tenant_context.middleware.js';
+import { asyncSubscriptionGuard } from '../../../subscription/subscription_public.js';
 import { MedicalRecordController } from '../../controllers/medical_record.controller.js';
 import { AnamnesisController } from '../../controllers/anamnesis.controller.js';
 import { ClinicalAlertController } from '../../controllers/clinical_alert.controller.js';
@@ -21,12 +22,14 @@ function asyncHandler(
 const clinicalReadStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('clinical_records.read'),
 ];
 
 const clinicalWriteStack: RequestHandler[] = [
   asyncHandler(authenticateMiddleware),
   tenantContextMiddleware,
+  asyncSubscriptionGuard(),
   authorize('clinical_records.write'),
 ];
 

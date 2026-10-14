@@ -6,14 +6,10 @@ test.describe('Messaging WhatsApp (E8a ops)', () => {
     await ensureSubscriptionActive();
   });
 
-  test('onboarding aponta para a rota WhatsApp', async ({ page }) => {
-    await page.goto('/app/onboarding');
-    await expect(page.getByRole('heading', { name: 'Onboarding' })).toBeVisible();
-    const whatsappRow = page.locator('li').filter({ hasText: 'WhatsApp' });
-    await expect(whatsappRow.getByRole('link', { name: 'Configurar' })).toHaveAttribute(
-      'href',
-      '/app/configuracoes/whatsapp',
-    );
+  test('primeiros passos aponta para a rota WhatsApp', async ({ page }) => {
+    await page.goto('/app/primeiros-passos');
+    await expect(page.getByRole('heading', { name: 'Primeiros passos', level: 1 })).toBeVisible();
+    await expect(page.locator('a[href="/app/configuracoes/whatsapp"]').first()).toBeVisible();
   });
 
   test('wizard conecta conta fake e mostra uso/logs', async ({ page }) => {

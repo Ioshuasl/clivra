@@ -1,5 +1,6 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { AppError } from '../../../../shared/middlewares/error_handler.middleware.js';
+import { assertPlanLimit, UsageMetric } from '../../../subscription/subscription_public.js';
 import {
   CreateProfessionalRepository,
   FindByMembershipRepository,
@@ -7,7 +8,6 @@ import {
 } from '../../repositories/professional/professional.repository.js';
 import type { ProfessionalCreateSchema } from '../../schemas/clinic.schema.js';
 import type { ProfessionalSummary } from '../../types/clinic.types.js';
-import { assertCanAdd, UsageMetric } from '../../../subscription/subscription_public.js';
 
 export class CreateService {
   constructor(
@@ -40,7 +40,8 @@ export class CreateService {
       }
     }
 
-    await assertCanAdd(ctx, UsageMetric.PROFESSIONALS);
+    await assertPlanLimit(ctx, UsageMetric.PROFESSIONALS);
+
     return this.create.execute(ctx, professionalSchema);
   }
 }

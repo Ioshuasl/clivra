@@ -5,7 +5,7 @@ export const publicClinicSlugParamSchema = z.object({
 });
 
 export const publicAvailabilityQuerySchema = z.object({
-  procedureId: z.string().uuid(),
+  procedureId: z.string().uuid().optional(),
   professionalId: z.string().uuid(),
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -15,12 +15,13 @@ export type PublicAvailabilityQuerySchema = z.infer<typeof publicAvailabilityQue
 
 export const publicBookingCreateSchema = z
   .object({
-    procedureId: z.string().uuid(),
+    procedureId: z.string().uuid().optional().nullable(),
     professionalId: z.string().uuid(),
     startsAt: z.string().min(1),
     name: z.string().min(3),
     phone: z.string().min(10),
     email: z.string().email().optional().nullable(),
+    patientNote: z.string().max(500).optional().nullable(),
     consentDataProcessing: z.boolean(),
     consentTerms: z.boolean(),
     consentWhatsappMarketing: z.boolean().default(false),
