@@ -9,10 +9,9 @@ test.describe('Messaging Inbox (E8b)', () => {
 
     await loginAs(page, RECEPTION);
 
-    await expect(page.getByRole('link', { name: 'Inbox' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^WhatsApp/ })).toBeVisible();
     await page.goto('/app/inbox');
-    await expect(page.getByRole('heading', { name: 'Inbox' })).toBeVisible();
-    await expect(page.getByText(/Sem bloqueio de janela de 24h/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'WhatsApp', level: 1 })).toBeVisible();
 
     const list = page.getByRole('list', { name: 'Lista de conversas' });
     await expect(list).toBeVisible({ timeout: 20_000 });
@@ -35,8 +34,8 @@ test.describe('Messaging Inbox (E8b)', () => {
     ).toBeVisible({ timeout: 20_000 });
 
     const reply = `Resposta e2e inbox ${Date.now()}`;
-    await page.getByLabel('Mensagem').fill(reply);
-    await page.getByRole('button', { name: 'Enviar' }).click();
+    await page.getByPlaceholder('Escreva uma mensagem…').fill(reply);
+    await page.getByRole('button', { name: 'Enviar mensagem' }).click();
     await expect(page.getByText(reply)).toBeVisible({ timeout: 20_000 });
 
     // Painel do paciente: ficha se vinculado; senão pelo menos o telefone do contato.

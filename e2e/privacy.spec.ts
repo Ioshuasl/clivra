@@ -35,7 +35,7 @@ ownerTest.describe('Privacidade (owner)', () => {
     await page.getByLabel('Paciente', { exact: true }).selectOption(patientValue ?? '');
     await page.getByLabel('Tipo', { exact: true }).selectOption('ACCESS');
     await page.getByRole('button', { name: 'Registrar' }).click();
-    await ownerExpect(page.getByText('Baixar pacote')).toBeVisible({
+    await ownerExpect(page.getByText('Baixar pacote').first()).toBeVisible({
       timeout: 60_000,
     });
   });

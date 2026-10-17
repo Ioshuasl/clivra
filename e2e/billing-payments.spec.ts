@@ -1,49 +1,51 @@
 import { expect, test } from '@playwright/test';
 import { loginAs } from './helpers/auth';
-import {
-  ensureCashSessionOpen,
-  ensureOpenInstallmentForMaria,
-} from './helpers/billing';
+import { ensureOpenInstallmentForMaria } from './helpers/billing';
 import { ASSISTANT, DENTIST, FINANCE, RECEPTION, SEED_PATIENT } from './helpers/credentials';
 
-test.describe('Contas a receber (recepção)', () => {
-  test('baixa PIX+CASH da Maria, recibo visível e COPY sem Meta', async ({ page }) => {
+function parseReaisToCents(value: string): number {
+  return Math.round(Number(value.replace(/\./g, '').replace(',', '.')) * 100);
+}
+
+function centsToReais(cents: number): string {
+  return (cents / 100).toFixed(2).replace('.', ',');
+}
+
+test.describe('Painel financeiro — receber (recepção)', () => {
+  test('baixa PIX+CASH da Maria pelo painel, recibo visível e COPY sem Meta', async ({ page }) => {
     // COPY exige PDF gerado pelo worker — pode levar >90s sob carga.
     test.setTimeout(180_000);
-    const seed = await ensureOpenInstallmentForMaria();
-    await ensureCashSessionOpen(seed.unitId);
+    await ensureOpenInstallmentForMaria();
 
     await loginAs(page, RECEPTION);
-    await expect(page.locator('a[href="/app/financeiro/receber"]')).toBeVisible();
-    await page.goto('/app/financeiro/receber');
-    await expect(page.getByRole('heading', { name: 'Contas a receber' })).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'Navegação principal' }).locator('a[href="/app/financeiro"]'),
+    ).toBeVisible();
+    await page.goto('/app/financeiro');
+    await expect(page.getByRole('heading', { name: 'Hoje na clínica', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Movimentações' })).toBeVisible();
 
-    await page.getByLabel('Filtrar paciente').fill(SEED_PATIENT);
-    const patientFilter = page.getByLabel('Paciente do filtro');
-    await expect(patientFilter).toBeVisible({ timeout: 20_000 });
-    const patientOption = patientFilter.locator('option').filter({ hasText: SEED_PATIENT });
-    await expect(patientOption).toHaveCount(1, { timeout: 20_000 });
-    const patientValue = await patientOption.getAttribute('value');
-    expect(patientValue).toBeTruthy();
-    await patientFilter.selectOption(patientValue!);
+    const mariaRow = page
+      .getByRole('listitem')
+      .filter({ hasText: SEED_PATIENT })
+      .filter({ has: page.getByRole('button', { name: 'Receber' }) });
+    await expect(mariaRow.first()).toBeVisible({ timeout: 20_000 });
+    await mariaRow.first().getByRole('button', { name: 'Receber' }).click();
 
-    const mariaRow = page.getByRole('row').filter({ hasText: SEED_PATIENT });
-    await expect(mariaRow.getByRole('button', { name: 'Baixar' }).first()).toBeVisible({
-      timeout: 20_000,
-    });
-    await mariaRow.getByRole('button', { name: 'Baixar' }).first().click();
-    await expect(page.getByRole('heading', { name: 'Baixa de parcela' })).toBeVisible();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Baixa de parcela')).toBeVisible();
 
-    const halfReais = (Math.floor(seed.balanceCents / 2) / 100).toFixed(2).replace('.', ',');
-    const restCents = seed.balanceCents - Math.floor(seed.balanceCents / 2);
-    const restReais = (restCents / 100).toFixed(2).replace('.', ',');
-
+    // O diálogo já vem com o saldo da parcela em PIX; divide em PIX + dinheiro.
+    const balanceCents = parseReaisToCents(await page.locator('#payment-amount-0').inputValue());
+    expect(balanceCents).toBeGreaterThan(1);
+    const pixCents = Math.floor(balanceCents / 2);
     await page.locator('#payment-method-0').selectOption('PIX');
-    await page.locator('#payment-amount-0').fill(halfReais);
+    await page.locator('#payment-amount-0').fill(centsToReais(pixCents));
     await page.getByRole('button', { name: '+ Forma de pagamento' }).click();
     await page.locator('#payment-method-1').selectOption('CASH');
-    await page.locator('#payment-amount-1').fill(restReais);
+    await page.locator('#payment-amount-1').fill(centsToReais(balanceCents - pixCents));
 
+    // Sem abrir caixa: o ciclo de caixa está desativado e dinheiro é aceito.
     await page.getByRole('button', { name: 'Confirmar baixa' }).click();
     await expect(page.getByText(/Recibo nº/i)).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/não é nota fiscal/i)).toBeVisible();
@@ -57,25 +59,36 @@ test.describe('Contas a receber (recepção)', () => {
 });
 
 test.describe('Financeiro (papéis)', () => {
-  test('FINANCE vê nav Receber/Caixa/Pagar', async ({ page }) => {
+  test('FINANCE vê Financeiro, o painel e o botão de registrar movimentação', async ({ page }) => {
     await loginAs(page, FINANCE);
-    await expect(page.locator('a[href="/app/financeiro/receber"]')).toBeVisible();
-    await expect(page.locator('a[href="/app/financeiro/caixa"]')).toBeVisible();
-    await expect(page.locator('a[href="/app/financeiro/pagar"]')).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'Navegação principal' }).locator('a[href="/app/financeiro"]'),
+    ).toBeVisible();
+    await page.goto('/app/financeiro');
+    await expect(page.getByRole('heading', { name: 'Hoje na clínica', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Registrar movimentação' })).toBeVisible();
+    await expect(page.locator('main a[href="/app/financeiro/relatorios"]')).toBeVisible();
   });
 
-  test('DENTIST não vê nav Receber/Caixa/Pagar', async ({ page }) => {
+  test('recepção vê o painel financeiro', async ({ page }) => {
+    await loginAs(page, RECEPTION);
+    await page.goto('/app/financeiro');
+    await expect(page.getByRole('heading', { name: 'Hoje na clínica', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Registrar movimentação' })).toBeVisible();
+  });
+
+  test('DENTIST não vê Financeiro na navegação', async ({ page }) => {
     await loginAs(page, DENTIST);
-    await expect(page.locator('a[href="/app/financeiro/receber"]')).toHaveCount(0);
-    await expect(page.locator('a[href="/app/financeiro/caixa"]')).toHaveCount(0);
-    await expect(page.locator('a[href="/app/financeiro/pagar"]')).toHaveCount(0);
+    await expect(
+      page.getByRole('navigation', { name: 'Navegação principal' }).locator('a[href="/app/financeiro"]'),
+    ).toHaveCount(0);
   });
 
-  test('ASB não vê nav financeiro', async ({ page }) => {
+  test('ASB não vê Financeiro na navegação', async ({ page }) => {
     await loginAs(page, ASSISTANT);
-    await expect(page.locator('a[href="/app/financeiro/receber"]')).toHaveCount(0);
-    await expect(page.locator('a[href="/app/financeiro/caixa"]')).toHaveCount(0);
-    await expect(page.locator('a[href="/app/financeiro/pagar"]')).toHaveCount(0);
+    await expect(
+      page.getByRole('navigation', { name: 'Navegação principal' }).locator('a[href="/app/financeiro"]'),
+    ).toHaveCount(0);
   });
 
   test('recepção vê aba Financeiro na ficha', async ({ page }) => {
@@ -86,7 +99,6 @@ test.describe('Financeiro (papéis)', () => {
     await expect(page).toHaveURL(/\/app\/pacientes\//);
     await expect(page.getByRole('tab', { name: 'Financeiro' })).toBeVisible();
     await page.getByRole('tab', { name: 'Financeiro' }).click();
-    await expect(page.getByRole('heading', { name: 'Financeiro' })).toBeVisible();
     await expect(page.getByText('Saldo em aberto')).toBeVisible();
   });
 });

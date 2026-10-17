@@ -52,11 +52,11 @@ test.describe('Atendimento (E5)', () => {
     const card = page.getByRole('button', { name: /Maria Silva — Agendado/ }).first();
     await expect(card).toBeVisible({ timeout: 20_000 });
     await card.press('Enter');
-    await expect(page.getByLabel('Status')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Iniciar atendimento' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Abrir atendimento' })).toHaveCount(0);
     await page.getByRole('button', { name: 'Fechar' }).click();
-    await expect(page.getByLabel('Status')).toHaveCount(0);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
 
     const appointmentId = await getSeedAppointmentId('IN_SERVICE');
     await page.goto(`/app/atendimento/${appointmentId}`);

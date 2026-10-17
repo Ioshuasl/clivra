@@ -3,27 +3,24 @@ import { expect as ownerExpect, test as ownerTest } from './helpers/fixtures';
 import { loginAs } from './helpers/auth';
 import { ASSISTANT, DENTIST, FINANCE, RECEPTION, SEED_PATIENT } from './helpers/credentials';
 
+const PROCEDURE_NAME = 'Restauração em resina — 1 face';
+
 async function createDraftQuote(page: Page) {
   await page.goto('/app/orcamentos');
-  await ownerExpect(page.getByRole('heading', { name: 'Orçamentos' })).toBeVisible();
+  await ownerExpect(page.getByRole('heading', { name: 'Orçamentos', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Novo orçamento' }).click();
-  await ownerExpect(page.getByRole('heading', { name: 'Novo orçamento' })).toBeVisible();
+  const sheet = page.getByRole('dialog');
+  await ownerExpect(sheet.getByText('Novo orçamento', { exact: true })).toBeVisible();
 
-  await page.getByLabel('Buscar paciente').fill(SEED_PATIENT);
-  await ownerExpect(page.locator('#quote-patient option', { hasText: SEED_PATIENT })).toHaveCount(1, {
-    timeout: 20_000,
-  });
-  await page.locator('#quote-patient').selectOption({ label: SEED_PATIENT });
-  await page.locator('#quote-professional').selectOption({ label: DENTIST.name });
+  await sheet.locator('#quote-patient').fill(SEED_PATIENT);
+  await page.getByRole('option', { name: new RegExp(SEED_PATIENT) }).first().click();
+  await sheet.locator('#quote-professional').selectOption({ label: DENTIST.name });
 
-  const procedureSelect = page.locator('#quote-item-procedure-0');
-  const procedureOption = procedureSelect.locator('option', { hasText: 'Restauração em resina — 1 face' });
-  await ownerExpect(procedureOption).toHaveCount(1, { timeout: 20_000 });
-  const procedureValue = await procedureOption.getAttribute('value');
-  await procedureSelect.selectOption(procedureValue ?? '');
-  await page.getByLabel('Dente').fill('26');
-  await page.getByRole('button', { name: 'Criar' }).click();
-  await ownerExpect(page.getByRole('heading', { name: 'Novo orçamento' })).toHaveCount(0);
+  await sheet.locator('#quote-item-procedure-0').fill('Restauração em resina');
+  await page.getByRole('option', { name: PROCEDURE_NAME }).first().click();
+  await sheet.locator('#quote-item-tooth-0').fill('26');
+  await sheet.getByRole('button', { name: 'Criar orçamento' }).click();
+  await ownerExpect(page.getByRole('dialog')).toHaveCount(0);
 }
 
 ownerTest.describe('Orçamentos (operacional)', () => {
@@ -34,9 +31,9 @@ ownerTest.describe('Orçamentos (operacional)', () => {
     await ownerExpect(page.getByRole('cell', { name: SEED_PATIENT }).first()).toBeVisible();
 
     await page.getByRole('button', { name: 'Enviar' }).first().click();
-    await ownerExpect(page.getByRole('heading', { name: 'Enviar orçamento' })).toBeVisible();
-    await page.locator('#quote-channel').selectOption('COPY');
-    await page.getByRole('dialog').getByRole('button', { name: 'Enviar' }).click();
+    await ownerExpect(page.getByRole('dialog').getByText('Enviar orçamento', { exact: true })).toBeVisible();
+    await page.getByRole('radio', { name: 'Copiar link' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Enviar', exact: true }).click();
 
     const publicUrl = page.locator('#quote-public-url');
     await ownerExpect(publicUrl).toBeVisible({ timeout: 20_000 });
@@ -59,9 +56,9 @@ ownerTest.describe('Orçamentos (operacional)', () => {
     await ownerExpect(page).toHaveURL(/\/app\/pacientes\//);
     await ownerExpect(page.getByRole('tab', { name: 'Orçamentos' })).toBeVisible();
     await page.getByRole('tab', { name: 'Orçamentos' }).click();
-    await ownerExpect(page.getByRole('heading', { name: 'Orçamentos' })).toBeVisible();
+    await ownerExpect(page.getByText('Orçamentos do paciente')).toBeVisible();
     await page.getByRole('tab', { name: 'Timeline' }).click();
-    await ownerExpect(page.getByText('QUOTE', { exact: true }).first()).toBeVisible();
+    await ownerExpect(page.getByText('Orçamento', { exact: true }).first()).toBeVisible();
   });
 });
 
@@ -81,11 +78,12 @@ test.describe('Orçamentos (recepção)', () => {
     await loginAs(page, RECEPTION);
     await page.goto('/app/orcamentos');
     await page.getByRole('button', { name: 'Novo orçamento' }).click();
-    await expect(page.getByRole('heading', { name: 'Novo orçamento' })).toBeVisible();
-    const procedureOption = page.locator('#quote-item-procedure-0 option', {
-      hasText: 'Restauração em resina — 1 face',
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.getByText('Novo orçamento', { exact: true })).toBeVisible();
+    await sheet.locator('#quote-item-procedure-0').fill('Restauração em resina');
+    await expect(page.getByRole('option', { name: PROCEDURE_NAME }).first()).toBeVisible({
+      timeout: 20_000,
     });
-    await expect(procedureOption).toHaveCount(1, { timeout: 20_000 });
   });
 });
 

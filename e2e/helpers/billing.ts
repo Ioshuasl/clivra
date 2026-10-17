@@ -142,23 +142,6 @@ export async function ensureOpenInstallmentForMaria(): Promise<{
   };
 }
 
-export async function ensureCashSessionOpen(unitId: string): Promise<void> {
-  const { token, tenantId } = await receptionSession();
-  const current = await api<{ id: string } | null>(
-    `/cash-sessions/current?unitId=${encodeURIComponent(unitId)}`,
-    { token, tenantId },
-  );
-  if (current?.id) return;
-
-  await api('/cash-sessions', {
-    token,
-    tenantId,
-    method: 'POST',
-    headers: { 'Idempotency-Key': crypto.randomUUID() },
-    body: JSON.stringify({ unitId, openingCents: 0 }),
-  });
-}
-
 export async function registerPaymentPixCash(
   installmentId: string,
   balanceCents: number,

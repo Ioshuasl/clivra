@@ -53,8 +53,17 @@ export async function waitForMailpitOtp(email: string, timeoutMs = 20_000): Prom
 }
 
 /** Aguarda disponibilidade carregar e escolhe o 1º horário livre (pula fim de semana/seed). */
+/** Passo 1: escolhe "Qualquer profissional" (ou o primeiro profissional) e avança. */
+export async function chooseAnyPublicProfessional(page: Page): Promise<void> {
+  const anyProfessional = page.getByRole('button', { name: /Qualquer profissional/i });
+  await anyProfessional.waitFor({ state: 'visible', timeout: 30_000 });
+  await anyProfessional.click();
+  await page.getByRole('button', { name: 'Continuar' }).click();
+}
+
 export async function pickFirstPublicSlot(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Próximos dias' }).waitFor({ state: 'visible', timeout: 45_000 });
+  const next = page.getByRole('button', { name: /^Próximos/ });
+  await next.waitFor({ state: 'visible', timeout: 45_000 });
 
   for (let attempt = 0; attempt < 16; attempt += 1) {
     const dayWithSlots = page.getByRole('button').filter({ hasText: /[1-9]\d*\s+horários/ }).first();
@@ -69,8 +78,8 @@ export async function pickFirstPublicSlot(page: Page): Promise<void> {
       return;
     }
 
-    await page.getByRole('button', { name: 'Próximos dias' }).click();
-    await page.getByRole('button', { name: 'Próximos dias' }).waitFor({ state: 'visible', timeout: 30_000 });
+    await next.click();
+    await next.waitFor({ state: 'visible', timeout: 30_000 });
     await page.waitForTimeout(300);
   }
   throw new Error('Nenhum horário público disponível');

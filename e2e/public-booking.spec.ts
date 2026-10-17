@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   captureDebugOtp,
   getSeedClinicSlug,
+  chooseAnyPublicProfessional,
   pickFirstPublicSlot,
   waitForMailpitOtp,
 } from './helpers/public-booking';
@@ -29,18 +30,7 @@ test.describe('Public booking (E4b)', () => {
     await page.goto(`/agendar/${slug}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    const anyProfessional = page.getByRole('button', { name: /Qualquer profissional/i });
-    if (await anyProfessional.isVisible().catch(() => false)) {
-      await anyProfessional.click();
-      await page.getByRole('button', { name: 'Continuar' }).click();
-    } else {
-      const dentist = page.getByRole('button', { name: 'Dra. Ana Souza' });
-      if (await dentist.isVisible().catch(() => false)) {
-        await dentist.click();
-        await page.getByRole('button', { name: 'Continuar' }).click();
-      }
-    }
-
+    await chooseAnyPublicProfessional(page);
     await pickFirstPublicSlot(page);
 
     await page.getByLabel('Nome completo').fill(`Paciente OTP ${stamp}`);
@@ -66,21 +56,10 @@ test.describe('Public booking (E4b)', () => {
     await page.goto(`/agendar/${slug}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(
-      page.getByText(/Reserve um horário|dentista define o atendimento/i),
+      page.getByText(/Reserve seu horário|dentista define o atendimento/i).first(),
     ).toBeVisible();
 
-    const anyProfessional = page.getByRole('button', { name: /Qualquer profissional/i });
-    if (await anyProfessional.isVisible().catch(() => false)) {
-      await anyProfessional.click();
-      await page.getByRole('button', { name: 'Continuar' }).click();
-    } else {
-      const dentist = page.getByRole('button', { name: 'Dra. Ana Souza' });
-      if (await dentist.isVisible().catch(() => false)) {
-        await dentist.click();
-        await page.getByRole('button', { name: 'Continuar' }).click();
-      }
-    }
-
+    await chooseAnyPublicProfessional(page);
     await pickFirstPublicSlot(page);
 
     await page.getByLabel('Nome completo').fill(`Paciente Público ${stamp}`);
@@ -97,7 +76,7 @@ test.describe('Public booking (E4b)', () => {
     await page.getByRole('button', { name: 'Confirmar agendamento' }).click();
 
     await expect(
-      page.getByText(/Pedido de horário enviado|Horário agendado com sucesso|Aguarde a confirmação/i),
+      page.getByRole('heading', { name: /Pedido enviado|Horário confirmado/ }),
     ).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/Consulta \/ avalia/i)).toBeVisible();
   });

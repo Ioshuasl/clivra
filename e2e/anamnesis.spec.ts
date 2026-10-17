@@ -22,7 +22,7 @@ ownerTest.describe('Anamnese (ficha + público)', () => {
   ownerTest('owner envia link, paciente responde e histórico aparece', async ({ page }) => {
     await openSeedPatient(page);
     await page.getByRole('tab', { name: 'Prontuário' }).click();
-    await ownerExpect(page.getByRole('heading', { name: 'Prontuário' })).toBeVisible();
+    await ownerExpect(page.getByText('Prontuário clínico')).toBeVisible();
 
     await page.getByRole('button', { name: 'Enviar anamnese' }).click();
     await ownerExpect(page.getByRole('heading', { name: 'Enviar anamnese' })).toBeVisible();
