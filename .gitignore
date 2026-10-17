@@ -28,3 +28,6 @@ frontend/src/packages/clinico/assets/odontogram/glyphs/*.png
 # Claude Code
 .claude/settings.local.json
 .claude/skills/*/.run/
+
+# Auditoria UX (capturas de tela geradas por audit/*.audit.ts)
+docs/avaliacao/telas/

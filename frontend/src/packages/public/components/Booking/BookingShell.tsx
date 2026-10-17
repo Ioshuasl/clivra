@@ -132,7 +132,7 @@ export function BookingShell({
           </div>
         </aside>
 
-        <div className="flex min-h-0 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-col">
           <header className="mb-4 flex items-start justify-between gap-3 sm:mb-5">
             <div className="min-w-0 lg:hidden">
               <ClivraLogo
@@ -147,7 +147,7 @@ export function BookingShell({
 
           <section
             className={cn(
-              'flex flex-1 flex-col rounded-[14px] border border-border bg-card',
+              'flex min-w-0 flex-1 flex-col rounded-[14px] border border-border bg-card',
               'px-4 py-5 shadow-none sm:px-6 sm:py-6',
               'md:px-7 md:py-7',
               'lg:px-8 lg:py-8',
@@ -200,7 +200,7 @@ export function BookingShell({
               ) : null}
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">{children}</div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 sm:gap-5">{children}</div>
           </section>
 
           <p className="mt-4 text-center text-[11px] text-muted-foreground sm:mt-5 sm:text-[12px] lg:text-left">

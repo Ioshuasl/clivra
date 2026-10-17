@@ -1,0 +1,40 @@
+import { test } from '@playwright/test';
+import { loginAs } from '../e2e/helpers/auth';
+import { RECEPTION } from '../e2e/helpers/credentials';
+import { SHOTS_DIR } from './lib';
+import { getSeedClinicSlug } from '../e2e/helpers/public-booking';
+
+test('estados complementares', async ({ browser }) => {
+  test.setTimeout(300_000);
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, locale: 'pt-BR' });
+  const page = await ctx.newPage();
+  await loginAs(page, RECEPTION);
+  await page.goto('/app/agenda');
+  await page.waitForLoadState('networkidle');
+  await page.getByRole('button', { name: 'Bloquear' }).click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${SHOTS_DIR}/estado__19-agenda-bloqueio.png` });
+  await page.goto('/app/agenda');
+  await page.waitForLoadState('networkidle');
+  await page.getByRole('button', { name: 'Fila de espera' }).click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${SHOTS_DIR}/estado__20-agenda-fila-de-espera.png` });
+  await ctx.close();
+
+  const slug = await getSeedClinicSlug();
+  const m = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR', isMobile: true, hasTouch: true });
+  const p = await m.newPage();
+  await p.goto(`/agendar/${slug}`);
+  await p.getByRole('button', { name: /Qualquer profissional/i }).click();
+  await p.getByRole('button', { name: 'Continuar' }).click();
+  await p.getByRole('button', { name: /^\d{1,2}:\d{2}$/ }).first().waitFor({ timeout: 30_000 });
+  await p.getByRole('button', { name: /^\d{1,2}:\d{2}$/ }).first().click();
+  await p.screenshot({ path: `${SHOTS_DIR}/estado__52a-publico-horario-escolhido.png` });
+  await p.getByRole('button', { name: 'Continuar' }).click();
+  await p.waitForTimeout(1000);
+  await p.screenshot({ path: `${SHOTS_DIR}/estado__52-publico-passo3-dados.png`, fullPage: true });
+  await p.getByRole('button', { name: 'Enviar código' }).click();
+  await p.waitForTimeout(800);
+  await p.screenshot({ path: `${SHOTS_DIR}/estado__53-publico-passo3-erros-validacao.png`, fullPage: true });
+  await m.close();
+});

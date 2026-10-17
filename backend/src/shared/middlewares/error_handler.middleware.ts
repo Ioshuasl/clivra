@@ -54,6 +54,22 @@ export function errorHandler(
     return;
   }
 
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    (err as { type?: string }).type === 'entity.too.large'
+  ) {
+    const body: ApiErrorBody = {
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'O envio é grande demais.',
+        requestId,
+      },
+    };
+    res.status(413).json(body);
+    return;
+  }
+
   logger.error({ err, requestId }, 'unhandled_error');
   const body: ApiErrorBody = {
     error: {

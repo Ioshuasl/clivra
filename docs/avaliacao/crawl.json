@@ -1,0 +1,4131 @@
+[
+  {
+    "role": "owner",
+    "route": "/app",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 144,
+    "idleMs": 739,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 87,
+        "bytes": 425
+      },
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 77,
+        "bytes": 170
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 72,
+        "bytes": 486
+      }
+    ],
+    "apiBytes": 30485,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 67,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 25,
+      "lowContrast": 15,
+      "textSampled": 106,
+      "h1Count": 1,
+      "headings": [
+        "H1:Tudo certo para umexcelente dia de atend",
+        "H2:Atendimentos de hoje",
+        "H2:Calendário",
+        "H2:Ações rápidas"
+      ],
+      "textLength": 1612
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/primeiros-passos",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 93,
+    "idleMs": 707,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 34,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 30,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 29,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 24,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 14,
+      "lowContrast": 14,
+      "textSampled": 54,
+      "h1Count": 1,
+      "headings": [
+        "H1:Primeiros passos",
+        "H2:Tudo pronto para começar",
+        "H2:Todos os passos"
+      ],
+      "textLength": 1267
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/pacientes",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 94,
+    "idleMs": 633,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 44,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/patients",
+        "status": 200,
+        "ms": 42,
+        "bytes": 10285
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 41,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 11609,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 21,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 14,
+      "lowContrast": 15,
+      "textSampled": 95,
+      "h1Count": 1,
+      "headings": [
+        "H1:Pacientes"
+      ],
+      "textLength": 1544
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/pacientes/:paciente",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 232,
+    "idleMs": 740,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 100,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/patients/01a131f2-8033-744e-a0bc-14af27911eef",
+        "status": 200,
+        "ms": 46,
+        "bytes": 1121
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 44,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 2445,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 35,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 14,
+      "lowContrast": 9,
+      "textSampled": 45,
+      "h1Count": 1,
+      "headings": [
+        "H1:Maria Silva"
+      ],
+      "textLength": 665
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/agenda",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 104,
+    "idleMs": 663,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 48,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 44,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 37,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 9609,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 38,
+      "unnamedButtons": 0,
+      "smallTargets": 7,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 43,
+      "lowContrast": 21,
+      "textSampled": 64,
+      "h1Count": 1,
+      "headings": [
+        "H1:Agenda"
+      ],
+      "textLength": 981
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/inbox",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 139,
+    "idleMs": 639,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 62,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 55,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 49,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 2109,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "WhatsApp · Clivra",
+      "overflowX": false,
+      "interactive": 21,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 6,
+      "lowContrast": 8,
+      "textSampled": 31,
+      "h1Count": 1,
+      "headings": [
+        "H1:WhatsApp"
+      ],
+      "textLength": 491
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/orcamentos",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 140,
+    "idleMs": 682,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 40,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 40,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 28,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 23009,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 74,
+      "unnamedButtons": 1,
+      "smallTargets": 1,
+      "unlabeledInputs": 2,
+      "imgsNoAlt": 0,
+      "tinyText": 9,
+      "lowContrast": 8,
+      "textSampled": 106,
+      "h1Count": 1,
+      "headings": [
+        "H1:Orçamentos"
+      ],
+      "textLength": 1646
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/financeiro",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 95,
+    "idleMs": 662,
+    "apiCalls": 13,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/installments",
+        "status": 200,
+        "ms": 71,
+        "bytes": 14895
+      },
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 65,
+        "bytes": 364
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 64,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 26944,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 70,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 116,
+      "lowContrast": 112,
+      "textSampled": 295,
+      "h1Count": 1,
+      "headings": [
+        "H1:Hoje na clínica",
+        "H2:Precisa de atenção",
+        "H2:Movimentações"
+      ],
+      "textLength": 4235
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/financeiro/relatorios",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 105,
+    "idleMs": 654,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/cash-flow",
+        "status": 200,
+        "ms": 67,
+        "bytes": 631
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 60,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/production",
+        "status": 200,
+        "ms": 54,
+        "bytes": 1759
+      }
+    ],
+    "apiBytes": 3714,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 20,
+      "unnamedButtons": 0,
+      "smallTargets": 2,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 17,
+      "lowContrast": 9,
+      "textSampled": 48,
+      "h1Count": 1,
+      "headings": [
+        "H1:Relatórios financeiros",
+        "H2:Fluxo do mês",
+        "H2:Produção por dentista",
+        "H2:Resumo financeiro"
+      ],
+      "textLength": 833
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 133,
+    "idleMs": 739,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 109,
+        "bytes": 166
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 94,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 51,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1490,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 23,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 6,
+      "lowContrast": 8,
+      "textSampled": 43,
+      "h1Count": 1,
+      "headings": [
+        "H1:Relatórios",
+        "H2:Clínica",
+        "H2:Financeiro"
+      ],
+      "textLength": 946
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/receita",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 130,
+    "idleMs": 677,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 52,
+        "bytes": 314
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 36,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 32,
+        "bytes": 1324
+      }
+    ],
+    "apiBytes": 1638,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 18,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 6,
+      "lowContrast": 8,
+      "textSampled": 27,
+      "h1Count": 1,
+      "headings": [
+        "H1:Receita"
+      ],
+      "textLength": 478
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/faltas",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 81,
+    "idleMs": 624,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/no-shows",
+        "status": 200,
+        "ms": 42,
+        "bytes": 1164
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 36,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 30,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 2488,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 17,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 8,
+      "lowContrast": 8,
+      "textSampled": 36,
+      "h1Count": 1,
+      "headings": [
+        "H1:Faltas"
+      ],
+      "textLength": 579
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/producao",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 79,
+    "idleMs": 623,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/procedures",
+        "status": 200,
+        "ms": 42,
+        "bytes": 221
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 37,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 31,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1545,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 17,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 7,
+      "lowContrast": 8,
+      "textSampled": 23,
+      "h1Count": 1,
+      "headings": [
+        "H1:Procedimentos"
+      ],
+      "textLength": 372
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/overdue",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 77,
+    "idleMs": 630,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/overdue",
+        "status": 200,
+        "ms": 44,
+        "bytes": 235
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 37,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 30,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1559,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Inadimplência · Clivra",
+      "overflowX": false,
+      "interactive": 14,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 3,
+      "lowContrast": 8,
+      "textSampled": 29,
+      "h1Count": 1,
+      "headings": [
+        "H1:Inadimplência",
+        "H2:1–15 dias",
+        "H2:16–30 dias",
+        "H2:31–60 dias",
+        "H2:60+ dias"
+      ],
+      "textLength": 605
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/clinica",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 100,
+    "idleMs": 634,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 47,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 23,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 23,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clínica · Clivra",
+      "overflowX": false,
+      "interactive": 48,
+      "unnamedButtons": 5,
+      "smallTargets": 1,
+      "unlabeledInputs": 2,
+      "imgsNoAlt": 0,
+      "tinyText": 17,
+      "lowContrast": 17,
+      "textSampled": 54,
+      "h1Count": 1,
+      "headings": [
+        "H1:Clínica",
+        "H2:Identificação",
+        "H2:Contato e operação",
+        "H2:Pagamentos",
+        "H2:Endereço"
+      ],
+      "textLength": 1293
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/horarios",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 128,
+    "idleMs": 666,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 40,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 26,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 24,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1804,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Horários · Clivra",
+      "overflowX": false,
+      "interactive": 51,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 17,
+      "imgsNoAlt": 0,
+      "tinyText": 23,
+      "lowContrast": 17,
+      "textSampled": 57,
+      "h1Count": 1,
+      "headings": [
+        "H1:Horários",
+        "H2:Horários semanais",
+        "H2:Exceções"
+      ],
+      "textLength": 1082
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/profissionais",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 80,
+    "idleMs": 624,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 37,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/users",
+        "status": 200,
+        "ms": 35,
+        "bytes": 2276
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 34,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 3600,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Profissionais · Clivra",
+      "overflowX": false,
+      "interactive": 26,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 9,
+      "lowContrast": 17,
+      "textSampled": 46,
+      "h1Count": 1,
+      "headings": [
+        "H1:Profissionais"
+      ],
+      "textLength": 603
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/procedimentos",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 77,
+    "idleMs": 610,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 25,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/procedures",
+        "status": 200,
+        "ms": 23,
+        "bytes": 3502
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 22,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 4826,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Procedimentos · Clivra",
+      "overflowX": false,
+      "interactive": 41,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 9,
+      "lowContrast": 17,
+      "textSampled": 145,
+      "h1Count": 1,
+      "headings": [
+        "H1:Procedimentos"
+      ],
+      "textLength": 1594
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/membros",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 101,
+    "idleMs": 637,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 39,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 37,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 35,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1543,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Membros · Clivra",
+      "overflowX": false,
+      "interactive": 31,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 10,
+      "lowContrast": 17,
+      "textSampled": 65,
+      "h1Count": 1,
+      "headings": [
+        "H1:Membros",
+        "H2:Membros",
+        "H2:Convites pendentes"
+      ],
+      "textLength": 788
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/whatsapp",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 173,
+    "idleMs": 699,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 47,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 43,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 29,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 8259,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "WhatsApp · Clivra",
+      "overflowX": false,
+      "interactive": 27,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 1,
+      "imgsNoAlt": 0,
+      "tinyText": 10,
+      "lowContrast": 17,
+      "textSampled": 96,
+      "h1Count": 1,
+      "headings": [
+        "H1:WhatsApp",
+        "H2:Conta",
+        "H2:Uso",
+        "H2:Logs de envio"
+      ],
+      "textLength": 1551
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/anamnese",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 95,
+    "idleMs": 621,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 27,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 23,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/anamnesis-forms",
+        "status": 200,
+        "ms": 20,
+        "bytes": 1830
+      }
+    ],
+    "apiBytes": 3154,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Anamnese · Clivra",
+      "overflowX": false,
+      "interactive": 25,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 8,
+      "lowContrast": 17,
+      "textSampled": 35,
+      "h1Count": 1,
+      "headings": [
+        "H1:Anamnese"
+      ],
+      "textLength": 434
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/auditoria",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 126,
+    "idleMs": 664,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 53,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 52,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 49,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 18680,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Auditoria · Clivra",
+      "overflowX": false,
+      "interactive": 35,
+      "unnamedButtons": 0,
+      "smallTargets": 5,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 8,
+      "lowContrast": 17,
+      "textSampled": 237,
+      "h1Count": 1,
+      "headings": [
+        "H1:Auditoria"
+      ],
+      "textLength": 4506
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/privacidade",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 128,
+    "idleMs": 703,
+    "apiCalls": 16,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 40,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/privacy/data-subject-requests/01a138c7-7607-70da-ac12-78d61ddaf363",
+        "status": 200,
+        "ms": 37,
+        "bytes": 778
+      },
+      {
+        "method": "GET",
+        "path": "/privacy/data-subject-requests/01a14766-9548-72b8-9b9c-554aa0083a13",
+        "status": 200,
+        "ms": 33,
+        "bytes": 778
+      }
+    ],
+    "apiBytes": 8908,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Privacidade · Clivra",
+      "overflowX": false,
+      "interactive": 53,
+      "unnamedButtons": 0,
+      "smallTargets": 7,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 8,
+      "lowContrast": 17,
+      "textSampled": 85,
+      "h1Count": 1,
+      "headings": [
+        "H1:Privacidade",
+        "H2:Exportar dados da clínica",
+        "H2:Solicitações do titular"
+      ],
+      "textLength": 1205
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/assinatura",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 870,
+    "idleMs": 1081,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/subscription/usage",
+        "status": 200,
+        "ms": 114,
+        "bytes": 431
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 30,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 28,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1793,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Assinatura · Clivra",
+      "overflowX": false,
+      "interactive": 24,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 5,
+      "lowContrast": 17,
+      "textSampled": 51,
+      "h1Count": 1,
+      "headings": [
+        "H1:Assinatura",
+        "H2:Clivra Essencial",
+        "H2:Uso atual",
+        "H2:Faturas"
+      ],
+      "textLength": 868
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app/atendimento/:atendimento",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 266,
+    "idleMs": 711,
+    "apiCalls": 14,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 30,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/patients/01a131f2-806f-740e-9bfd-8bd6644280b5/record/notes",
+        "status": 200,
+        "ms": 29,
+        "bytes": 39
+      },
+      {
+        "method": "GET",
+        "path": "/appointments/01a131f2-8149-71a8-a8ed-9547f5323679",
+        "status": 200,
+        "ms": 28,
+        "bytes": 999
+      }
+    ],
+    "apiBytes": 3915,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 278,
+      "unnamedButtons": 0,
+      "smallTargets": 224,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 18,
+      "lowContrast": 17,
+      "textSampled": 47,
+      "h1Count": 1,
+      "headings": [
+        "H1:Carla M. · 30a",
+        "H2:Anexos"
+      ],
+      "textLength": 829
+    }
+  },
+  {
+    "role": "owner",
+    "route": "/app",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1107,
+    "idleMs": 1737,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 448,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 448,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 447,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/primeiros-passos",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1157,
+    "idleMs": 2048,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 245,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 235,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 222,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/pacientes",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1106,
+    "idleMs": 1510,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 240,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 239,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 239,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/pacientes/:paciente",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1126,
+    "idleMs": 1526,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 237,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 235,
+        "bytes": 1324
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/agenda",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1102,
+    "idleMs": 1730,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 442,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 244,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 236,
+        "bytes": 1324
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/inbox",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1104,
+    "idleMs": 1518,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/orcamentos",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1090,
+    "idleMs": 1710,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 431,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 430,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 231,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/financeiro",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1112,
+    "idleMs": 1737,
+    "apiCalls": 13,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/installments",
+        "status": 200,
+        "ms": 467,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 466,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 464,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/financeiro/relatorios",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1091,
+    "idleMs": 1735,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 462,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/production",
+        "status": 200,
+        "ms": 257,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/cash-flow",
+        "status": 200,
+        "ms": 257,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1105,
+    "idleMs": 1744,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 461,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 242,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/receita",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1096,
+    "idleMs": 1489,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/faltas",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1124,
+    "idleMs": 1518,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 237,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 236,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 234,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/producao",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1105,
+    "idleMs": 1517,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 248,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 247,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/procedures",
+        "status": 200,
+        "ms": 247,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios/overdue",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1103,
+    "idleMs": 1519,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/overdue",
+        "status": 200,
+        "ms": 242,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 242,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 241,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/clinica",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1100,
+    "idleMs": 1523,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 259,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 258,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 240,
+        "bytes": 1324
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/horarios",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1148,
+    "idleMs": 1809,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/profissionais",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1119,
+    "idleMs": 1750,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 467,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 244,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 244,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/procedimentos",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1101,
+    "idleMs": 1500,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 239,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 239,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 239,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/membros",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1089,
+    "idleMs": 1700,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 444,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 238,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 238,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/whatsapp",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1101,
+    "idleMs": 1746,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 244,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/anamnese",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1107,
+    "idleMs": 1526,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 232,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 232,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/auditoria",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1152,
+    "idleMs": 1809,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 471,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 471,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/audit-logs",
+        "status": 200,
+        "ms": 242,
+        "bytes": 17746
+      }
+    ],
+    "apiBytes": 19070,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/configuracoes/privacidade",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1104,
+    "idleMs": 1988,
+    "apiCalls": 16,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 473,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/privacy/data-subject-requests/01a138c7-7607-70da-ac12-78d61ddaf363",
+        "status": 200,
+        "ms": 450,
+        "bytes": 778
+      },
+      {
+        "method": "GET",
+        "path": "/privacy/data-subject-requests/01a14758-4977-758d-b939-3e45bd0b3113",
+        "status": 200,
+        "ms": 446,
+        "bytes": 778
+      }
+    ],
+    "apiBytes": 6770,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/assinatura",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1616,
+    "idleMs": 2100,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 242,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 242,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 241,
+        "bytes": 1324
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app/atendimento/:atendimento",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1603,
+    "idleMs": 2219,
+    "apiCalls": 14,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 237,
+        "bytes": 1324
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 200,
+        "ms": 237,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/subscription",
+        "status": 200,
+        "ms": 237,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1324,
+    "apiErrors": [],
+    "jsErrors": [],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 160,
+    "idleMs": 699,
+    "apiCalls": 10,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 54,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 41,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 41,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1328,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 66,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 25,
+      "lowContrast": 16,
+      "textSampled": 102,
+      "h1Count": 1,
+      "headings": [
+        "H1:Tudo certo para umexcelente dia de atend",
+        "H2:Atendimentos de hoje",
+        "H2:Calendário",
+        "H2:Ações rápidas"
+      ],
+      "textLength": 1533
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/pacientes",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 138,
+    "idleMs": 656,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 21,
+        "bytes": 1056
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 18,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 15,
+        "bytes": 136
+      }
+    ],
+    "apiBytes": 11477,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 22,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 14,
+      "lowContrast": 16,
+      "textSampled": 96,
+      "h1Count": 1,
+      "headings": [
+        "H1:Pacientes"
+      ],
+      "textLength": 1550
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/agenda",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 169,
+    "idleMs": 722,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 32,
+        "bytes": 1056
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 29,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 21,
+        "bytes": 7621
+      }
+    ],
+    "apiBytes": 9477,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 39,
+      "unnamedButtons": 0,
+      "smallTargets": 7,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 43,
+      "lowContrast": 22,
+      "textSampled": 65,
+      "h1Count": 1,
+      "headings": [
+        "H1:Agenda"
+      ],
+      "textLength": 987
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/inbox",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 249,
+    "idleMs": 641,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 23,
+        "bytes": 1056
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 19,
+        "bytes": 136
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 19,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1977,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "WhatsApp · Clivra",
+      "overflowX": false,
+      "interactive": 22,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 6,
+      "lowContrast": 9,
+      "textSampled": 32,
+      "h1Count": 1,
+      "headings": [
+        "H1:WhatsApp"
+      ],
+      "textLength": 497
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/orcamentos",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 112,
+    "idleMs": 649,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/quotes",
+        "status": 200,
+        "ms": 27,
+        "bytes": 11400
+      },
+      {
+        "method": "GET",
+        "path": "/patients",
+        "status": 200,
+        "ms": 20,
+        "bytes": 10285
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 20,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 22877,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 75,
+      "unnamedButtons": 1,
+      "smallTargets": 1,
+      "unlabeledInputs": 2,
+      "imgsNoAlt": 0,
+      "tinyText": 9,
+      "lowContrast": 9,
+      "textSampled": 107,
+      "h1Count": 1,
+      "headings": [
+        "H1:Orçamentos"
+      ],
+      "textLength": 1652
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/financeiro",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 132,
+    "idleMs": 670,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 52,
+        "bytes": 364
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 49,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/installments",
+        "status": 200,
+        "ms": 47,
+        "bytes": 38
+      }
+    ],
+    "apiBytes": 26812,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 71,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 116,
+      "lowContrast": 113,
+      "textSampled": 296,
+      "h1Count": 1,
+      "headings": [
+        "H1:Hoje na clínica",
+        "H2:Precisa de atenção",
+        "H2:Movimentações"
+      ],
+      "textLength": 4241
+    }
+  },
+  {
+    "role": "recepcao",
+    "route": "/app",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1102,
+    "idleMs": 1742,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 455,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 234,
+        "bytes": 1056
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 234,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/pacientes",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1120,
+    "idleMs": 1532,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 247,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 246,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/agenda",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1137,
+    "idleMs": 1785,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 487,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 251,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 251,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/inbox",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1120,
+    "idleMs": 1534,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 248,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 248,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 248,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/orcamentos",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1093,
+    "idleMs": 1719,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 456,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 238,
+        "bytes": 1056
+      },
+      {
+        "method": "GET",
+        "path": "/patients",
+        "status": 200,
+        "ms": 234,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "recepcao",
+    "route": "/app/financeiro",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1104,
+    "idleMs": 1721,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 454,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/installments",
+        "status": 200,
+        "ms": 454,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 453,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1192,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "dentista",
+    "route": "/app",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 153,
+    "idleMs": 686,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 43,
+        "bytes": 457
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 28,
+        "bytes": 445
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 24,
+        "bytes": 6651
+      }
+    ],
+    "apiBytes": 29745,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 65,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 25,
+      "lowContrast": 15,
+      "textSampled": 101,
+      "h1Count": 1,
+      "headings": [
+        "H1:Tudo certo para umexcelente dia de atend",
+        "H2:Atendimentos de hoje",
+        "H2:Calendário",
+        "H2:Ações rápidas"
+      ],
+      "textLength": 1539
+    }
+  },
+  {
+    "role": "dentista",
+    "route": "/app/agenda",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 155,
+    "idleMs": 706,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 29,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 27,
+        "bytes": 1072
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 23,
+        "bytes": 7621
+      }
+    ],
+    "apiBytes": 9493,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 38,
+      "unnamedButtons": 0,
+      "smallTargets": 7,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 43,
+      "lowContrast": 21,
+      "textSampled": 64,
+      "h1Count": 1,
+      "headings": [
+        "H1:Agenda"
+      ],
+      "textLength": 990
+    }
+  },
+  {
+    "role": "dentista",
+    "route": "/app/pacientes",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 143,
+    "idleMs": 634,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 20,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 19,
+        "bytes": 1072
+      },
+      {
+        "method": "GET",
+        "path": "/patients",
+        "status": 200,
+        "ms": 14,
+        "bytes": 9905
+      }
+    ],
+    "apiBytes": 11113,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 21,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 14,
+      "lowContrast": 15,
+      "textSampled": 95,
+      "h1Count": 1,
+      "headings": [
+        "H1:Pacientes"
+      ],
+      "textLength": 1553
+    }
+  },
+  {
+    "role": "dentista",
+    "route": "/app/relatorios/producao",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 133,
+    "idleMs": 658,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/procedures",
+        "status": 200,
+        "ms": 46,
+        "bytes": 221
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 26,
+        "bytes": 1072
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 22,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1429,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 17,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 7,
+      "lowContrast": 8,
+      "textSampled": 23,
+      "h1Count": 1,
+      "headings": [
+        "H1:Procedimentos"
+      ],
+      "textLength": 373
+    }
+  },
+  {
+    "role": "dentista",
+    "route": "/app",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1117,
+    "idleMs": 1752,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 478,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 251,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 251,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1208,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "dentista",
+    "route": "/app/agenda",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1139,
+    "idleMs": 1815,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 489,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 247,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 246,
+        "bytes": 136
+      }
+    ],
+    "apiBytes": 1208,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "dentista",
+    "route": "/app/pacientes",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1115,
+    "idleMs": 1499,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/patients",
+        "status": 200,
+        "ms": 239,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 238,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 238,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1208,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "dentista",
+    "route": "/app/relatorios/producao",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1120,
+    "idleMs": 1533,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 250,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/procedures",
+        "status": 200,
+        "ms": 249,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 249,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1208,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "financeiro",
+    "route": "/app",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 157,
+    "idleMs": 695,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 35,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 32,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 27,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1252,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 60,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 11,
+      "lowContrast": 8,
+      "textSampled": 72,
+      "h1Count": 1,
+      "headings": [
+        "H1:Tudo certo para umexcelente dia de atend",
+        "H2:Atendimentos de hoje",
+        "H2:Calendário",
+        "H2:Ações rápidas"
+      ],
+      "textLength": 963
+    }
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/financeiro",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 142,
+    "idleMs": 698,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 68,
+        "bytes": 364
+      },
+      {
+        "method": "GET",
+        "path": "/installments",
+        "status": 200,
+        "ms": 61,
+        "bytes": 14895
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 403,
+        "ms": 58,
+        "bytes": 136
+      }
+    ],
+    "apiBytes": 27008,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 70,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 116,
+      "lowContrast": 112,
+      "textSampled": 295,
+      "h1Count": 1,
+      "headings": [
+        "H1:Hoje na clínica",
+        "H2:Precisa de atenção",
+        "H2:Movimentações"
+      ],
+      "textLength": 4234
+    }
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/financeiro/relatorios",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 94,
+    "idleMs": 629,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/production",
+        "status": 200,
+        "ms": 37,
+        "bytes": 1759
+      },
+      {
+        "method": "GET",
+        "path": "/reports/cash-flow",
+        "status": 200,
+        "ms": 34,
+        "bytes": 631
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 28,
+        "bytes": 136
+      }
+    ],
+    "apiBytes": 3642,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 20,
+      "unnamedButtons": 0,
+      "smallTargets": 2,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 17,
+      "lowContrast": 9,
+      "textSampled": 48,
+      "h1Count": 1,
+      "headings": [
+        "H1:Relatórios financeiros",
+        "H2:Fluxo do mês",
+        "H2:Produção por dentista",
+        "H2:Resumo financeiro"
+      ],
+      "textLength": 832
+    }
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/relatorios",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 157,
+    "idleMs": 692,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 44,
+        "bytes": 166
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 39,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 25,
+        "bytes": 980
+      }
+    ],
+    "apiBytes": 1418,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 23,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 6,
+      "lowContrast": 8,
+      "textSampled": 43,
+      "h1Count": 1,
+      "headings": [
+        "H1:Relatórios",
+        "H2:Clínica",
+        "H2:Financeiro"
+      ],
+      "textLength": 945
+    }
+  },
+  {
+    "role": "financeiro",
+    "route": "/app",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1179,
+    "idleMs": 1811,
+    "apiCalls": 9,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 470,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 233,
+        "bytes": 136
+      },
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 233,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1252,
+    "apiErrors": [
+      "403 GET /clinic",
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/financeiro",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1123,
+    "idleMs": 1775,
+    "apiCalls": 12,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/payables",
+        "status": 200,
+        "ms": 489,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 489,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 489,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1388,
+    "apiErrors": [
+      "403 GET /clinic",
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/financeiro/relatorios",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1099,
+    "idleMs": 1519,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/production",
+        "status": 200,
+        "ms": 244,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 243,
+        "bytes": 980
+      },
+      {
+        "method": "GET",
+        "path": "/reports/cash-flow",
+        "status": 200,
+        "ms": 235,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1252,
+    "apiErrors": [
+      "403 GET /clinic/onboarding",
+      "403 GET /clinic"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "financeiro",
+    "route": "/app/relatorios",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1131,
+    "idleMs": 1538,
+    "apiCalls": 8,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/reports/dashboard",
+        "status": 200,
+        "ms": 254,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/messaging/conversations",
+        "status": 200,
+        "ms": 253,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/reports/revenue",
+        "status": 200,
+        "ms": 253,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1252,
+    "apiErrors": [
+      "403 GET /clinic",
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "asb",
+    "route": "/app",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 125,
+    "idleMs": 641,
+    "apiCalls": 6,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 18,
+        "bytes": 870
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 15,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 15,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1006,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 59,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 25,
+      "lowContrast": 12,
+      "textSampled": 92,
+      "h1Count": 1,
+      "headings": [
+        "H1:Tudo certo para umexcelente dia de atend",
+        "H2:Atendimentos de hoje",
+        "H2:Calendário",
+        "H2:Ações rápidas"
+      ],
+      "textLength": 1343
+    }
+  },
+  {
+    "role": "asb",
+    "route": "/app/agenda",
+    "mode": "local",
+    "httpStatus": 200,
+    "h1Ms": 139,
+    "idleMs": 671,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 23,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 22,
+        "bytes": 870
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 18,
+        "bytes": 7621
+      }
+    ],
+    "apiBytes": 9291,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 35,
+      "unnamedButtons": 0,
+      "smallTargets": 7,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 43,
+      "lowContrast": 18,
+      "textSampled": 61,
+      "h1Count": 1,
+      "headings": [
+        "H1:Agenda"
+      ],
+      "textLength": 939
+    }
+  },
+  {
+    "role": "asb",
+    "route": "/app",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 1114,
+    "idleMs": 1540,
+    "apiCalls": 6,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "status": 200,
+        "ms": 233,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 200,
+        "ms": 232,
+        "bytes": 870
+      },
+      {
+        "method": "GET",
+        "path": "/appointments",
+        "status": 200,
+        "ms": 231,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1006,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "asb",
+    "route": "/app/agenda",
+    "mode": "br-eu",
+    "httpStatus": 200,
+    "h1Ms": 3586,
+    "idleMs": 4225,
+    "apiCalls": 7,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 487,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/clinic/onboarding",
+        "status": 403,
+        "ms": 245,
+        "bytes": 136
+      },
+      {
+        "method": "GET",
+        "path": "/clinic",
+        "status": 200,
+        "ms": 245,
+        "bytes": 0
+      }
+    ],
+    "apiBytes": 1006,
+    "apiErrors": [
+      "403 GET /clinic/onboarding"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "publico",
+    "route": "/login",
+    "mode": "local",
+    "h1Ms": 135,
+    "idleMs": 718,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 6,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 7,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 1,
+      "lowContrast": 8,
+      "textSampled": 20,
+      "h1Count": 1,
+      "headings": [
+        "H2:Tecnologia e cuidadopara uma odontologia",
+        "H1:Acesse sua conta"
+      ],
+      "textLength": 584
+    }
+  },
+  {
+    "role": "publico",
+    "route": "/signup",
+    "mode": "local",
+    "h1Ms": 60018,
+    "idleMs": 60020,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 2,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 6,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 5,
+      "lowContrast": 0,
+      "textSampled": 9,
+      "h1Count": 0,
+      "headings": [],
+      "textLength": 203
+    }
+  },
+  {
+    "role": "publico",
+    "route": "/forgot-password",
+    "mode": "local",
+    "h1Ms": 60027,
+    "idleMs": 60029,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 8,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": {
+      "title": "Clivra",
+      "overflowX": false,
+      "interactive": 3,
+      "unnamedButtons": 0,
+      "smallTargets": 1,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 2,
+      "lowContrast": 0,
+      "textSampled": 6,
+      "h1Count": 0,
+      "headings": [],
+      "textLength": 138
+    }
+  },
+  {
+    "role": "publico",
+    "route": "/agendar/:slug",
+    "mode": "local",
+    "h1Ms": 172,
+    "idleMs": 691,
+    "apiCalls": 2,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/public/clinics/clinica-teste-c3d7ed43",
+        "status": 200,
+        "ms": 16,
+        "bytes": 477
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 2,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": {
+      "title": "Agendar consulta · Clivra",
+      "overflowX": false,
+      "interactive": 5,
+      "unnamedButtons": 0,
+      "smallTargets": 0,
+      "unlabeledInputs": 0,
+      "imgsNoAlt": 0,
+      "tinyText": 1,
+      "lowContrast": 6,
+      "textSampled": 24,
+      "h1Count": 1,
+      "headings": [
+        "H2:Reserve seu horário em poucos passos",
+        "H1:Clínica Teste"
+      ],
+      "textLength": 761
+    }
+  },
+  {
+    "role": "publico",
+    "route": "/login",
+    "mode": "br-eu",
+    "h1Ms": 325,
+    "idleMs": 1088,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 250,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "publico",
+    "route": "/signup",
+    "mode": "br-eu",
+    "h1Ms": 60254,
+    "idleMs": 60255,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 220,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "publico",
+    "route": "/forgot-password",
+    "mode": "br-eu",
+    "h1Ms": 60264,
+    "idleMs": 60265,
+    "apiCalls": 1,
+    "apiSlowest": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 241,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "publico",
+    "route": "/agendar/:slug",
+    "mode": "br-eu",
+    "h1Ms": 279,
+    "idleMs": 1017,
+    "apiCalls": 2,
+    "apiSlowest": [
+      {
+        "method": "GET",
+        "path": "/public/clinics/clinica-teste-c3d7ed43",
+        "status": 200,
+        "ms": 237,
+        "bytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "status": 401,
+        "ms": 236,
+        "bytes": 141
+      }
+    ],
+    "apiErrors": [
+      "401 POST /auth/refresh"
+    ],
+    "jsErrors": [
+      "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ],
+    "heur": null
+  },
+  {
+    "role": "owner",
+    "route": "/app",
+    "mode": "mobile-390",
+    "overflowX": false,
+    "smallTargets": 1,
+    "tinyText": 24
+  },
+  {
+    "role": "owner",
+    "route": "/app/pacientes",
+    "mode": "mobile-390",
+    "overflowX": false,
+    "smallTargets": 0,
+    "tinyText": 13
+  },
+  {
+    "role": "owner",
+    "route": "/app/agenda",
+    "mode": "mobile-390",
+    "overflowX": false,
+    "smallTargets": 7,
+    "tinyText": 42
+  },
+  {
+    "role": "owner",
+    "route": "/app/financeiro",
+    "mode": "mobile-390",
+    "overflowX": false,
+    "smallTargets": 0,
+    "tinyText": 115
+  },
+  {
+    "role": "owner",
+    "route": "/app/orcamentos",
+    "mode": "mobile-390",
+    "overflowX": true,
+    "smallTargets": 1,
+    "tinyText": 8
+  },
+  {
+    "role": "owner",
+    "route": "/app/relatorios",
+    "mode": "mobile-390",
+    "overflowX": false,
+    "smallTargets": 0,
+    "tinyText": 5
+  }
+]

@@ -1,0 +1,135 @@
+[
+  {
+    "flow": "Login até a tela inicial",
+    "mode": "local",
+    "ok": true,
+    "ms": 1399,
+    "interactions": 0
+  },
+  {
+    "flow": "Cadastrar paciente novo",
+    "mode": "local",
+    "ok": true,
+    "ms": 1525,
+    "interactions": 4
+  },
+  {
+    "flow": "Buscar paciente e abrir a ficha",
+    "mode": "local",
+    "ok": true,
+    "ms": 369,
+    "interactions": 2
+  },
+  {
+    "flow": "Agendar consulta (botão Novo agendamento)",
+    "mode": "local",
+    "ok": false,
+    "ms": 31224,
+    "interactions": 4,
+    "note": "pode falhar por conflito de horário se já houver reserva Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+  },
+  {
+    "flow": "Receber parcela em PIX",
+    "mode": "local",
+    "ok": true,
+    "ms": 1160,
+    "interactions": 2
+  },
+  {
+    "flow": "Início → relatório de faltas",
+    "mode": "local",
+    "ok": true,
+    "ms": 771,
+    "interactions": 1
+  },
+  {
+    "flow": "Criar orçamento e gerar link",
+    "mode": "local",
+    "ok": false,
+    "ms": 31208,
+    "interactions": 7,
+    "note": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+  },
+  {
+    "flow": "Lançar despesa (conta a pagar)",
+    "mode": "local",
+    "ok": true,
+    "ms": 1795,
+    "interactions": 8
+  },
+  {
+    "flow": "Paciente agenda pelo link público (celular)",
+    "mode": "local",
+    "ok": false,
+    "ms": 15738,
+    "interactions": 12,
+    "note": "TimeoutError: locator.fill: Timeout 15000ms exceeded."
+  },
+  {
+    "flow": "Login até a tela inicial",
+    "mode": "br-eu",
+    "ok": true,
+    "ms": 671,
+    "interactions": 0
+  },
+  {
+    "flow": "Cadastrar paciente novo",
+    "mode": "br-eu",
+    "ok": true,
+    "ms": 3142,
+    "interactions": 4
+  },
+  {
+    "flow": "Buscar paciente e abrir a ficha",
+    "mode": "br-eu",
+    "ok": false,
+    "ms": 6152,
+    "interactions": 2,
+    "note": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed"
+  },
+  {
+    "flow": "Agendar consulta (botão Novo agendamento)",
+    "mode": "br-eu",
+    "ok": false,
+    "ms": 32019,
+    "interactions": 4,
+    "note": "pode falhar por conflito de horário se já houver reserva Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+  },
+  {
+    "flow": "Receber parcela em PIX",
+    "mode": "br-eu",
+    "ok": true,
+    "ms": 2484,
+    "interactions": 2
+  },
+  {
+    "flow": "Início → relatório de faltas",
+    "mode": "br-eu",
+    "ok": true,
+    "ms": 2011,
+    "interactions": 1
+  },
+  {
+    "flow": "Criar orçamento e gerar link",
+    "mode": "br-eu",
+    "ok": false,
+    "ms": 32111,
+    "interactions": 7,
+    "note": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+  },
+  {
+    "flow": "Lançar despesa (conta a pagar)",
+    "mode": "br-eu",
+    "ok": true,
+    "ms": 3226,
+    "interactions": 8
+  },
+  {
+    "flow": "Paciente agenda pelo link público (celular)",
+    "mode": "br-eu",
+    "ok": false,
+    "ms": 17331,
+    "interactions": 12,
+    "note": "TimeoutError: locator.fill: Timeout 15000ms exceeded."
+  }
+]

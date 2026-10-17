@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -80,10 +80,13 @@ export function AppointmentFormDialog({
     }
     return ids;
   }, [patients, initialPatientId]);
+  // Guarda os nomes já carregados: ao escolher, o campo vira o nome, a busca muda e a lista esvazia.
+  const patientLabels = useRef(new Map<string, string>());
   const patientLabelById = useMemo(() => {
-    const map = new Map(patients.map((p) => [p.id, `#${p.code} ${p.name}`] as const));
+    for (const p of patients) patientLabels.current.set(p.id, `#${p.code} ${p.name}`);
     return (id: string) => {
-      if (map.has(id)) return map.get(id)!;
+      const cached = patientLabels.current.get(id);
+      if (cached) return cached;
       if (id === initialPatientId && initialPatientLabel) return initialPatientLabel;
       return id;
     };

@@ -1,0 +1,289 @@
+[
+  {
+    "id": "ISO-1",
+    "teste": "Clínica intrusa lê paciente de outra clínica pelo id",
+    "esperado": "404/403, sem dados",
+    "observado": "404",
+    "veredito": "OK"
+  },
+  {
+    "id": "ISO-2",
+    "teste": "Token da clínica intrusa com X-Tenant-Id da clínica alvo",
+    "esperado": "401/403/404",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "ISO-3",
+    "teste": "Listagem de pacientes da clínica intrusa contém só os dela",
+    "esperado": "0 pacientes de outra clínica",
+    "observado": "0 itens",
+    "veredito": "OK"
+  },
+  {
+    "id": "ISO-4",
+    "teste": "Parcelas de outra clínica via listagem",
+    "esperado": "lista vazia",
+    "observado": "0 itens",
+    "veredito": "OK"
+  },
+  {
+    "id": "ISO-5",
+    "teste": "Baixar parcela de outra clínica",
+    "esperado": "404/403",
+    "observado": "404",
+    "veredito": "OK"
+  },
+  {
+    "id": "AUT-1",
+    "teste": "Rota protegida sem token",
+    "esperado": "401",
+    "observado": "401",
+    "veredito": "OK"
+  },
+  {
+    "id": "AUT-2",
+    "teste": "JWT inválido",
+    "esperado": "401",
+    "observado": "401",
+    "veredito": "OK"
+  },
+  {
+    "id": "AUT-3",
+    "teste": "JWT com assinatura adulterada",
+    "esperado": "401",
+    "observado": "401",
+    "veredito": "OK"
+  },
+  {
+    "id": "AUT-4",
+    "teste": "Login com injeção de SQL",
+    "esperado": "400/401, sem erro 500",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "AUT-5",
+    "teste": "12 senhas erradas seguidas (limite de tentativas)",
+    "esperado": "429 em produção (aqui NODE_ENV≠production desliga o limite)",
+    "observado": "status finais: 401,401,401",
+    "veredito": "ATENÇÃO"
+  },
+  {
+    "id": "AUT-7",
+    "teste": "Dono legítimo tenta entrar depois que um desconhecido errou a senha 12x",
+    "esperado": "consegue entrar (conta não pode ser trancada por terceiros)",
+    "observado": "401 UNAUTHENTICATED",
+    "veredito": "FALHA"
+  },
+  {
+    "id": "AUT-6",
+    "teste": "Cadastro de clínica com senha de 1 caractere",
+    "esperado": "400/422 (senha forte exigida)",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-1",
+    "teste": "Papel sem permissão acessa /audit-logs",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-2",
+    "teste": "Papel sem permissão acessa /installments",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-3",
+    "teste": "Papel sem permissão acessa /installments",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-4",
+    "teste": "Papel sem permissão acessa /patients/01a131f2-8033-744e-a0bc-14af27911eef/medical-record",
+    "esperado": "403/404",
+    "observado": "404",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-5",
+    "teste": "Papel sem permissão acessa /users",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-6",
+    "teste": "Papel sem permissão acessa /patients/01a131f2-8033-744e-a0bc-14af27911eef/medical-record",
+    "esperado": "403/404",
+    "observado": "404",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-7",
+    "teste": "Papel sem permissão acessa /reports/revenue?from=2026-01-01&to=2026-12-31",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-8",
+    "teste": "Papel sem permissão acessa /privacy/exports",
+    "esperado": "403/404/405",
+    "observado": "404",
+    "veredito": "OK"
+  },
+  {
+    "id": "PER-9",
+    "teste": "Recepção tenta se promover a OWNER",
+    "esperado": "403",
+    "observado": "403",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-1",
+    "teste": "Nome de paciente com 20.000 caracteres",
+    "esperado": "400/413/422, sem 500",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-2",
+    "teste": "Nome com HTML/script (armazenamento)",
+    "esperado": "201 armazena como texto",
+    "observado": "201",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-3",
+    "teste": "Nome com byte nulo",
+    "esperado": "400/422, sem 500",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-4",
+    "teste": "Nome com emoji e acentos",
+    "esperado": "201",
+    "observado": "201",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-5",
+    "teste": "CPF inválido (11111111111)",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-6",
+    "teste": "Data de nascimento impossível",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-7",
+    "teste": "Nascimento no futuro",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-8",
+    "teste": "Corpo de 2 MB",
+    "esperado": "413",
+    "observado": "413",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-9",
+    "teste": "Paginação limit=100000",
+    "esperado": "400 ou limitado (≤100 itens)",
+    "observado": "400 / - itens",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-10",
+    "teste": "Paginação limit=-5",
+    "esperado": "400",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-11",
+    "teste": "Busca com '%' (curinga)",
+    "esperado": "200 sem erro",
+    "observado": "200",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-12",
+    "teste": "Content-Type errado",
+    "esperado": "400/415",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "INP-13",
+    "teste": "Mass assignment: PATCH com tenantId/id/code",
+    "esperado": "campos ignorados",
+    "observado": "400; paciente continua na clínica: true",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-1",
+    "teste": "Pagamento com valor negativo",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-2",
+    "teste": "Pagamento de R$ 0,00",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-3",
+    "teste": "Valor com fração de centavo (100.5)",
+    "esperado": "400/422",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-4",
+    "teste": "Soma das formas ≠ valor total",
+    "esperado": "400/422",
+    "observado": "422",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-5",
+    "teste": "6 cliques simultâneos com a mesma chave de idempotência",
+    "esperado": "exatamente 1 pagamento criado",
+    "observado": "1 pagamento(s); status 201,201,201,201,201,201",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-6",
+    "teste": "Pagamento sem Idempotency-Key",
+    "esperado": "400",
+    "observado": "400",
+    "veredito": "OK"
+  },
+  {
+    "id": "MON-7",
+    "teste": "Pagamento muito acima do saldo (vira crédito?)",
+    "esperado": "422 ou crédito explícito",
+    "observado": "201: {\"paymentId\":\"01a1479e-7e92-737e-9a8f-eb95254c2384\",\"receiptNumber\":30,\"installmentStatus\":\"PAID\",\"creditCentsGranted\":9",
+    "veredito": "ATENÇÃO"
+  }
+]

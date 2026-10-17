@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { WAITLIST_WEEKDAYS } from '@/packages/operacional/enum/Waitlist/WaitlistStatusEnum';
 import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
@@ -46,11 +46,13 @@ export function WaitlistFormDialog({ open, professionalId, onClose }: WaitlistFo
 
   const patients = patientsQuery.data?.items ?? [];
   const patientIds = useMemo(() => patients.map((patient) => patient.id), [patients]);
+  // Guarda os nomes já carregados: ao escolher, o campo vira o nome, a busca muda e a lista esvazia.
+  const patientLabels = useRef(new Map<string, string>());
   const patientLabelById = useMemo(() => {
-    const map = new Map(
-      patients.map((patient) => [patient.id, `#${patient.code} ${patient.name}`] as const),
-    );
-    return (id: string) => map.get(id) ?? id;
+    for (const patient of patients) {
+      patientLabels.current.set(patient.id, `#${patient.code} ${patient.name}`);
+    }
+    return (id: string) => patientLabels.current.get(id) ?? id;
   }, [patients]);
 
   const handleForm = () => {

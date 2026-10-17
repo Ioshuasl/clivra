@@ -1,6 +1,16 @@
 import { z } from 'zod';
 import { CONSENT_CHANNELS, CONSENT_TYPES } from '../enum/consent/consent.enum.js';
 
+/** Data civil real no formato AAAA-MM-DD (rejeita 2999-13-45, 2026-02-30). */
+const birthDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((value) => {
+    const [y, m, d] = value.split('-').map(Number);
+    const date = new Date(Date.UTC(y!, m! - 1, d));
+    return date.getUTCFullYear() === y && date.getUTCMonth() === m! - 1 && date.getUTCDate() === d;
+  }, 'Data inválida.');
+
 const addressSchema = z
   .object({
     street: z.string().max(200).optional(),
@@ -30,11 +40,7 @@ export const patientCreateSchema = z
     name: z.string().min(3).max(200),
     socialName: z.string().max(200).optional().nullable(),
     cpf: z.string().max(14).optional().nullable(),
-    birthDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .optional()
-      .nullable(),
+    birthDate: birthDateSchema.optional().nullable(),
     sex: z.string().max(40).optional().nullable(),
     phonePrimary: z.string().min(8).max(30),
     phoneSecondary: z.string().max(30).optional().nullable(),
@@ -53,11 +59,7 @@ export const patientUpdateSchema = z
     name: z.string().min(3).max(200).optional(),
     socialName: z.string().max(200).optional().nullable(),
     cpf: z.string().max(14).optional().nullable(),
-    birthDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .optional()
-      .nullable(),
+    birthDate: birthDateSchema.optional().nullable(),
     sex: z.string().max(40).optional().nullable(),
     phonePrimary: z.string().min(8).max(30).optional(),
     phoneSecondary: z.string().max(30).optional().nullable(),

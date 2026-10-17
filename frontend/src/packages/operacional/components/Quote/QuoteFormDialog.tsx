@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray } from 'react-hook-form';
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { TOOTH_FACES } from '@/packages/operacional/enum/Quote/ToothFaceEnum';
@@ -118,11 +118,13 @@ function QuoteCreateForm({
     return ids;
   }, [patients, patientId]);
 
+  // Guarda os nomes já carregados: ao escolher, o campo vira o nome, a busca muda e a lista esvazia.
+  const patientLabels = useRef(new Map<string, string>());
   const patientLabelById = useMemo(() => {
-    const map = new Map(
-      patients.map((item) => [item.id, `#${item.code} ${item.socialName || item.name}`] as const),
-    );
-    return (id: string) => map.get(id) ?? id;
+    for (const item of patients) {
+      patientLabels.current.set(item.id, `#${item.code} ${item.socialName || item.name}`);
+    }
+    return (id: string) => patientLabels.current.get(id) ?? id;
   }, [patients]);
 
   const procedures = proceduresQuery.data ?? [];

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "XSS-1",
+    "teste": "Nome de paciente com <img onerror> na lista",
+    "esperado": "texto escapado, nenhum alert",
+    "observado": "alerts: 0",
+    "veredito": "OK"
+  },
+  {
+    "id": "XSS-2",
+    "teste": "Mesmo nome na agenda",
+    "esperado": "nenhum alert",
+    "observado": "alerts: 0",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-1",
+    "teste": "Duplo clique em \"Criar paciente\"",
+    "esperado": "apenas 1 cadastro",
+    "observado": "1 cadastro(s)",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-2",
+    "teste": "Botão Voltar do navegador na lista de pacientes",
+    "esperado": "sem erro de tela",
+    "observado": "url /app/pacientes/01a1479e-ae31-740c-89d1-6aa8786e1f44",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-3",
+    "teste": "Salvar paciente sem internet",
+    "esperado": "mensagem clara e botão volta ao normal",
+    "observado": "mensagem: \"(nenhuma)\"; botão preso em \"Salvando…\": true",
+    "veredito": "ATENÇÃO"
+  },
+  {
+    "id": "UI-4",
+    "teste": "Sessão expirada (cookies apagados) e recarregar",
+    "esperado": "volta ao login sem erro",
+    "observado": "url /login",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-5",
+    "teste": "Ficha de paciente inexistente",
+    "esperado": "mensagem amigável com saída",
+    "observado": "Clivra Início Pacientes Agenda WhatsApp 1 Orçamentos Financeiro Relatórios Configurações  Clivra  Gestão completa para clínicas odontológicas.  OT Dr. Owner Tes",
+    "veredito": "ATENÇÃO"
+  },
+  {
+    "id": "UI-6",
+    "teste": "Rota inexistente dentro do app",
+    "esperado": "página 404 em português com link de volta",
+    "observado": "404 This page could not be found.",
+    "veredito": "ATENÇÃO"
+  },
+  {
+    "id": "UI-7",
+    "teste": "Login usando só o teclado (Tab/Enter)",
+    "esperado": "entra no sistema",
+    "observado": "entrou",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-8",
+    "teste": "Zoom 200% na agenda (janela 683px)",
+    "esperado": "sem rolagem horizontal da página",
+    "observado": "ok",
+    "veredito": "OK"
+  },
+  {
+    "id": "UI-9",
+    "teste": "Esc fecha o formulário \"Novo paciente\"",
+    "esperado": "fecha",
+    "observado": "continua aberto",
+    "veredito": "ATENÇÃO"
+  }
+]
