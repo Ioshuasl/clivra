@@ -38,12 +38,15 @@ const envSchema = z.object({
   WAHA_WEBHOOK_URL: z.string().url().optional(),
   WAHA_ENGINE: z.enum(['WEBJS', 'GOWS', 'NOWEB']).default('WEBJS'),
   WAHA_SESSION_NAME: z.string().min(1).optional(),
-  MAIL_DSN: z.string().min(1),
+  /** SMTP (Mailpit em dev). Em production o envio é pelo Resend e este valor não é usado. */
+  MAIL_DSN: z.string().min(1).default('smtp://localhost:1025'),
   MAIL_FROM: z.string().min(1).default('noreply@localhost'),
   RESEND_API_KEY: z.string().optional(),
   APP_PUBLIC_URL: z.string().url(),
   CORS_ORIGINS: z.string().min(1),
   SENTRY_DSN: z.string().optional(),
+  /** Só para ensaio local do build de produção: pula a checagem de configuração segura. */
+  SKIP_PRODUCTION_CHECKS: z.enum(['0', '1']).default('0'),
   /** Quantos proxies reversos ficam na frente da API (Easypanel/Traefik = 1). Sem isso o IP do cliente vira o do proxy. */
   TRUST_PROXY: z.coerce.number().int().min(0).max(5).optional(),
   KEK_LOCAL_BASE64: z.string().optional(),
@@ -88,8 +91,54 @@ function assertAsaasConfig(parsed: Env): void {
   }
 }
 
+
+function isLocalHost(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.localhost');
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Em production, recusa subir com configuração de desenvolvimento (e-mail, storage, URLs, mensageria).
+ * Evita o pior cenário: subir "funcionando" mas sem enviar e-mail ou gravando arquivos no lugar errado.
+ */
+function assertProductionConfig(parsed: Env): void {
+  if (parsed.NODE_ENV !== 'production') return;
+  if (parsed.SKIP_PRODUCTION_CHECKS === '1') {
+    console.warn('[config] SKIP_PRODUCTION_CHECKS=1 — checagem de configuração de produção DESLIGADA (use só em ensaio local).');
+    return;
+  }
+  const problems: string[] = [];
+  if (!parsed.RESEND_API_KEY) problems.push('RESEND_API_KEY ausente (sem ela nenhum e-mail sai: código do paciente, convites e recuperação de senha)');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(parsed.MAIL_FROM.replace(/^.*<(.+)>$/, '$1')) || parsed.MAIL_FROM.endsWith('@localhost')) {
+    problems.push('MAIL_FROM deve ser um e-mail de domínio verificado no Resend (ex.: Clivra <nao-responda@seudominio.com.br>)');
+  }
+  if (isLocalHost(parsed.STORAGE_ENDPOINT) || !parsed.STORAGE_ENDPOINT.startsWith('https://')) {
+    problems.push('STORAGE_ENDPOINT deve ser https e não pode ser localhost (use o endpoint do S3)');
+  }
+  if (parsed.STORAGE_ACCESS_KEY === 'minioadmin' || parsed.STORAGE_SECRET_KEY === 'minioadmin') {
+    problems.push('STORAGE_ACCESS_KEY/SECRET_KEY ainda são as credenciais padrão do MinIO');
+  }
+  if (!parsed.APP_PUBLIC_URL.startsWith('https://') || isLocalHost(parsed.APP_PUBLIC_URL)) {
+    problems.push('APP_PUBLIC_URL deve ser o endereço https público do sistema');
+  }
+  for (const origin of parsed.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)) {
+    if (!origin.startsWith('https://') || isLocalHost(origin)) {
+      problems.push(`CORS_ORIGINS contém origem insegura: ${origin}`);
+    }
+  }
+  if (parsed.MESSAGING_PROVIDER === 'fake') problems.push('MESSAGING_PROVIDER=fake não pode ser usado em production');
+  if (problems.length > 0) {
+    throw new Error('Configuração de produção inválida:\n - ' + problems.join('\n - '));
+  }
+}
+
 export const env: Env = envSchema.parse(process.env);
 assertAsaasConfig(env);
+assertProductionConfig(env);
 
 export const jwtPrivateKey = decodePemKey(env.JWT_PRIVATE_KEY);
 export const jwtPublicKey = decodePemKey(env.JWT_PUBLIC_KEY);

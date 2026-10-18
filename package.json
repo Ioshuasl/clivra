@@ -32,6 +32,8 @@
     "test:split-installments": "pnpm --filter @repo/backend test:split-installments",
     "test:receipt-amount-in-words": "pnpm --filter @repo/backend test:receipt-amount-in-words",
     "test:civil-day": "pnpm --filter @repo/backend test:civil-day",
+    "ops:email-test": "pnpm --filter @repo/backend ops:email-test",
+    "ops:storage-check": "pnpm --filter @repo/backend ops:storage-check",
     "test:quotes-crud": "pnpm --filter @repo/backend test:quotes-crud",
     "test:quotes-send": "pnpm --filter @repo/backend test:quotes-send",
     "test:quotes-decision": "pnpm --filter @repo/backend test:quotes-decision",

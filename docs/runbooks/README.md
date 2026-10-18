@@ -9,3 +9,4 @@ Procedimentos mínimos da S8. Não substituem o [docs/11](../11-infra-devops.md)
 | Tenant suspenso por engano | [tenant-suspenso-por-engano.md](./tenant-suspenso-por-engano.md) |
 | Credencial vazada | [credencial-vazada.md](./credencial-vazada.md) |
 | Suspeita de acesso cross-tenant | [suspeita-cross-tenant.md](./suspeita-cross-tenant.md) |
+| E-mail (Resend) e arquivos (S3) em produção | [email-e-storage-producao.md](./email-e-storage-producao.md) |
