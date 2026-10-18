@@ -38,6 +38,7 @@ export function InvitationAcceptForm({ token }: InvitationAcceptFormProps) {
   return (
     <AuthCard title="Aceitar convite" description="Crie sua conta para entrar na clínica.">
       <form
+        method="post"
         className="grid gap-4"
         onSubmit={(e) => {
           void form.handleSubmit(onSave)(e);

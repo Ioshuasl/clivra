@@ -31,6 +31,7 @@ export function SignupForm() {
       description={`Comece no ${CLIVRA.name}: cadastro do owner e da clínica. Senha com no mínimo 10 caracteres.`}
     >
       <form
+        method="post"
         className="grid gap-4"
         onSubmit={(e) => {
           void form.handleSubmit(onSave)(e);

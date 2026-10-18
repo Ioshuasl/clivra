@@ -1,4 +1,6 @@
-# Avaliação do Clivra para produção — 16/10/2026
+# Avaliação do Clivra para produção — 16/10/2026 (atualizado em 17/10/2026)
+
+> **Atualização 17/10:** itens de segurança de login, formulário de agendamento e falta de internet **corrigidos** (ver seção 8).
 
 Escopo: `pnpm tester` completo, teste de build, Playwright contra o frontend em **modo produção**
 (`next build` + `next start`), varredura de **todas as telas** por papel (dono, recepção, dentista,
@@ -153,3 +155,17 @@ odontograma (224, esperado).
 2. **Primeira semana:** itens 6.1 a 6.4 de UX (maior efeito para o leigo) e cortar chamadas desnecessárias de API.
 3. **Antes de escalar:** servidor em São Paulo, limite de tentativas no Redis, Sentry e backup com restauração testada.
 4. Manter `audit/` no CI de homologação para repetir esta avaliação a cada versão.
+
+## 8. Correções aplicadas em 17/10/2026
+
+| Item | O que foi feito | Verificação |
+|---|---|---|
+| Conta trancada por terceiros | Bloqueio agora vale por **e-mail + IP** (Redis, com reserva em memória); vale também para e-mails inexistentes; limite por minuto por e-mail também passou a considerar o IP | `test:login-throttle` (8 verificações) e `test:identity` verdes |
+| Senha mínima | Cadastro, redefinição e convite exigem **10 caracteres** (a tela já exigia) | smoke: 1 e 9 caracteres recusados |
+| IP real atrás do proxy (novo achado) | Sem `trust proxy` todos os usuários dividiriam o IP do Easypanel (limite de 10 logins/min para a plataforma toda). Novo `TRUST_PROXY` (padrão 1 em produção) | código; **configurar `TRUST_PROXY=1`** no Easypanel |
+| Novo agendamento (6.1) | Formulário ganhou **data, horário e duração**; a sugestão vai para 9h do dia seguinte quando já passou do expediente | spec novo no Playwright |
+| Falta de internet (6.2) | Gravações e consultas deixam de ficar pausadas; mensagem clara ("Sem conexão com o servidor… nada foi salvo"); a mensagem técnica com URL da API sumiu | spec novo no Playwright |
+| Login sem JavaScript (novo achado) | Se o JavaScript falhava, o formulário mandava **e-mail e senha pela URL** (GET). Formulários de login, cadastro, redefinição, convite e agendamento público agora usam POST | verificado no navegador |
+| Teste de agenda instável | Verificação instantânea fechava o painel que ainda abria; trocada por espera real | suíte completa 77/77 |
+
+Pendentes desta lista: 6.3 a 6.15 (UX menores), lint do frontend no build, Resend/S3 de produção, Dockerfiles e deploy.

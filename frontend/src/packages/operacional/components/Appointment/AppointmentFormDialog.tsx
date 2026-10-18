@@ -26,6 +26,7 @@ import {
   ComboboxList,
 } from '@/shared/ui/combobox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
+import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import {
   Sheet,
@@ -46,6 +47,8 @@ function slotSummary(startsAt: string, endsAt: string): string {
     return '';
   }
 }
+
+const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
 
 export function AppointmentFormDialog({
   open,
@@ -152,7 +155,32 @@ export function AppointmentFormDialog({
   const professionalName =
     professionals.find((p) => p.id === (professionalId || form.watch('professionalId')))?.name ??
     null;
-  const summaryParts = [slotSummary(startsAt, endsAt), professionalName].filter(Boolean);
+  // Data, horário e duração editáveis: o formulário guarda sempre o início/fim em ISO.
+  const watchedStart = form.watch('startsAt') || startsAt;
+  const watchedEnd = form.watch('endsAt') || endsAt;
+  const startDate = parseISO(watchedStart);
+  const endDate = parseISO(watchedEnd);
+  const validStart = !Number.isNaN(startDate.getTime());
+  const dateValue = validStart ? format(startDate, 'yyyy-MM-dd') : '';
+  const timeValue = validStart ? format(startDate, 'HH:mm') : '';
+  const durationMinutes =
+    validStart && !Number.isNaN(endDate.getTime())
+      ? Math.max(5, Math.round((endDate.getTime() - startDate.getTime()) / 60000))
+      : 30;
+  const durationOptions = DURATION_OPTIONS.includes(durationMinutes)
+    ? DURATION_OPTIONS
+    : [...DURATION_OPTIONS, durationMinutes].sort((a, b) => a - b);
+
+  const applyWhen = (date: string, time: string, minutes: number) => {
+    if (!date || !time) return;
+    const start = new Date(`${date}T${time}`);
+    if (Number.isNaN(start.getTime())) return;
+    form.setValue('startsAt', start.toISOString(), { shouldValidate: true });
+    form.setValue('endsAt', new Date(start.getTime() + minutes * 60000).toISOString(), {
+      shouldValidate: true,
+    });
+  };
+  const summaryParts = [slotSummary(watchedStart, watchedEnd), professionalName].filter(Boolean);
 
   return (
     <Sheet
@@ -219,6 +247,42 @@ export function AppointmentFormDialog({
                 />
                 <FieldError>{form.formState.errors.patientId?.message}</FieldError>
               </Field>
+
+              <div className="grid grid-cols-3 gap-3">
+                <Field>
+                  <FieldLabel htmlFor="appt-date">Data</FieldLabel>
+                  <Input
+                    id="appt-date"
+                    type="date"
+                    value={dateValue}
+                    onChange={(e) => applyWhen(e.target.value, timeValue, durationMinutes)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="appt-time">Horário</FieldLabel>
+                  <Input
+                    id="appt-time"
+                    type="time"
+                    step={300}
+                    value={timeValue}
+                    onChange={(e) => applyWhen(dateValue, e.target.value, durationMinutes)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="appt-duration">Duração</FieldLabel>
+                  <NativeSelect
+                    id="appt-duration"
+                    value={String(durationMinutes)}
+                    onChange={(e) => applyWhen(dateValue, timeValue, Number(e.target.value))}
+                  >
+                    {durationOptions.map((minutes) => (
+                      <NativeSelectOption key={minutes} value={String(minutes)}>
+                        {minutes} min
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+              </div>
 
               {!lockProfessional ? (
                 <Field data-invalid={Boolean(form.formState.errors.professionalId)}>

@@ -52,9 +52,12 @@ class ApiClient {
         },
       });
     } catch {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[api] sem conexão com ${API_URL} — confirme se o backend está rodando (pnpm dev:api).`);
+      }
       throw new ApiClientError(
         'NETWORK_ERROR',
-        `Não foi possível conectar à API (${API_URL}). Confirme se o backend está rodando (pnpm dev:api).`,
+        'Sem conexão com o servidor. Verifique sua internet e tente novamente — nada foi salvo.',
         0,
       );
     }

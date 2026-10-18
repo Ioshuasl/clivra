@@ -100,6 +100,8 @@ export function LoginForm() {
           </div>
 
           <form
+
+            method="post"
             className={cn(
               'grid gap-4',
               '[@media(max-height:820px)]:gap-3',

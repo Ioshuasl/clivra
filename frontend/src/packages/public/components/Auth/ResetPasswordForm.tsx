@@ -42,6 +42,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <AuthCard title="Nova senha" description="Defina uma senha com no mínimo 10 caracteres.">
       <form
+        method="post"
         className="grid gap-4"
         onSubmit={(e) => {
           void form.handleSubmit(onSave)(e);

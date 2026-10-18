@@ -40,6 +40,7 @@ export function ForgotPasswordForm() {
         </div>
       ) : (
         <form
+          method="post"
           className="grid gap-4"
           onSubmit={(e) => {
             void form.handleSubmit(onSave)(e);

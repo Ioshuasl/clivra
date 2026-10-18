@@ -90,7 +90,12 @@ test.describe('Agenda (E4a)', () => {
         force: true,
       });
       const search = page.getByPlaceholder('Buscar paciente…');
-      if (await search.isVisible().catch(() => false)) {
+      // O painel anima ao abrir: espera de verdade antes de concluir que não abriu.
+      const shown = await search
+        .waitFor({ state: 'visible', timeout: 4_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (shown) {
         opened = true;
         break;
       }
@@ -127,6 +132,44 @@ test.describe('Agenda (E4a)', () => {
     await page.getByRole('button', { name: new RegExp(SEED_PATIENT) }).first().click();
     await page.getByRole('button', { name: 'Confirmar presença' }).click();
     await expect(page.getByText('Confirmado').first()).toBeVisible();
+  });
+
+  test('Novo agendamento: escolhe data, horário e duração no formulário', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/app/agenda');
+    await expect(page.getByRole('heading', { name: 'Agenda' })).toBeVisible({ timeout: 45_000 });
+
+    // Dia útil daqui a ~6 semanas, em horário comercial e minuto variável (evita conflito entre execuções).
+    const day = new Date();
+    day.setDate(day.getDate() + 40 + (Date.now() % 25));
+    while (day.getDay() === 0 || day.getDay() === 6) day.setDate(day.getDate() + 1);
+    const ymd = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    const hour = 9 + (Date.now() % 8);
+    const minute = [0, 15, 30, 45][Date.now() % 4]!;
+    const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+    await page.getByRole('button', { name: 'Novo agendamento' }).click();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.getByText('Novo agendamento', { exact: true })).toBeVisible();
+
+    await page.getByPlaceholder('Buscar paciente…').fill('Maria');
+    await page.getByRole('option', { name: new RegExp(SEED_PATIENT) }).first().click();
+
+    await page.locator('#appt-date').fill(ymd);
+    await page.locator('#appt-time').fill(time);
+    await page.locator('#appt-duration').selectOption('45');
+    await expect(page.locator('#appt-date')).toHaveValue(ymd);
+    await expect(page.locator('#appt-time')).toHaveValue(time);
+    await expect(page.locator('#appt-duration')).toHaveValue('45');
+
+    const professional = page.locator('#appt-professional');
+    if (await professional.isVisible().catch(() => false)) {
+      const value = await professional.locator('option').nth(1).getAttribute('value');
+      if (value) await professional.selectOption(value);
+    }
+
+    await page.getByRole('button', { name: 'Agendar', exact: true }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 20_000 });
   });
 
   test('abre diálogo de bloqueio', async ({ page }) => {

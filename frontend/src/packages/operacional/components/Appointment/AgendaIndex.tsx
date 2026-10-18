@@ -83,6 +83,11 @@ function defaultCreateSlot(anchor: Date, slotMinutes: SlotMinutes): {
   const now = new Date();
   if (toYmd(start) === toYmd(now)) {
     start.setHours(now.getHours(), snapMinutes(now.getMinutes(), slotMinutes), 0, 0);
+    // Já fora do expediente comum (antes das 8h ou a partir das 18h): sugere 9h do dia seguinte.
+    if (start.getHours() < 8 || start.getHours() >= 18) {
+      start.setDate(start.getDate() + 1);
+      start.setHours(9, 0, 0, 0);
+    }
   } else {
     start.setHours(9, 0, 0, 0);
   }

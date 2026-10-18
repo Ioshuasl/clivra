@@ -32,6 +32,7 @@ export function BookingStepIdentity({
 }: BookingStepIdentityProps) {
   return (
     <form
+      method="post"
       className="flex flex-1 flex-col gap-4 sm:gap-5"
       onSubmit={(event) => {
         void form.handleSubmit(onSave)(event);

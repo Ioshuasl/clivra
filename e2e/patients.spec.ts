@@ -43,4 +43,20 @@ test.describe('Patients (E3)', () => {
     await expect(page.getByRole('heading', { name })).toBeVisible();
     await expect(page.getByText(/Ficha #/)).toBeVisible();
   });
+
+  test('sem internet: avisa com clareza e o botão volta ao normal', async ({ page }) => {
+    await page.goto('/app/pacientes');
+    await page.getByRole('button', { name: 'Novo paciente' }).click();
+    await page.getByLabel('Nome completo').fill(`Offline ${Date.now()}`);
+    await page.getByLabel('Telefone', { exact: true }).fill(`6295${String(Date.now()).slice(-7)}`);
+
+    await page.context().setOffline(true);
+    try {
+      await page.getByRole('button', { name: 'Criar paciente' }).click();
+      await expect(page.getByText(/Sem conexão com o servidor/)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('button', { name: 'Criar paciente' })).toBeEnabled();
+    } finally {
+      await page.context().setOffline(false);
+    }
+  });
 });
