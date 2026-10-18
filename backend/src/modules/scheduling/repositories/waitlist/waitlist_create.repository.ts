@@ -65,7 +65,7 @@ export class CreateRepository {
           patientId: input.patientId,
           professionalId: input.professionalId ?? null,
           procedureId: input.procedureId,
-          preferredPeriods: input.preferredPeriods as Prisma.InputJsonValue,
+          preferredPeriods: input.preferredPeriods,
           priority: input.priority,
           status: 'WAITING',
         },

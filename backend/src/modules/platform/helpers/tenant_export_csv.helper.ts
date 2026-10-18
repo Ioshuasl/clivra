@@ -24,7 +24,7 @@ export function jsonFile(value: unknown): Buffer {
   return Buffer.from(
     `${JSON.stringify(
       value,
-      (_key, current) => {
+      (_key: string, current: unknown): unknown => {
         if (typeof current === 'bigint') return Number(current);
         if (current instanceof Date) return current.toISOString();
         return current;

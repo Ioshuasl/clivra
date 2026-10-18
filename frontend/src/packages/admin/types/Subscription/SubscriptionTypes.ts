@@ -22,7 +22,7 @@ export type PlanSummary = {
 export type SubscriptionSummary = {
   id: string;
   tenantId: string;
-  status: SubscriptionStatus | string;
+  status: SubscriptionStatus | (string & {});
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAt: string | null;
@@ -39,7 +39,7 @@ export type SubscriptionSummary = {
 };
 
 export type UsageItem = {
-  metric: UsageMetric | string;
+  metric: UsageMetric | (string & {});
   current: number;
   limit: number | null;
   period: string;

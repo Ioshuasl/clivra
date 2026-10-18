@@ -62,7 +62,7 @@ export function patientInitials(name: string | null | undefined): string {
 export function patientAgeYears(birthDate: string | null | undefined): number | null {
   if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return null;
   const [y, m, d] = birthDate.split('-').map(Number);
-  const birth = new Date(y!, m! - 1, d!);
+  const birth = new Date(y!, m! - 1, d);
   if (Number.isNaN(birth.getTime())) return null;
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();

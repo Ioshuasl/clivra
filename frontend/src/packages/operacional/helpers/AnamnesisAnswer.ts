@@ -5,12 +5,18 @@ export function formatAnamnesisAnswer(answer: unknown): string {
   if (typeof answer === 'object' && 'value' in answer) {
     const row = answer as { value?: unknown; text?: unknown };
     const base =
-      typeof row.value === 'boolean' ? (row.value ? 'Sim' : 'Não') : String(row.value ?? '');
+      typeof row.value === 'boolean'
+        ? row.value
+          ? 'Sim'
+          : 'Não'
+        : typeof row.value === 'string' || typeof row.value === 'number'
+          ? String(row.value)
+          : '';
     const extra = typeof row.text === 'string' ? row.text.trim() : '';
     if (extra) return `${base} — ${extra}`;
     return base || '—';
   }
-  return String(answer);
+  return JSON.stringify(answer);
 }
 
 export function formatDateTimePt(iso: string): string {

@@ -42,7 +42,7 @@ export function parseQuestions(raw: unknown): AnamnesisQuestion[] {
         : undefined,
       alertWhen:
         row.alertWhen && typeof row.alertWhen === 'object'
-          ? (row.alertWhen as AnamnesisAlertWhen)
+          ? (row.alertWhen)
           : undefined,
       alertSeverity:
         row.alertSeverity === 'INFO' || row.alertSeverity === 'WARNING' || row.alertSeverity === 'CRITICAL'
@@ -57,7 +57,7 @@ export function parseQuestions(raw: unknown): AnamnesisQuestion[] {
           : undefined,
       showWhen:
         row.showWhen && typeof row.showWhen === 'object'
-          ? (row.showWhen as AnamnesisQuestion['showWhen'])
+          ? (row.showWhen)
           : undefined,
     });
   }
@@ -82,7 +82,7 @@ export function visibleQuestions(
 
 export function answerScalar(answer: unknown): unknown {
   if (answer && typeof answer === 'object' && 'value' in answer) {
-    return (answer as { value: unknown }).value;
+    return (answer).value;
   }
   return answer;
 }

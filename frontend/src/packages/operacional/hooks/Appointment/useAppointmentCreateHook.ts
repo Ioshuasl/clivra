@@ -1,7 +1,6 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { operacionalQueryKeys } from '@/packages/operacional/helpers/OperacionalQueryKeys';
 import { AppointmentCreateService } from '@/packages/operacional/services/Appointment/AppointmentCreateService';
 import { AppointmentSeriesCreateService } from '@/packages/operacional/services/Appointment/AppointmentSeriesService';
 import type {

@@ -2,7 +2,6 @@ import type { RequestContext } from '../../../../shared/domain/request_context.j
 import { getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
 import { civilDateUtc } from '../../helpers/civil_date.helper.js';
 import { dateOnly, periodEndExclusiveUtc, periodStartUtc } from '../../helpers/money.helper.js';
-import type { CashFlowBasis } from '../../enum/report/cash_flow_basis.enum.js';
 import type { PaymentMethod } from '../../enum/payment/payment_method.enum.js';
 import type { CashFlowLine, CashFlowRaw } from '../../types/report/report.types.js';
 import type { CashFlowQuerySchema } from '../../schemas/billing.schema.js';

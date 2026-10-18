@@ -41,7 +41,7 @@ export function getWahaSessionPort(): WahaSessionPort {
 }
 
 export function setMessagingProvider(provider: MessagingProvider | undefined): void {
-  singleton = provider as MessagingProvider & Partial<WahaSessionPort>;
+  singleton = provider;
 }
 
 export type { MessagingProvider } from '../../../modules/messaging/types/ports/messaging_provider.port.js';

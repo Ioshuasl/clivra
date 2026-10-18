@@ -46,7 +46,7 @@ export function InboxIndex() {
   useEffect(() => {
     if (!selected || selected.unreadCount <= 0 || markRead.isPending) return;
     void markRead.mutateAsync(selected.id);
-  }, [selected?.id, selected?.unreadCount]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected?.id, selected?.unreadCount]);
 
   if (listQuery.isLoading) {
     return (

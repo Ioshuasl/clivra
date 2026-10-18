@@ -70,7 +70,7 @@ export function toPatientCreatePayload(values: PatientCreateFormValues) {
     name: values.name.trim(),
     socialName: emptyToNull(values.socialName),
     cpf: emptyToNull(values.cpf),
-    birthDate: emptyToNull(values.birthDate as string | null),
+    birthDate: emptyToNull(values.birthDate),
     sex: emptyToNull(values.sex),
     phonePrimary: values.phonePrimary.trim(),
     phoneSecondary: emptyToNull(values.phoneSecondary),

@@ -147,7 +147,7 @@ export function WaitlistFormDialog({ open, professionalId, onClose }: WaitlistFo
                             : 'Nenhum paciente encontrado.'}
                         </ComboboxEmpty>
                         <ComboboxList>
-                          {(id) => (
+                          {(id: string) => (
                             <ComboboxItem key={id} value={id}>
                               {patientLabelById(id)}
                             </ComboboxItem>

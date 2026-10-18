@@ -1,7 +1,6 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { operacionalQueryKeys } from '@/packages/operacional/helpers/OperacionalQueryKeys';
 import type { PatientCreateFormValues } from '@/packages/operacional/schemas/Patient/PatientSchema';
 import { PatientCreateService } from '@/packages/operacional/services/Patient/PatientCreateService';
 

@@ -66,7 +66,7 @@ export function QuoteFilter({
               {patientsLoading ? 'Carregando…' : 'Nenhum paciente encontrado.'}
             </ComboboxEmpty>
             <ComboboxList>
-              {(id) => (
+              {(id: string) => (
                 <ComboboxItem key={id} value={id}>
                   {patientLabelById(id)}
                 </ComboboxItem>

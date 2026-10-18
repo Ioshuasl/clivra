@@ -180,7 +180,7 @@ export function BookingShell({
                   <ol className="flex gap-1.5" aria-hidden>
                     {Array.from({ length: stepTotal }, (_, i) => {
                       const n = i + 1;
-                      const done = n < stepIndex!;
+                      const done = n < stepIndex;
                       const current = n === stepIndex;
                       return (
                         <li

@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 import { ClivraLogo } from '@/shared/brand/ClivraLogo';
 import { CLIVRA } from '@/shared/brand/ClivraBrand';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
-import { ThemeToggle } from '@/shared/ui/theme-toggle';
 
 type AuthCardProps = {
   title: string;

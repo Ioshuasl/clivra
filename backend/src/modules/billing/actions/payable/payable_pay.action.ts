@@ -19,7 +19,6 @@ import { PayRepository } from '../../repositories/payable/payable_pay.repository
 import type { PayablePaySchema } from '../../schemas/billing.schema.js';
 import type { PayablePayResult } from '../../types/payable/payable.types.js';
 import { tenantToday } from '../../helpers/tenant_today.helper.js';
-import type { PaymentMethod } from '../../enum/payment/payment_method.enum.js';
 
 function isUniqueConflict(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
@@ -43,7 +42,7 @@ export class PayAction {
     idempotencyKey: string,
   ): Promise<PayablePayResult> {
     const today = await tenantToday(ctx);
-    const method = payablePaySchema.method as PaymentMethod;
+    const method = payablePaySchema.method;
     if (method === 'PATIENT_CREDIT') throw new PayableMethodNotAllowedError();
 
     const existing = await this.findKey.execute(ctx, idempotencyKey, today);

@@ -35,7 +35,6 @@ import { NextNumberRepository } from '../../repositories/receipt/receipt_next_nu
 import type { PaymentCreateSchema } from '../../schemas/billing.schema.js';
 import type { PaymentRegisterResult } from '../../types/receivable/receivable_http.types.js';
 import { toJsonCents } from '../../helpers/money.helper.js';
-import type { PaymentMethod } from '../../enum/payment/payment_method.enum.js';
 
 function isIdempotencyConflict(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
@@ -187,7 +186,7 @@ export class RegisterAction {
               .map((split) => ({
                 kind: 'PAYMENT_IN' as const,
                 amountCents: split.amountCents,
-                method: split.method as PaymentMethod,
+                method: split.method,
               }))
           : [];
 

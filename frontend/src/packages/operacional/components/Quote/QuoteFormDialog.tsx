@@ -197,7 +197,7 @@ function QuoteCreateForm({
                         {patientsQuery.isLoading ? 'Carregando…' : 'Nenhum paciente encontrado.'}
                       </ComboboxEmpty>
                       <ComboboxList>
-                        {(id) => (
+                        {(id: string) => (
                           <ComboboxItem key={id} value={id}>
                             {patientLabelById(id)}
                           </ComboboxItem>
@@ -304,7 +304,7 @@ function QuoteCreateForm({
                               : 'Nenhum procedimento encontrado.'}
                           </ComboboxEmpty>
                           <ComboboxList>
-                            {(id) => (
+                            {(id: string) => (
                               <ComboboxItem key={id} value={id}>
                                 {procedureLabelById(id)}
                               </ComboboxItem>
@@ -580,7 +580,7 @@ function QuoteEditForm({ quoteId, onClose }: { quoteId: string; onClose: () => v
                             : 'Nenhum procedimento encontrado.'}
                         </ComboboxEmpty>
                         <ComboboxList>
-                          {(id) => (
+                          {(id: string) => (
                             <ComboboxItem key={id} value={id}>
                               {procedureLabelById(id)}
                             </ComboboxItem>

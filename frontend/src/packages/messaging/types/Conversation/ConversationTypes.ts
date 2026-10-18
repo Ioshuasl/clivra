@@ -6,7 +6,7 @@ export type ConversationSummary = {
   patientId: string | null;
   contactPhone: string;
   contactName: string | null;
-  status: ConversationStatus | string;
+  status: ConversationStatus | (string & {});
   assignedToUserId: string | null;
   unreadCount: number;
   lastMessageAt: string | null;

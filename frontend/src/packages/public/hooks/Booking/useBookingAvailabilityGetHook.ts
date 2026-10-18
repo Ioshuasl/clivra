@@ -88,7 +88,6 @@ export function useBookingAvailabilityGetHook(input: {
       days: mergeAvailabilityDays(ready),
     };
     // resultsUpdatedAt estabiliza o memo quando os dados das queries mudam
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fingerprint via dataUpdatedAt
   }, [enabled, resultsUpdatedAt]);
 
   const slotOwners = useMemo(() => {
@@ -105,7 +104,6 @@ export function useBookingAvailabilityGetHook(input: {
       }
     }
     return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fingerprint via dataUpdatedAt
   }, [professionalIds, resultsUpdatedAt]);
 
   return {

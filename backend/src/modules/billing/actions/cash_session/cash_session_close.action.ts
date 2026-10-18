@@ -19,7 +19,6 @@ import {
 } from '../../repositories/cash_session/cash_session_get.repository.js';
 import type { CashSessionCloseSchema } from '../../schemas/billing.schema.js';
 import type { CashSessionDto } from '../../types/cash_session/cash_session.types.js';
-import type { PaymentMethod } from '../../enum/payment/payment_method.enum.js';
 
 function isUniqueConflict(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
@@ -30,7 +29,7 @@ function isUniqueConflict(err: unknown): boolean {
 
 function countedFromSchema(cashSessionCloseSchema: CashSessionCloseSchema): MethodCents[] {
   return cashSessionCloseSchema.countedByMethod.map((row) => ({
-    method: row.method as PaymentMethod,
+    method: row.method,
     amountCents: BigInt(row.countedCents),
   }));
 }

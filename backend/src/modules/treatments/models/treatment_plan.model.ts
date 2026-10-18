@@ -2,7 +2,7 @@ import type { TreatmentItemStatus } from '../enum/treatment_item/treatment_item_
 import type { TreatmentPlanStatus } from '../enum/treatment_plan/treatment_plan_status.enum.js';
 
 export function nextPlanStatus(
-  items: ReadonlyArray<{ status: TreatmentItemStatus | string }>,
+  items: ReadonlyArray<{ status: TreatmentItemStatus | (string & {}) }>,
 ): TreatmentPlanStatus {
   const open = items.some((item) => item.status === 'PLANNED' || item.status === 'SCHEDULED');
   if (open) return 'ACTIVE';

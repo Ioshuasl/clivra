@@ -96,7 +96,7 @@ export class InMemoryJobQueue implements JobQueue {
           queue: job.queue,
           jobName: job.jobName,
           payload: job.payload,
-          error: lastError instanceof Error ? lastError.message : String(lastError),
+          error: lastError instanceof Error ? lastError.message : JSON.stringify(lastError),
         });
       }
     }

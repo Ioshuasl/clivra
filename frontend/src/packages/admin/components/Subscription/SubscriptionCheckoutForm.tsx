@@ -206,7 +206,9 @@ export function SubscriptionCheckoutForm() {
       ) : (
         <form
           className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            void form.handleSubmit(onSubmit)(e);
+          }}
           noValidate
         >
           {stage === 'choose' ? (

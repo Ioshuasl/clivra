@@ -23,7 +23,7 @@ export type WhatsappAccountQr = {
 export type MessageTemplateSummary = {
   id: string;
   key: string;
-  category: TemplateCategory | string;
+  category: TemplateCategory | (string & {});
   language: string;
   providerName: string;
   body: string;
@@ -36,12 +36,12 @@ export type AutomationConfig = {
   sendAtLocalTime?: string;
   offsetHours?: number;
   onlyForStatuses?: string[];
-  templateKey?: TemplateKey | string;
+  templateKey?: TemplateKey | (string & {});
 };
 
 export type AutomationSummary = {
   id: string;
-  key: AutomationKey | string;
+  key: AutomationKey | (string & {});
   enabled: boolean;
   config: AutomationConfig;
   updatedAt: string;

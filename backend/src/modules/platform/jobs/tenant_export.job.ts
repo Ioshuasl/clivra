@@ -61,12 +61,12 @@ function snapshotFiles(snapshot: TenantExportSnapshot): ZipStoreEntry[] {
       data: buildCsv(
         ['id', 'code', 'name', 'cpf', 'phonePrimary', 'email', 'active'],
         snapshot.patients.map((row) => [
-          String(row.id),
-          String(row.code ?? ''),
-          String(row.name ?? ''),
-          row.cpf == null ? '' : String(row.cpf),
-          String(row.phonePrimary ?? ''),
-          row.email == null ? '' : String(row.email),
+          cell(row.id),
+          cell(row.code),
+          cell(row.name),
+          cell(row.cpf),
+          cell(row.phonePrimary),
+          cell(row.email),
           row.active === true ? 'true' : 'false',
         ]),
       ),
@@ -162,4 +162,14 @@ export async function tenantExportJob(payload: JobPayload): Promise<void> {
     logger.warn({ tenantId: ctx.tenantId, exportId, requestId: ctx.requestId }, 'tenant_export_failed');
     if (!(err instanceof ObjectStorageError)) throw err;
   }
+}
+
+function cell(value: unknown): string {
+  if (value == null) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return value.toString();
+  }
+  return JSON.stringify(value);
 }

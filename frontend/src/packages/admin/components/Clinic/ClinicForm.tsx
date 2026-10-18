@@ -430,7 +430,7 @@ export function ClinicForm() {
                       <ComboboxContent>
                         <ComboboxEmpty>Nenhum fuso encontrado.</ComboboxEmpty>
                         <ComboboxList>
-                          {(item) => (
+                          {(item: string) => (
                             <ComboboxItem key={item} value={item}>
                               {brazilTimezoneLabel(item)}
                             </ComboboxItem>
@@ -521,7 +521,7 @@ export function ClinicForm() {
                   <ComboboxContent anchor={paymentAnchor}>
                     <ComboboxEmpty>Nenhum método encontrado.</ComboboxEmpty>
                     <ComboboxList>
-                      {(item) => (
+                      {(item: string) => (
                         <ComboboxItem key={item} value={item}>
                           {paymentLabel(item)}
                         </ComboboxItem>

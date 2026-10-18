@@ -1,4 +1,3 @@
-import type { Prisma } from '@prisma/client';
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import type { DbTransaction } from '../../../../shared/database/db_transaction.js';
 import type { ExportFormat } from '../../enum/report/export_format.enum.js';
@@ -30,7 +29,7 @@ export class CreateRepository {
         report: persist.report,
         format: persist.format,
         status: 'PENDING',
-        filters: persist.filters as Prisma.InputJsonValue,
+        filters: persist.filters,
         requestedBy: persist.requestedBy,
       },
     });

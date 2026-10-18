@@ -1,4 +1,3 @@
-import type { Prisma } from '@prisma/client';
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import type { DbTransaction } from '../../../../shared/database/db_transaction.js';
 import { getPrismaClient, getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
@@ -10,7 +9,7 @@ import type {
 
 function mapMeta(value: unknown): PublicBookingTokenMeta {
   if (!value || typeof value !== 'object') return {};
-  return value as PublicBookingTokenMeta;
+  return value;
 }
 
 export class CreateTokenRepository {
@@ -34,7 +33,7 @@ export class CreateTokenRepository {
         tokenHash: input.tokenHash,
         expiresAt: input.expiresAt,
         targetId: input.targetId ?? null,
-        meta: (input.meta ?? {}) as Prisma.InputJsonValue,
+        meta: (input.meta ?? {}),
       },
     });
     return id;
@@ -87,7 +86,7 @@ export class UpdateTokenRepository {
       data: {
         ...(patch.usedAt !== undefined ? { usedAt: patch.usedAt } : {}),
         ...(patch.targetId !== undefined ? { targetId: patch.targetId } : {}),
-        ...(patch.meta !== undefined ? { meta: patch.meta as Prisma.InputJsonValue } : {}),
+        ...(patch.meta !== undefined ? { meta: patch.meta } : {}),
       },
     });
   }

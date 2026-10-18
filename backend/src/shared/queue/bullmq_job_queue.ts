@@ -206,9 +206,10 @@ function sanitizeBullmqJobId(jobId: string | undefined): string | undefined {
 
 function isRedisConnectivityError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
-  const message = err instanceof Error ? err.message : String(err);
+  const message = err instanceof Error ? err.message : JSON.stringify(err);
   if (/Custom Id cannot contain/i.test(message)) return false;
-  const code = 'code' in err ? String((err as { code?: unknown }).code ?? '') : '';
+  const rawCode = 'code' in err ? (err as { code?: unknown }).code : undefined;
+  const code = typeof rawCode === 'string' || typeof rawCode === 'number' ? String(rawCode) : '';
   return (
     /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNRESET|READONLY|LOADING|NR_CLOSED|Connection is closed/i.test(
       message,

@@ -235,7 +235,7 @@ export function AppointmentFormDialog({
                             : 'Nenhum paciente encontrado.'}
                         </ComboboxEmpty>
                         <ComboboxList>
-                          {(id) => (
+                          {(id: string) => (
                             <ComboboxItem key={id} value={id}>
                               {patientLabelById(id)}
                             </ComboboxItem>
