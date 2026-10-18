@@ -91,6 +91,15 @@ async function main() {
   const defaultUnitId = ((dataOf(units) as Array<{ id: string; isDefault: boolean }>)[0] ?? {})
     .id;
 
+  // Agenda por cadeira vem desligada por padrão: liga antes de cadastrar cadeiras.
+  const enableChairs = await request('/api/v1/clinic', {
+    method: 'PATCH',
+    headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },
+    body: JSON.stringify({ chairsEnabled: true }),
+  });
+  console.log('chairs-enable', enableChairs.status);
+  if (enableChairs.status !== 200) failed = true;
+
   const chair = await request(`/api/v1/clinic/units/${defaultUnitId}/chairs`, {
     method: 'POST',
     headers: { ...authHeaders(token, tenantId), 'content-type': 'application/json' },

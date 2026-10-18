@@ -132,7 +132,8 @@ async function main() {
         fileName: 'quota.bin',
         storageKey: `tenants/${tenantId}/patients/${patientId}/quota.bin`,
         mimeType: 'application/pdf',
-        sizeBytes: BigInt(env.ATTACHMENT_QUOTA_BYTES),
+        // Plano Essencial: 5 GB de armazenamento (limite do plano, não mais a cota fixa do .env).
+        sizeBytes: BigInt(5 * 1024 ** 3),
         checksumSha256: 'a'.repeat(64),
         uploadedBy: ownerUserId,
       },
@@ -224,7 +225,7 @@ async function main() {
 
   const audit = await tenantDb.runInTenantContext(smokeCtx, async (tx) =>
     tx.auditLog.findFirst({
-      where: { tenantId, action: 'READ', resourceType: 'attachment', patientId },
+      where: { tenantId, action: 'CLINICAL_READ', resourceType: 'attachment', patientId },
       orderBy: { createdAt: 'desc' },
     }),
   );
@@ -262,6 +263,14 @@ async function main() {
   if (deleteShort.status !== 422 || errorCode(deleteShort) !== 'BUSINESS_RULE_VIOLATION') {
     failed = true;
   }
+
+  // O plano Essencial limita 2 usuários administrativos; este smoke convida mais papéis, então usa o plano Clínica.
+  await tenantDb.runInTenantContext(smokeCtx, async (tx) => {
+    await tx.subscription.update({
+      where: { tenantId },
+      data: { planId: 'a1000000-0000-4000-8000-000000000002' },
+    });
+  });
 
   async function acceptInvite(email: string, role: string, name: string) {
     const invite = await request('/api/v1/users/invitations', {

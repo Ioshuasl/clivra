@@ -1,7 +1,12 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
-import { civilDateUtc } from '../../helpers/civil_date.helper.js';
-import { dateOnly, periodEndExclusiveUtc, periodStartUtc } from '../../helpers/money.helper.js';
+import {
+  civilDateUtc,
+  todayInTimezone,
+  zonedDayEndExclusiveUtc,
+  zonedDayStartUtc,
+} from '../../helpers/civil_date.helper.js';
+import { dateOnly } from '../../helpers/money.helper.js';
 import type { PaymentMethod } from '../../enum/payment/payment_method.enum.js';
 import type { CashFlowLine, CashFlowRaw } from '../../types/report/report.types.js';
 import type { CashFlowQuerySchema } from '../../schemas/billing.schema.js';
@@ -13,9 +18,14 @@ function asMethod(value: string): PaymentMethod {
 }
 
 export class GetRepository {
-  async execute(ctx: RequestContext, query: CashFlowQuerySchema): Promise<CashFlowRaw> {
-    const from = periodStartUtc(query.from);
-    const toEx = periodEndExclusiveUtc(query.to);
+  async execute(
+    ctx: RequestContext,
+    query: CashFlowQuerySchema,
+    timezone: string,
+  ): Promise<CashFlowRaw> {
+    // O período é em dias da clínica (fuso dela), não em dias UTC.
+    const from = zonedDayStartUtc(query.from, timezone);
+    const toEx = zonedDayEndExclusiveUtc(query.to, timezone);
     const unitId = query.unitId;
 
     return getTenantPrisma().runInTenantContext(ctx, async (tx) => {
@@ -61,7 +71,7 @@ export class GetRepository {
         });
         const inflows: CashFlowLine[] = [];
         for (const payment of payments) {
-          const date = dateOnly(payment.receivedAt);
+          const date = todayInTimezone(timezone, payment.receivedAt);
           const category = payment.installment.receivable.category?.name ?? OTHER;
           for (const split of payment.splits) {
             inflows.push({
@@ -73,7 +83,7 @@ export class GetRepository {
           }
         }
         const outflows: CashFlowLine[] = payables.map((row) => ({
-          date: dateOnly(row.paidAt ?? row.dueDate),
+          date: row.paidAt ? todayInTimezone(timezone, row.paidAt) : dateOnly(row.dueDate),
           amountCents: row.paidCents ?? row.amountCents,
           category: row.category?.name ?? OTHER,
           method: row.method ? asMethod(row.method) : null,

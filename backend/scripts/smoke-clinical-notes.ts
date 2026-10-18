@@ -319,6 +319,14 @@ async function main() {
   );
   if (!outboxCreated || !outboxAmended || !outboxStarted) failed = true;
 
+  // O plano Essencial limita 2 usuários administrativos; este smoke convida mais papéis, então usa o plano Clínica.
+  await tenantDb.runInTenantContext(smokeCtx, async (tx) => {
+    await tx.subscription.update({
+      where: { tenantId },
+      data: { planId: 'a1000000-0000-4000-8000-000000000002' },
+    });
+  });
+
   async function acceptInvite(email: string, role: string, name: string) {
     const invite = await request('/api/v1/users/invitations', {
       method: 'POST',

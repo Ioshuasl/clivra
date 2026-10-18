@@ -1,5 +1,6 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { toJsonCents } from '../../helpers/money.helper.js';
+import { tenantTimezone } from '../../helpers/tenant_today.helper.js';
 import { GetRepository } from '../../repositories/report/cash_flow_get.repository.js';
 import type { CashFlowQuerySchema } from '../../schemas/billing.schema.js';
 import type { CashFlowDto } from '../../types/report/report.types.js';
@@ -9,7 +10,7 @@ export class GetService {
   constructor(private readonly get = new GetRepository()) {}
 
   async execute(ctx: RequestContext, cashFlowQuerySchema: CashFlowQuerySchema): Promise<CashFlowDto> {
-    const raw = await this.get.execute(ctx, cashFlowQuerySchema);
+    const raw = await this.get.execute(ctx, cashFlowQuerySchema, await tenantTimezone(ctx));
     const opening = raw.openingInflowsCents - raw.openingOutflowsCents;
     const inflowsCents = raw.inflows.reduce((sum, line) => sum + line.amountCents, 0n);
     const outflowsCents = raw.outflows.reduce((sum, line) => sum + line.amountCents, 0n);

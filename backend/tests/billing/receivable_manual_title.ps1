@@ -4,7 +4,15 @@ $ErrorActionPreference = 'Stop'
 Reset-AcceptResults
 
 $session = Connect-AcceptSession -Role Finance
-$patientId = Find-AcceptPatientId -Session $session
+# Paciente novo a cada execução: a Maria acumula dezenas de parcelas dos outros aceites e a listagem (50) não alcançaria as novas.
+$reception = Connect-AcceptSession -Role Reception
+$stamp = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$phone = '6290' + ([string]$stamp).Substring(([string]$stamp).Length - 7)
+$pat = Invoke-ApiJson -Method POST -Path '/api/v1/patients' `
+  -Token $reception.Token -TenantId $reception.TenantId `
+  -Body @{ name = ('Aceite Titulo ' + $stamp); phonePrimary = $phone }
+Assert-Accept 'manual_patient_create' ($pat.Status -in @(200, 201)) ("HTTP {0}" -f $pat.Status)
+$patientId = [string]$pat.Body.data.patient.id
 $total = 10000
 $count = 3
 $due = (Get-Date).AddDays(7).ToString('yyyy-MM-dd')
@@ -23,7 +31,7 @@ Assert-Accept 'manual_receivable_create' ($recv.Status -in @(200, 201)) ("HTTP {
 $receivableId = [string]$recv.Body.data.id
 if (-not $receivableId) { $receivableId = [string]$recv.Body.data.receivableId }
 
-$listPath = '/api/v1/installments?patientId={0}&limit=50' -f $patientId
+$listPath = '/api/v1/installments?patientId={0}&dueFrom={1}&limit=50' -f $patientId, $due
 $list = Invoke-ApiJson -Method GET -Path $listPath -Token $session.Token -TenantId $session.TenantId
 $rows = @($list.Body.data) | Where-Object { $_.receivableId -eq $receivableId }
 if ($rows.Count -eq 0 -and $receivableId) {

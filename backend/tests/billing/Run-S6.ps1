@@ -1,4 +1,4 @@
-# Orquestra os aceites S6 (billing) na ordem menos destrutiva → mais mutável
+﻿# Orquestra os aceites S6 (billing) na ordem menos destrutiva → mais mutável
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
 $failed = 0
@@ -9,8 +9,7 @@ $order = @(
   'payment_idempotency',
   'payment_partial_credit',
   'cash_flow_basis',
-  'cash_close_difference',
-  'cash_session_rules'
+  'cash_cycle_disabled'
 )
 
 foreach ($name in $order) {

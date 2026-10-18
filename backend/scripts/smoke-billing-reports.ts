@@ -67,6 +67,13 @@ async function main() {
     day: '2-digit',
   }).format(new Date());
 
+  // Datas relativas a hoje (o smoke não pode depender do calendário): 20 dias à frente e 45 dias de atraso (faixa 31–60).
+  function daysFromToday(offset: number): string {
+    const base = new Date(`${today}T12:00:00Z`);
+    base.setUTCDate(base.getUTCDate() + offset);
+    return base.toISOString().slice(0, 10);
+  }
+
   const password = 'SenhaForte!99';
   const signup = await request('/api/v1/auth/signup', {
     method: 'POST',
@@ -130,7 +137,7 @@ async function main() {
       unitId,
       totalCents: 10000,
       installmentCount: 1,
-      firstDueDate: '2026-09-05',
+      firstDueDate: daysFromToday(20),
       description: 'Parcela futura smoke',
     }),
   });
@@ -145,7 +152,7 @@ async function main() {
       unitId,
       totalCents: 8000,
       installmentCount: 1,
-      firstDueDate: '2026-07-01',
+      firstDueDate: daysFromToday(-45),
       description: 'Parcela vencida smoke',
     }),
   });

@@ -10,6 +10,14 @@ import { MarkOverdueService } from '../src/modules/billing/services/installment/
 
 type Json = { status: number; body: Record<string, unknown> | null };
 
+function isoDay(date: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+// Datas relativas a hoje: vence dia 10 do próximo mês; a recorrência gera o dia 10 do mês seguinte (ainda em aberto).
+const payableDue = isoDay(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 10));
+const spawnedDue = isoDay(new Date(new Date().getFullYear(), new Date().getMonth() + 2, 10));
+
 async function main() {
   const app = createApp();
   const server = app.listen(0) as Server;
@@ -110,7 +118,7 @@ async function main() {
       categoryId: rent?.id,
       description: 'Aluguel agosto',
       amountCents: 250000,
-      dueDate: '2026-08-10',
+      dueDate: payableDue,
       supplier: 'Imobiliaria Centro',
       recurrence: { frequency: 'MONTHLY', until: '2027-12-31' },
     }),
@@ -146,7 +154,7 @@ async function main() {
       categoryId: rent?.id,
       description: 'Aluguel setembro',
       amountCents: 250000,
-      dueDate: '2026-08-10',
+      dueDate: payableDue,
       supplier: 'Imobiliaria Centro',
       recurrence: { frequency: 'MONTHLY', until: '2027-12-31' },
     }),
@@ -184,7 +192,7 @@ async function main() {
   });
   console.log('spawned', spawned.status, dataOf(spawned).dueDate, dataOf(spawned).status);
   if (spawned.status !== 200) failed = true;
-  if (dataOf(spawned).dueDate !== '2026-09-10') failed = true;
+  if (dataOf(spawned).dueDate !== spawnedDue) failed = true;
   if (dataOf(spawned).status !== 'OPEN') failed = true;
 
   const patchPaid = await request(`/api/v1/payables/${payablePixId}`, {

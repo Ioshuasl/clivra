@@ -54,6 +54,9 @@ jobs:
       - name: Installment split invariant
         run: pnpm test:split-installments
 
+      - name: Civil day bounds (timezone)
+        run: pnpm test:civil-day
+
       - name: Lint
         run: pnpm lint
 

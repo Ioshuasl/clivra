@@ -1,6 +1,6 @@
 import type { RequestContext } from '../../../../shared/domain/request_context.js';
 import { getTenantPrisma } from '../../../../shared/database/tenant_prisma.js';
-import { periodEndExclusiveUtc, periodStartUtc } from '../../helpers/money.helper.js';
+import { zonedDayEndExclusiveUtc, zonedDayStartUtc } from '../../helpers/civil_date.helper.js';
 import type { ProductionReportQuerySchema } from '../../schemas/billing.schema.js';
 import type { ProductionItemDto, ProductionReportDto, ProductionRowDto } from '../../types/report/report.types.js';
 
@@ -8,9 +8,11 @@ export class GetRepository {
   async execute(
     ctx: RequestContext,
     query: ProductionReportQuerySchema,
+    timezone: string,
   ): Promise<ProductionReportDto> {
-    const from = periodStartUtc(query.from);
-    const toEx = periodEndExclusiveUtc(query.to);
+    // O período é em dias da clínica (fuso dela), não em dias UTC.
+    const from = zonedDayStartUtc(query.from, timezone);
+    const toEx = zonedDayEndExclusiveUtc(query.to, timezone);
 
     return getTenantPrisma().runInTenantContext(ctx, async (tx) => {
       const entries = await tx.productionEntry.findMany({

@@ -32,6 +32,7 @@
     "test:attachments": "tsx scripts/smoke-attachments.ts",
     "test:split-installments": "tsx scripts/check-split-installments.ts",
     "test:receipt-amount-in-words": "tsx scripts/check-receipt-amount-in-words.ts",
+    "test:civil-day": "tsx scripts/check-civil-day-bounds.ts",
     "test:quotes-crud": "tsx scripts/smoke-quotes-crud.ts",
     "test:quotes-send": "tsx scripts/smoke-quotes-send.ts",
     "test:quotes-decision": "tsx scripts/smoke-quotes-decision.ts",
