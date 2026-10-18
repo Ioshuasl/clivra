@@ -77,6 +77,10 @@ export function QuoteFilter({
       </div>
 
       <Select
+        items={[
+          { value: STATUS_ALL, label: 'Todos os status' },
+          ...QUOTE_STATUSES.map((item) => ({ value: item, label: QUOTE_STATUS_LABELS[item] })),
+        ]}
         value={status || STATUS_ALL}
         onValueChange={(next) => {
           if (next == null || next === STATUS_ALL) {

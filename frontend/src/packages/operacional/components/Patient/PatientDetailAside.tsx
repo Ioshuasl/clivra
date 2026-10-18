@@ -260,8 +260,12 @@ export function PatientDetailAside({
             {patientActive ? (
               <Button
                 type="button"
-                variant="destructive"
-                className="mt-1 cursor-pointer"
+                variant={confirmFuture ? 'destructive' : 'outline'}
+                className={
+                  confirmFuture
+                    ? 'mt-1 cursor-pointer'
+                    : 'mt-1 cursor-pointer border-destructive/40 text-destructive hover:bg-destructive/10'
+                }
                 disabled={deactivatePending}
                 onClick={onDeactivate}
               >

@@ -13,17 +13,17 @@ const STATUS_UI: Record<string, { label: string; className: string; dot: string 
     dot: 'bg-success',
   },
   SCHEDULED: {
-    label: 'Aguardando',
+    label: 'Agendado',
     className: 'bg-warning/15 text-warning',
     dot: 'bg-warning',
   },
   REQUESTED: {
-    label: 'Aguardando',
+    label: 'Solicitado',
     className: 'bg-warning/15 text-warning',
     dot: 'bg-warning',
   },
   CHECKED_IN: {
-    label: 'Aguardando',
+    label: 'Chegou',
     className: 'bg-warning/15 text-warning',
     dot: 'bg-warning',
   },
@@ -33,7 +33,7 @@ const STATUS_UI: Record<string, { label: string; className: string; dot: string 
     dot: 'bg-info',
   },
   COMPLETED: {
-    label: 'Finalizado',
+    label: 'Concluído',
     className: 'bg-success/10 text-success',
     dot: 'bg-success',
   },
@@ -43,7 +43,7 @@ const STATUS_UI: Record<string, { label: string; className: string; dot: string 
     dot: 'bg-destructive',
   },
   NO_SHOW: {
-    label: 'Falta',
+    label: 'Faltou',
     className: 'bg-destructive/10 text-destructive',
     dot: 'bg-destructive',
   },
@@ -153,11 +153,11 @@ export function DashboardUpcomingAppointments({
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold text-foreground">{name}</p>
-                    <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+                    <p className="text-[14px] font-semibold text-foreground sm:truncate">{name}</p>
+                    <p className="mt-0.5 text-[13px] text-muted-foreground sm:truncate">
                       {row.procedure?.name ?? 'Consulta'}
                     </p>
-                    <p className="mt-0.5 truncate text-[12px] text-muted-foreground/80">
+                    <p className="mt-0.5 text-[12px] text-muted-foreground/80 sm:truncate">
                       {professionalLabel(row.professional?.name)}
                       {row.patient?.phonePrimary ? (
                         <span className="text-muted-foreground/60">

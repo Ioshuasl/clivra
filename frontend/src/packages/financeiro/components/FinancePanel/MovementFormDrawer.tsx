@@ -1,5 +1,6 @@
 'use client';
 
+import { formatIsoDateBr } from '@/shared/helpers/FormatDateBr';
 import { useState } from 'react';
 import { INSTALLMENT_PAYABLE_STATUSES } from '@/packages/financeiro/enum/Installment/InstallmentStatusEnum';
 import { remainingCents } from '@/packages/financeiro/helpers/FinanceiroDate';
@@ -88,7 +89,7 @@ export function MovementFormDrawer({
                           {patientNames[installment.patientId] ?? 'Paciente'}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          Parcela {installment.number} · {installment.dueDate}
+                          Parcela {installment.number} · {formatIsoDateBr(installment.dueDate)}
                         </span>
                       </span>
                       <span className="text-sm font-semibold tabular-nums">
@@ -127,7 +128,7 @@ export function MovementFormDrawer({
                             {payable.supplier || payable.description}
                           </span>
                           <span className="block text-xs text-muted-foreground">
-                            {payable.description} · {payable.dueDate}
+                            {payable.description} · {formatIsoDateBr(payable.dueDate)}
                           </span>
                         </span>
                         <span className="text-sm font-semibold tabular-nums">

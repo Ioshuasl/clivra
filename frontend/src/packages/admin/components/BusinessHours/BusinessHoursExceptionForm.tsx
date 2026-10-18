@@ -91,7 +91,7 @@ export function BusinessHoursExceptionForm() {
 
             <Field>
               <FieldLabel>Escopo</FieldLabel>
-              <NativeSelect {...form.register('professionalId')}>
+              <NativeSelect aria-label="Escopo da exceção" {...form.register('professionalId')}>
                 <NativeSelectOption value="">Unidade inteira</NativeSelectOption>
                 {activeProfessionals.map((pro) => (
                   <NativeSelectOption key={pro.id} value={pro.id}>

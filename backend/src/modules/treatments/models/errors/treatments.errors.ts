@@ -40,7 +40,7 @@ export class DiscountLimitExceededError extends AppError {
 
 export class ToothRequiredError extends AppError {
   constructor() {
-    super('BUSINESS_RULE_VIOLATION', 'Procedimento exige dente (FDI).', 422);
+    super('BUSINESS_RULE_VIOLATION', 'Informe o dente (ex.: 26) para este procedimento.', 422);
     this.name = 'ToothRequiredError';
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatIsoDateBr } from '@/shared/helpers/FormatDateBr';
 import { useEffect, useRef, useState } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import {
@@ -162,7 +163,7 @@ export function PaymentFormDialog({ installment, patientName, onClose }: Payment
                 </p>
                 <p>
                   <span className="text-muted-foreground">Parcela:</span> #{installment.number} ·
-                  venc. {installment.dueDate}
+                  venc. {formatIsoDateBr(installment.dueDate)}
                 </p>
                 <p>
                   <span className="text-muted-foreground">Saldo:</span> {formatCents(balance)}

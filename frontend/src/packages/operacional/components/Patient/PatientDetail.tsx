@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { PatientConsentsPanel } from '@/packages/operacional/components/Patient/PatientConsentsPanel';
 import { PatientDadosFields } from '@/packages/operacional/components/Patient/PatientDadosFields';
@@ -33,6 +34,7 @@ import { Can } from '@/shared/auth/Can';
 import { ApiClientError } from '@/shared/api/api-client';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
+import { buttonVariants } from '@/shared/ui/button';
 import {
   Card,
   CardContent,
@@ -178,9 +180,16 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
 
   if (patientQuery.isError || !patientQuery.data) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{operacionalErrorMessage(patientQuery.error)}</AlertDescription>
-      </Alert>
+      <div className="grid max-w-xl gap-3">
+        <Alert variant="destructive">
+          <AlertDescription>{operacionalErrorMessage(patientQuery.error)}</AlertDescription>
+        </Alert>
+        <div>
+          <Link href="/app/pacientes" className={cn(buttonVariants({ variant: 'outline' }), 'cursor-pointer')}>
+            Voltar para pacientes
+          </Link>
+        </div>
+      </div>
     );
   }
 

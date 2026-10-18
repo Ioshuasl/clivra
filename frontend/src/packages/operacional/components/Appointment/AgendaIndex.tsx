@@ -98,6 +98,10 @@ function defaultCreateSlot(anchor: Date, slotMinutes: SlotMinutes): {
 export function AgendaIndex() {
   const { tenant } = useAuth();
   const [viewMode, setViewMode] = useState<AgendaViewMode>('week');
+  // No celular só cabem 2 colunas da semana: abre direto no dia.
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) setViewMode('day');
+  }, []);
   const [resourceMode, setResourceMode] = useState<AgendaResourceMode>('professional');
   const [anchor, setAnchor] = useState(() => new Date());
   const [slotMinutes, setSlotMinutes] = useState<SlotMinutes>(30);
@@ -257,7 +261,7 @@ export function AgendaIndex() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
       <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Agenda</h1>
@@ -297,7 +301,7 @@ export function AgendaIndex() {
         </Alert>
       ) : null}
 
-      <Card className="min-h-0 flex-1 gap-0 py-0">
+      <Card className="min-h-[26rem] flex-1 gap-0 py-0">
         <CardHeader className="shrink-0 border-b border-border py-3">
           <AgendaToolbar
             viewMode={viewMode}

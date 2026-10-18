@@ -63,7 +63,8 @@ test.describe('Agenda (E4a)', () => {
     // Dia + manhã no expediente (grade 7–20; clínica seed 8–18). Semana+fração alta
     // abria slot perto/após 18h → "Horário fora do expediente".
     await page.getByRole('button', { name: 'Dia' }).click();
-    const daysAhead = 14 + (Date.now() % 21);
+    // Depois dos feriados fictícios do seed (que ficam nas próximas 3 semanas).
+    const daysAhead = 30 + (Date.now() % 21);
     for (let i = 0; i < daysAhead; i += 1) {
       await page.getByRole('button', { name: 'Próximo' }).click();
     }

@@ -119,6 +119,7 @@ export function BusinessHoursForm() {
         <Field>
           <FieldLabel>Escopo</FieldLabel>
           <NativeSelect
+            aria-label="Escopo dos horários"
             value={professionalId}
             onChange={(e) => setProfessionalId(e.target.value)}
           >
@@ -153,6 +154,7 @@ export function BusinessHoursForm() {
                 <Field>
                   <FieldLabel>Dia</FieldLabel>
                   <NativeSelect
+                    aria-label={`Dia da semana (horário ${index + 1})`}
                     {...form.register(`slots.${index}.weekday`, { valueAsNumber: true })}
                   >
                     {WEEKDAYS.map((day) => (
@@ -164,17 +166,26 @@ export function BusinessHoursForm() {
                 </Field>
                 <Field>
                   <FieldLabel>Início</FieldLabel>
-                  <Input type="time" {...form.register(`slots.${index}.startsAt`)} />
+                  <Input
+                    type="time"
+                    aria-label={`Início (horário ${index + 1})`}
+                    {...form.register(`slots.${index}.startsAt`)}
+                  />
                 </Field>
                 <Field>
                   <FieldLabel>Fim</FieldLabel>
-                  <Input type="time" {...form.register(`slots.${index}.endsAt`)} />
+                  <Input
+                    type="time"
+                    aria-label={`Fim (horário ${index + 1})`}
+                    {...form.register(`slots.${index}.endsAt`)}
+                  />
                 </Field>
                 <div className="flex items-end">
                   <Button
                     type="button"
                     variant="ghost"
                     className="cursor-pointer"
+                    aria-label={`Remover horário ${index + 1}`}
                     onClick={() => remove(index)}
                   >
                     Remover

@@ -42,7 +42,7 @@ export function DashboardMetricCards({ metrics }: DashboardMetricCardsProps) {
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-primary">
                   <Icon className="size-3.5" strokeWidth={1.6} />
                 </span>
-                <p className="truncate text-[12px] font-medium text-muted-foreground">
+                <p className="text-[12px] leading-tight font-medium text-muted-foreground sm:truncate">
                   {metric.title}
                 </p>
               </div>

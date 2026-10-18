@@ -90,6 +90,35 @@ function ActionIcon({
   );
 }
 
+function TextAction({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="cursor-pointer gap-1.5"
+      disabled={disabled}
+      onClick={(event) => {
+        stopRowClick(event);
+        onClick();
+      }}
+    >
+      {children}
+      {label}
+    </Button>
+  );
+}
+
 function QuoteRowActions({
   quote,
   onEdit,
@@ -116,16 +145,16 @@ function QuoteRowActions({
           <ActionIcon label="Editar" onClick={() => onEdit(quote)}>
             <PencilIcon strokeWidth={1.7} />
           </ActionIcon>
-          <ActionIcon label="Enviar" onClick={() => onSend(quote)}>
-            <SendIcon strokeWidth={1.7} />
-          </ActionIcon>
+          <TextAction label="Enviar" onClick={() => onSend(quote)}>
+            <SendIcon strokeWidth={1.7} className="size-4" />
+          </TextAction>
         </Can>
       ) : null}
       {quote.status === 'SENT' ? (
         <Can permission="quotes.write">
-          <ActionIcon label="Decidir" onClick={() => onDecide(quote)}>
-            <CheckCheckIcon strokeWidth={1.7} />
-          </ActionIcon>
+          <TextAction label="Decidir" onClick={() => onDecide(quote)}>
+            <CheckCheckIcon strokeWidth={1.7} className="size-4" />
+          </TextAction>
         </Can>
       ) : null}
       {QUOTE_DUPLICATE_STATUSES.includes(quote.status) ? (
@@ -140,13 +169,13 @@ function QuoteRowActions({
         </Can>
       ) : null}
       {quote.status !== 'DRAFT' ? (
-        <ActionIcon
-          label="Abrir PDF"
+        <TextAction
+          label="Ver PDF"
           disabled={pdfLoadingId === quote.id}
           onClick={() => onPdf(quote)}
         >
-          <FileTextIcon strokeWidth={1.7} />
-        </ActionIcon>
+          <FileTextIcon strokeWidth={1.7} className="size-4" />
+        </TextAction>
       ) : null}
     </div>
   );

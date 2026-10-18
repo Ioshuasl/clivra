@@ -1,5 +1,7 @@
+/** Data de hoje no relógio do usuário (AAAA-MM-DD). Não usa UTC: depois das 21h em Brasília ainda é "hoje". */
 export function todayIsoDate(date = new Date()): string {
-  return date.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 export function addDaysIso(isoDate: string, days: number): string {

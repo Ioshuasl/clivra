@@ -37,7 +37,7 @@ function findingFill(condition: ToothCondition): string {
 
 function hoverHint(target: HoverTarget | null): string {
   if (!target) {
-    return 'Passe o mouse no dente: a coroa escolhe a face; a raiz ou o número, o dente inteiro.';
+    return 'Toque (ou passe o mouse) no dente: a coroa escolhe a face; a raiz ou o número, o dente inteiro.';
   }
   if (!target.face) return `Dente ${target.toothCode} · inteiro`;
   return `Dente ${target.toothCode} · ${TOOTH_FACE_LABELS[target.face]}`;

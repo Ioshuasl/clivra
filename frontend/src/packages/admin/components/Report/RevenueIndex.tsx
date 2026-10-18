@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPeriodLabelBr } from '@/shared/helpers/FormatDateBr';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { ReportDetailShell } from '@/packages/admin/components/Report/ReportDetailShell';
@@ -125,7 +126,7 @@ export function RevenueIndex() {
               ) : (
                 report.data.buckets.map((bucket) => (
                   <TableRow key={bucket.key}>
-                    <TableCell>{bucket.label}</TableCell>
+                    <TableCell>{formatPeriodLabelBr(bucket.label)}</TableCell>
                     <TableCell className="tabular-nums">{bucket.count}</TableCell>
                     <TableCell className="text-right tabular-nums">
                       {formatCents(bucket.amountCents)}

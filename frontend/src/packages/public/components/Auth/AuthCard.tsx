@@ -23,7 +23,9 @@ export function AuthCard({ title, description, children }: AuthCardProps) {
         </div>
         <Card className="w-full border-border/80 shadow-sm">
           <CardHeader>
-            <CardTitle>{title}</CardTitle>
+            <CardTitle role="heading" aria-level={1}>
+              {title}
+            </CardTitle>
             {description ? <CardDescription>{description}</CardDescription> : null}
           </CardHeader>
           <CardContent>{children}</CardContent>

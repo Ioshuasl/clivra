@@ -46,7 +46,7 @@ export const APPOINTMENT_STATUS_META: Record<
     border: 'border-border',
   },
   NO_SHOW: {
-    label: 'Falta',
+    label: 'Faltou',
     bg: 'bg-destructive/15',
     text: 'text-destructive',
     border: 'border-transparent',
