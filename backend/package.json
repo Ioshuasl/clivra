@@ -16,6 +16,7 @@
     "test:clinical-crypto": "tsx scripts/check-clinical-crypto.ts",
     "test:rls": "tsx scripts/check-rls.ts",
     "test:identity": "tsx scripts/smoke-identity.ts",
+    "test:login-throttle": "tsx scripts/smoke-login-throttle.ts",
     "test:clinic": "tsx scripts/smoke-clinic.ts",
     "test:patients": "tsx scripts/smoke-patients.ts",
     "test:scheduling": "tsx scripts/smoke-scheduling.ts",

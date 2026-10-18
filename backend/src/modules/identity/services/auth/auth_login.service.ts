@@ -1,11 +1,14 @@
 import { verifyPasswordConstantTime } from '../../../../shared/helpers/password.js';
 import { AuditAction, writeAuditLogSafe } from '../../../../shared/database/write_audit.js';
 import { InvalidCredentialsError } from '../../models/errors/invalid_credentials.error.js';
-import { isLocked, nextLockout } from '../../helpers/lockout.helper.js';
+import {
+  clearLoginFailures,
+  isLoginBlocked,
+  registerLoginFailure,
+} from '../../helpers/login_throttle.helper.js';
 import {
   GetByEmailRepository,
   UpdateLastLoginRepository,
-  UpdateLoginFailureRepository,
 } from '../../repositories/user/user.repository.js';
 import { ListActiveByUserRepository } from '../../repositories/membership/membership.repository.js';
 import type { LoginSchema } from '../../schemas/auth.schema.js';
@@ -17,7 +20,6 @@ export class LoginService {
   constructor(
     private readonly getByEmail = new GetByEmailRepository(),
     private readonly updateLastLogin = new UpdateLastLoginRepository(),
-    private readonly updateFailure = new UpdateLoginFailureRepository(),
     private readonly listMemberships = new ListActiveByUserRepository(),
     private readonly issueTokens = new IssueTokensService(),
   ) {}
@@ -27,29 +29,30 @@ export class LoginService {
     meta?: { ipAddress?: string; userAgent?: string },
   ): Promise<AuthSessionResult> {
     const email = loginSchema.email.toLowerCase();
+    // O bloqueio vale para e-mail + IP (e para e-mails que nem existem): quem erra só tranca a si
+    // mesmo, e um terceiro não consegue deixar o dono da clínica sem acesso.
+    const ip = meta?.ipAddress ?? 'unknown';
+    if (await isLoginBlocked(email, ip)) {
+      throw new AppError(
+        'RATE_LIMITED',
+        'Muitas tentativas. Aguarde alguns minutos ou use "Esqueci minha senha".',
+        429,
+      );
+    }
+
     const user = await this.getByEmail.execute(email);
     const valid = await verifyPasswordConstantTime(
       loginSchema.password,
       user?.passwordHash,
     );
 
-    if (user && isLocked(user.lockedUntil)) {
-      await this.auditFailed(user.id, meta);
+    if (!user || !valid) {
+      await registerLoginFailure(email, ip);
+      if (user) await this.auditFailed(user.id, meta);
       throw new InvalidCredentialsError();
     }
 
-    if (!user || !valid) {
-      if (user) {
-        const failedAttempts = user.failedAttempts + 1;
-        await this.updateFailure.execute(
-          user.id,
-          failedAttempts,
-          nextLockout(failedAttempts),
-        );
-        await this.auditFailed(user.id, meta);
-      }
-      throw new InvalidCredentialsError();
-    }
+    await clearLoginFailures(email, ip);
 
     const memberships = await this.listMemberships.execute(user.id);
     const membership = pickPreferredMembership(memberships);

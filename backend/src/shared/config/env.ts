@@ -44,6 +44,8 @@ const envSchema = z.object({
   APP_PUBLIC_URL: z.string().url(),
   CORS_ORIGINS: z.string().min(1),
   SENTRY_DSN: z.string().optional(),
+  /** Quantos proxies reversos ficam na frente da API (Easypanel/Traefik = 1). Sem isso o IP do cliente vira o do proxy. */
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).optional(),
   KEK_LOCAL_BASE64: z.string().optional(),
   DSR_DUE_DAYS: z.coerce.number().int().min(1).max(90).default(15),
   CLINICAL_READ_ANOMALY_N: z.coerce.number().int().min(1).max(10_000).default(40),

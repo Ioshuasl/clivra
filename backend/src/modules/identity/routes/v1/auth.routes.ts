@@ -24,7 +24,7 @@ export function buildAuthRoutes(): Router {
   router.post(
     '/login',
     rateLimit({ windowMs: 60_000, max: 10, key: (req) => `login:ip:${clientIp(req)}` }),
-    rateLimit({ windowMs: 60_000, max: 5, key: (req) => `login:email:${bodyEmailKey(req)}` }),
+    rateLimit({ windowMs: 60_000, max: 5, key: (req) => `login:email:${bodyEmailKey(req)}:${clientIp(req)}` }),
     asyncHandler(controller.login),
   );
   router.post('/refresh', asyncHandler(controller.refresh));

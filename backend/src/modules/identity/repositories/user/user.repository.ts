@@ -75,20 +75,6 @@ export class UpdateLastLoginRepository {
   }
 }
 
-export class UpdateLoginFailureRepository {
-  async execute(
-    userId: string,
-    failedAttempts: number,
-    lockedUntil: Date | null,
-  ): Promise<void> {
-    const prisma = getPrismaClient();
-    await prisma.user.update({
-      where: { id: userId },
-      data: { failedAttempts, lockedUntil },
-    });
-  }
-}
-
 export class UpdatePasswordRepository {
   async execute(userId: string, passwordHash: string, tx?: DbTransaction): Promise<void> {
     const client = tx ?? getPrismaClient();

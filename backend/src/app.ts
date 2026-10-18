@@ -15,6 +15,9 @@ function attachRawBody(req: Request, _res: unknown, buf: Buffer): void {
 export function createApp(options?: { registerApi?: (api: Router) => void }): Application {
   const app = express();
 
+  // Atrás do proxy do Easypanel o IP real vem em X-Forwarded-For; sem isso todos compartilham o IP do proxy.
+  app.set('trust proxy', env.TRUST_PROXY ?? (env.NODE_ENV === 'production' ? 1 : 0));
+
   const origins = env.CORS_ORIGINS.split(',').map((o) => o.trim());
 
   app.use(helmet());

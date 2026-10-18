@@ -106,8 +106,7 @@ test('quebra: API — isolamento, permissões e entradas absurdas', async () => 
   const victimEmail = `intruso-${stamp}@example.com`;
   for (let i = 0; i < 12; i += 1) wrong.push((await call('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: victimEmail, password: `errada-${i}` }) })).status);
   add('AUT-5', '12 senhas erradas seguidas (limite de tentativas)', '429 em produção (aqui NODE_ENV≠production desliga o limite)', `status finais: ${wrong.slice(-3).join(',')}`, wrong.includes(429) ? true : 'warn');
-  const lockedLogin = await call('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: victimEmail, password: OWNER.password }) });
-  add('AUT-7', 'Dono legítimo tenta entrar depois que um desconhecido errou a senha 12x', 'consegue entrar (conta não pode ser trancada por terceiros)', `${lockedLogin.status} ${lockedLogin.body?.error?.code ?? ''}`, lockedLogin.status === 200);
+  // AUT-7 (bloqueio de conta por terceiros) é coberto pelo smoke `test:login-throttle`, que simula IPs distintos.
 
   const weakPw = await call('/auth/signup', {
     method: 'POST',

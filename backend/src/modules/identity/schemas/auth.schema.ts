@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const signupSchema = z.object({
   email: z.string().email().max(255),
-  password: z.string().min(1).max(128),
+  password: z.string().min(10).max(128),
   clinicName: z.string().min(2).max(120),
   ownerName: z.string().min(2).max(120),
 });
@@ -18,7 +18,7 @@ export const passwordForgotSchema = z.object({
 
 export const passwordResetSchema = z.object({
   token: z.string().min(1).max(512),
-  password: z.string().min(1).max(128),
+  password: z.string().min(10).max(128),
 });
 
 export const switchTenantSchema = z.object({

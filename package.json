@@ -19,6 +19,7 @@
     "test:kms": "pnpm --filter @repo/backend test:kms",
     "test:clinical-crypto": "pnpm --filter @repo/backend test:clinical-crypto",
     "test:identity": "pnpm --filter @repo/backend test:identity",
+    "test:login-throttle": "pnpm --filter @repo/backend test:login-throttle",
     "test:outbox": "pnpm --filter @repo/backend test:outbox",
     "test:public-booking": "pnpm --filter @repo/backend test:public-booking",
     "test:waitlist": "pnpm --filter @repo/backend test:waitlist",

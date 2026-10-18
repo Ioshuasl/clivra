@@ -17,7 +17,7 @@ export const invitationCreateSchema = z.object({
 export const invitationAcceptSchema = z.object({
   token: z.string().min(1).max(512),
   name: z.string().min(2).max(120),
-  password: z.string().min(1).max(128),
+  password: z.string().min(10).max(128),
 });
 
 export const invitationIdParamSchema = z.object({
