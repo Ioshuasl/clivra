@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useChairCreateHook } from '@/packages/admin/hooks/Chair/useChairCreateHook';
 import {
   useChairCreateFormHook,
@@ -14,7 +13,6 @@ import type {
 } from '@/packages/admin/schemas/Chair/ChairSchema';
 import type { ChairFormDialogProps } from '@/packages/admin/types/Chair/ChairFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -64,8 +62,6 @@ export function ChairFormDialog({ mode, unitId, chair, onClose }: ChairFormDialo
   };
 
   const isPending = create.isPending || update.isPending;
-  const isError = create.isError || update.isError;
-  const error = create.error ?? update.error;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -93,11 +89,6 @@ export function ChairFormDialog({ mode, unitId, chair, onClose }: ChairFormDialo
                   <Input id="chair-color" placeholder="#3B82F6" {...createForm.register('color')} />
                 </Field>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
@@ -140,11 +131,6 @@ export function ChairFormDialog({ mode, unitId, chair, onClose }: ChairFormDialo
                   </NativeSelect>
                 </Field>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar

@@ -1,8 +1,10 @@
 'use client';
 
+import { PencilIcon } from 'lucide-react';
+import { SettingsActiveBadge } from '@/packages/admin/components/Settings/SettingsActiveBadge';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
 import { ROLE_LABELS, type Role } from '@/packages/admin/enum/RoleEnum';
 import type { ProfessionalSummary } from '@/packages/admin/types/Professional/ProfessionalTypes';
-import { Button } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -30,9 +32,9 @@ export function ProfessionalTable({ professionals, onEdit }: ProfessionalTablePr
           <TableHead>E-mail</TableHead>
           <TableHead>Papel</TableHead>
           <TableHead>CRO</TableHead>
-          <TableHead>Especialidades</TableHead>
-          <TableHead>Ativo</TableHead>
-          <TableHead />
+          <TableHead className="hidden 2xl:table-cell">Especialidades</TableHead>
+          <TableHead>Situação</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -46,12 +48,16 @@ export function ProfessionalTable({ professionals, onEdit }: ProfessionalTablePr
                 ? `${professional.croNumber}${professional.croState ? `/${professional.croState}` : ''}`
                 : '—'}
             </TableCell>
-            <TableCell>{professional.specialties.join(', ') || '—'}</TableCell>
-            <TableCell>{professional.active ? 'Sim' : 'Não'}</TableCell>
+            <TableCell className="hidden 2xl:table-cell">
+              {professional.specialties.join(', ') || '—'}
+            </TableCell>
             <TableCell>
-              <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(professional)}>
-                Editar
-              </Button>
+              <SettingsActiveBadge active={professional.active} />
+            </TableCell>
+            <TableCell className="text-right">
+              <SettingsIconButton label="Editar profissional" onClick={() => onEdit(professional)}>
+                <PencilIcon strokeWidth={1.7} />
+              </SettingsIconButton>
             </TableCell>
           </TableRow>
         ))}

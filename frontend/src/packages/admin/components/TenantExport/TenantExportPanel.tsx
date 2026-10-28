@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useTenantExportCreateHook } from '@/packages/admin/hooks/TenantExport/useTenantExportCreateHook';
 import { useTenantExportGetHook } from '@/packages/admin/hooks/TenantExport/useTenantExportGetHook';
 import { ClivraSurface } from '@/shared/layout/ClivraPage';
@@ -48,11 +47,6 @@ export function TenantExportPanel() {
         {create.isPending ? 'Solicitando…' : 'Exportar dados da clínica'}
       </Button>
 
-      {create.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{adminErrorMessage(create.error)}</AlertDescription>
-        </Alert>
-      ) : null}
 
       {exportQuery.data ? (
         <div className="grid gap-2 text-sm">

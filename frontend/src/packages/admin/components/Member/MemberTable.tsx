@@ -1,11 +1,13 @@
 'use client';
 
+import { PencilIcon, SendIcon, XIcon } from 'lucide-react';
+import { SettingsActiveBadge } from '@/packages/admin/components/Settings/SettingsActiveBadge';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
 import { ROLE_LABELS, type Role } from '@/packages/admin/enum/RoleEnum';
 import type {
   InvitationSummary,
   MemberSummary,
 } from '@/packages/admin/types/Member/MemberTypes';
-import { Button } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -51,8 +53,8 @@ export function MemberTable({
                 <TableHead>Nome</TableHead>
                 <TableHead>E-mail</TableHead>
                 <TableHead>Papel</TableHead>
-                <TableHead>Ativo</TableHead>
-                <TableHead />
+                <TableHead>Situação</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,16 +63,13 @@ export function MemberTable({
                   <TableCell>{member.name}</TableCell>
                   <TableCell>{member.email}</TableCell>
                   <TableCell>{ROLE_LABELS[member.role as Role] ?? member.role}</TableCell>
-                  <TableCell>{member.active ? 'Sim' : 'Não'}</TableCell>
                   <TableCell>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditMember(member)}
-                    >
-                      Editar
-                    </Button>
+                    <SettingsActiveBadge active={member.active} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <SettingsIconButton label="Editar membro" onClick={() => onEditMember(member)}>
+                      <PencilIcon strokeWidth={1.7} />
+                    </SettingsIconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -90,7 +89,7 @@ export function MemberTable({
                 <TableHead>E-mail</TableHead>
                 <TableHead>Papel</TableHead>
                 <TableHead>Expira em</TableHead>
-                <TableHead />
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -103,25 +102,24 @@ export function MemberTable({
                   <TableCell>
                     {new Date(invitation.expiresAt).toLocaleString('pt-BR')}
                   </TableCell>
-                  <TableCell className="flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={resendingId === invitation.id}
-                      onClick={() => onResendInvitation(invitation.id)}
-                    >
-                      Reenviar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={revokingId === invitation.id}
-                      onClick={() => onRevokeInvitation(invitation.id)}
-                    >
-                      Revogar
-                    </Button>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <SettingsIconButton
+                        label="Reenviar convite"
+                        disabled={resendingId === invitation.id}
+                        onClick={() => onResendInvitation(invitation.id)}
+                      >
+                        <SendIcon strokeWidth={1.7} />
+                      </SettingsIconButton>
+                      <SettingsIconButton
+                        label="Revogar convite"
+                        destructive
+                        disabled={revokingId === invitation.id}
+                        onClick={() => onRevokeInvitation(invitation.id)}
+                      >
+                        <XIcon strokeWidth={1.7} />
+                      </SettingsIconButton>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

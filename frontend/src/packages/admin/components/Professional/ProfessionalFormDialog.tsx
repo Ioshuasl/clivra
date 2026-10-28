@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import {
   useProfessionalCreateFormHook,
   useProfessionalUpdateFormHook,
@@ -15,7 +14,6 @@ import {
 } from '@/packages/admin/schemas/Professional/ProfessionalSchema';
 import type { ProfessionalFormDialogProps } from '@/packages/admin/types/Professional/ProfessionalFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -85,8 +83,6 @@ export function ProfessionalFormDialog({
   };
 
   const isPending = create.isPending || update.isPending;
-  const error = create.error ?? update.error;
-  const isError = create.isError || update.isError;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -135,11 +131,6 @@ export function ProfessionalFormDialog({
                   <Input id="color" {...createForm.register('color')} />
                 </Field>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
@@ -178,11 +169,6 @@ export function ProfessionalFormDialog({
                   Ativo
                 </label>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar

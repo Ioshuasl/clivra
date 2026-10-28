@@ -1,4 +1,5 @@
-import { ReceiptTextIcon } from 'lucide-react';
+import { CreditCardIcon, ExternalLinkIcon, ReceiptTextIcon } from 'lucide-react';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
 import { SubscriptionToneBadge } from '@/packages/admin/components/Subscription/SubscriptionToneBadge';
 import { BILLING_METHOD_LABELS, type BillingMethod } from '@/packages/admin/enum/Subscription/BillingMethodEnum';
 import {
@@ -11,7 +12,6 @@ import { formatDateBr } from '@/packages/admin/helpers/SubscriptionFormat';
 import type { SubscriptionPayment } from '@/packages/admin/types/Subscription/SubscriptionCheckoutTypes';
 import { ClivraSurface } from '@/shared/layout/ClivraPage';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
-import { Button } from '@/shared/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/shared/ui/empty';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
@@ -93,25 +93,14 @@ export function SubscriptionPaymentTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       {open && canPay && payment.billingType !== 'CREDIT_CARD' ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="cursor-pointer"
-                          onClick={() => onPay(payment.id)}
-                        >
-                          Pagar
-                        </Button>
+                        <SettingsIconButton label="Pagar fatura" onClick={() => onPay(payment.id)}>
+                          <CreditCardIcon strokeWidth={1.7} />
+                        </SettingsIconButton>
                       ) : null}
                       {payment.invoiceUrl ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="cursor-pointer"
-                          nativeButton={false}
-                          render={<a href={payment.invoiceUrl} target="_blank" rel="noreferrer" />}
-                        >
-                          Ver fatura
-                        </Button>
+                        <SettingsIconButton label="Ver fatura" href={payment.invoiceUrl}>
+                          <ExternalLinkIcon strokeWidth={1.7} />
+                        </SettingsIconButton>
                       ) : null}
                     </div>
                   </TableCell>

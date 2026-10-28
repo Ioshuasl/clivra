@@ -2,9 +2,10 @@ export const QUESTION_TYPES = ['BOOLEAN', 'BOOLEAN_WITH_TEXT', 'SINGLE_CHOICE', 
 
 export type QuestionType = (typeof QUESTION_TYPES)[number];
 
+/** Nome do tipo de resposta, em linguagem do dia a dia. */
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  BOOLEAN: 'Sim/Não',
-  BOOLEAN_WITH_TEXT: 'Sim/Não com texto',
-  SINGLE_CHOICE: 'Escolha única',
-  TEXT: 'Texto',
+  BOOLEAN: 'Sim ou não',
+  BOOLEAN_WITH_TEXT: 'Sim ou não, com detalhes',
+  SINGLE_CHOICE: 'Escolher uma opção',
+  TEXT: 'Resposta escrita',
 };

@@ -7,7 +7,7 @@ import {
   PatientNotFoundForRecordError,
 } from '../../models/errors/clinical_records.errors.js';
 import { validateAnswers, visibleQuestions } from '../../models/anamnesis/anamnesis_answers.model.js';
-import { GetActiveRepository } from '../../repositories/anamnesis_form/anamnesis_form_get_active.repository.js';
+import { ResolveRepository } from '../../repositories/anamnesis_form/anamnesis_form_resolve.repository.js';
 import { GetIdRepository } from '../../repositories/medical_record/medical_record_get_id.repository.js';
 import { GetRepository as GetPatientSnapshotRepository } from '../../repositories/patient_snapshot/patient_snapshot_get.repository.js';
 import type { AnamnesisAnswersSchema } from '../../schemas/anamnesis.schema.js';
@@ -17,7 +17,7 @@ export class CreateService {
   constructor(
     private readonly getRecordId = new GetIdRepository(),
     private readonly getPatient = new GetPatientSnapshotRepository(),
-    private readonly getActiveForm = new GetActiveRepository(),
+    private readonly resolveForm = new ResolveRepository(),
     private readonly submit = new SubmitAction(),
   ) {}
 
@@ -33,7 +33,7 @@ export class CreateService {
     const patient = await this.getPatient.execute(ctx, patientId);
     if (!patient) throw new PatientNotFoundForRecordError();
 
-    const form = await this.getActiveForm.execute(ctx);
+    const form = await this.resolveForm.execute(ctx, anamnesisSchema.professionalId);
     if (!form) throw new AnamnesisFormNotFoundError();
 
     const questions = visibleQuestions(form.questions, patient.sex);

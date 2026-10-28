@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFieldArray } from 'react-hook-form';
-import { ALERT_CATEGORIES, ALERT_CATEGORY_LABELS } from '@/packages/admin/enum/AnamnesisForm/AlertCategoryEnum';
-import { ALERT_SEVERITIES, ALERT_SEVERITY_LABELS } from '@/packages/admin/enum/AnamnesisForm/AlertSeverityEnum';
-import { QUESTION_TYPES, QUESTION_TYPE_LABELS } from '@/packages/admin/enum/AnamnesisForm/QuestionTypeEnum';
+import { useEffect, useState } from 'react';
+import { useFieldArray, type FieldErrors } from 'react-hook-form';
+import { PlusIcon } from 'lucide-react';
+import { AnamnesisQuestionCard } from '@/packages/admin/components/AnamnesisForm/AnamnesisQuestionCard';
 import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
+import { ANAMNESIS_SUGGESTIONS } from '@/packages/admin/helpers/AnamnesisQuestionSuggestions';
 import { useAnamnesisFormCreateHook } from '@/packages/admin/hooks/AnamnesisForm/useAnamnesisFormCreateHook';
 import { useAnamnesisFormFormHook } from '@/packages/admin/hooks/AnamnesisForm/useAnamnesisFormFormHook';
 import {
-  EMPTY_ANAMNESIS_QUESTION,
   anamnesisFormToFormValues,
+  newAnamnesisQuestion,
   type AnamnesisFormCreateFormValues,
 } from '@/packages/admin/schemas/AnamnesisForm/AnamnesisFormSchema';
 import type { AnamnesisFormFormDialogProps } from '@/packages/admin/types/AnamnesisForm/AnamnesisFormFormDialogTypes';
@@ -20,201 +20,167 @@ import { Button } from '@/shared/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
+import { Field, FieldError, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
-import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
-import { Textarea } from '@/shared/ui/textarea';
+
+function scrollToQuestion(index: number) {
+  requestAnimationFrame(() => {
+    document
+      .querySelector(`[data-question="${index}"]`)
+      ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
 
 export function AnamnesisFormFormDialog({ source, onClose }: AnamnesisFormFormDialogProps) {
   const form = useAnamnesisFormFormHook(source ? anamnesisFormToFormValues(source) : undefined);
+  const isNew = !source;
   const create = useAnamnesisFormCreateHook();
   const questions = useFieldArray({ control: form.control, name: 'questions' });
+  const [activeIndex, setActiveIndex] = useState<number | null>(
+    (source?.questions.length ?? 1) <= 1 ? 0 : null,
+  );
+
+  const handleForm = () => {
+    if (source) form.reset(anamnesisFormToFormValues(source));
+  };
 
   useEffect(() => {
-    if (!source) return;
-    form.reset(anamnesisFormToFormValues(source));
-  }, [source, form]);
+    handleForm();
+  }, [source]);
 
   const onSave = async (values: AnamnesisFormCreateFormValues) => {
     await create.mutateAsync(values);
     onClose();
   };
 
+  // Ao falhar a validação, abre a primeira pergunta com problema para o usuário corrigir.
+  const onInvalid = (errors: FieldErrors<AnamnesisFormCreateFormValues>) => {
+    const list = errors.questions;
+    if (!Array.isArray(list)) return;
+    const first = list.findIndex(Boolean);
+    if (first >= 0) {
+      setActiveIndex(first);
+      scrollToQuestion(first);
+    }
+  };
+
+  const addQuestion = (overrides?: Parameters<typeof newAnamnesisQuestion>[0], open = true) => {
+    const index = questions.fields.length;
+    questions.append(newAnamnesisQuestion(overrides));
+    if (open) setActiveIndex(index);
+    scrollToQuestion(index);
+  };
+
+  const existingLabels = new Set(
+    form.watch('questions').map((question) => question.label.trim().toLowerCase()),
+  );
+  const suggestions = ANAMNESIS_SUGGESTIONS.filter(
+    (item) => !existingLabels.has((item.question.label ?? '').toLowerCase()),
+  );
+
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto bg-muted sm:max-w-3xl">
         <MotionDialogBody>
           <DialogHeader>
-            <DialogTitle>Nova versão da anamnese</DialogTitle>
+            <DialogTitle>{isNew ? 'Novo modelo de anamnese' : `Editar “${source.name}”`}</DialogTitle>
+            <DialogDescription>
+              Monte as perguntas que o paciente responde antes do atendimento. Ao salvar, o modelo
+              vale para os próximos pacientes e as respostas antigas continuam guardadas.
+            </DialogDescription>
           </DialogHeader>
           <form
             className="grid gap-4"
             onSubmit={(event) => {
-              void form.handleSubmit(onSave)(event);
+              void form.handleSubmit(onSave, onInvalid)(event);
             }}
           >
-            <FieldGroup>
-              <Field data-invalid={Boolean(form.formState.errors.name)}>
-                <FieldLabel htmlFor="anamnesis-form-name">Nome</FieldLabel>
-                <Input id="anamnesis-form-name" {...form.register('name')} />
-                <FieldError>{form.formState.errors.name?.message}</FieldError>
-              </Field>
-            </FieldGroup>
+            {isNew ? (
+              <div className="rounded-2xl border border-l-4 border-border border-l-primary bg-card p-4">
+                <Field data-invalid={Boolean(form.formState.errors.name)}>
+                  <FieldLabel htmlFor="anamnesis-form-name">Nome do modelo</FieldLabel>
+                  <Input
+                    id="anamnesis-form-name"
+                    className="h-11 text-base font-medium"
+                    placeholder="Ex.: Anamnese Ortodontia"
+                    {...form.register('name')}
+                  />
+                  <FieldError>{form.formState.errors.name?.message}</FieldError>
+                </Field>
+              </div>
+            ) : null}
 
-            {questions.fields.map((field, index) => {
-              const type = form.watch(`questions.${index}.type`);
-              const alertMode = form.watch(`questions.${index}.alertMode`);
-              return (
-                <div key={field.id} className="grid gap-3 rounded-md border p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">Pergunta {index + 1}</p>
-                    {questions.fields.length > 1 ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => questions.remove(index)}
-                      >
-                        Remover
-                      </Button>
-                    ) : null}
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Field data-invalid={Boolean(form.formState.errors.questions?.[index]?.id)}>
-                      <FieldLabel htmlFor={`q-${index}-id`}>Id</FieldLabel>
-                      <Input id={`q-${index}-id`} {...form.register(`questions.${index}.id`)} />
-                      <FieldError>{form.formState.errors.questions?.[index]?.id?.message}</FieldError>
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor={`q-${index}-type`}>Tipo</FieldLabel>
-                      <NativeSelect
-                        id={`q-${index}-type`}
-                        value={type}
-                        onChange={(event) => {
-                          form.setValue(
-                            `questions.${index}.type`,
-                            event.target.value as AnamnesisFormCreateFormValues['questions'][number]['type'],
-                          );
-                        }}
-                      >
-                        {QUESTION_TYPES.map((item) => (
-                          <NativeSelectOption key={item} value={item}>
-                            {QUESTION_TYPE_LABELS[item]}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                    </Field>
-                  </div>
-                  <Field data-invalid={Boolean(form.formState.errors.questions?.[index]?.label)}>
-                    <FieldLabel htmlFor={`q-${index}-label`}>Pergunta</FieldLabel>
-                    <Input id={`q-${index}-label`} {...form.register(`questions.${index}.label`)} />
-                    <FieldError>{form.formState.errors.questions?.[index]?.label?.message}</FieldError>
-                  </Field>
-                  {type === 'SINGLE_CHOICE' ? (
-                    <Field>
-                      <FieldLabel htmlFor={`q-${index}-options`}>Opções (separadas por vírgula)</FieldLabel>
-                      <Textarea id={`q-${index}-options`} rows={2} {...form.register(`questions.${index}.optionsText`)} />
-                    </Field>
-                  ) : null}
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" {...form.register(`questions.${index}.required`)} />
-                    Obrigatória
-                  </label>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Field>
-                      <FieldLabel htmlFor={`q-${index}-alert-mode`}>Alerta automático</FieldLabel>
-                      <NativeSelect
-                        id={`q-${index}-alert-mode`}
-                        value={alertMode}
-                        onChange={(event) => {
-                          form.setValue(
-                            `questions.${index}.alertMode`,
-                            event.target.value as AnamnesisFormCreateFormValues['questions'][number]['alertMode'],
-                          );
-                        }}
-                      >
-                        <NativeSelectOption value="none">Nenhum</NativeSelectOption>
-                        <NativeSelectOption value="equals">Quando igual a</NativeSelectOption>
-                        <NativeSelectOption value="notEquals">Quando diferente de</NativeSelectOption>
-                      </NativeSelect>
-                    </Field>
-                    {alertMode !== 'none' ? (
-                      <Field>
-                        <FieldLabel htmlFor={`q-${index}-alert-value`}>Valor (true/false ou texto)</FieldLabel>
-                        <Input id={`q-${index}-alert-value`} {...form.register(`questions.${index}.alertValue`)} />
-                      </Field>
-                    ) : null}
-                  </div>
-                  {alertMode !== 'none' ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <Field>
-                        <FieldLabel htmlFor={`q-${index}-severity`}>Severidade</FieldLabel>
-                        <NativeSelect
-                          id={`q-${index}-severity`}
-                          value={form.watch(`questions.${index}.alertSeverity`)}
-                          onChange={(event) => {
-                            form.setValue(
-                              `questions.${index}.alertSeverity`,
-                              event.target.value as AnamnesisFormCreateFormValues['questions'][number]['alertSeverity'],
-                            );
-                          }}
-                        >
-                          {ALERT_SEVERITIES.map((item) => (
-                            <NativeSelectOption key={item} value={item}>
-                              {ALERT_SEVERITY_LABELS[item]}
-                            </NativeSelectOption>
-                          ))}
-                        </NativeSelect>
-                      </Field>
-                      <Field>
-                        <FieldLabel htmlFor={`q-${index}-category`}>Categoria</FieldLabel>
-                        <NativeSelect
-                          id={`q-${index}-category`}
-                          value={form.watch(`questions.${index}.alertCategory`)}
-                          onChange={(event) => {
-                            form.setValue(
-                              `questions.${index}.alertCategory`,
-                              event.target.value as AnamnesisFormCreateFormValues['questions'][number]['alertCategory'],
-                            );
-                          }}
-                        >
-                          {ALERT_CATEGORIES.map((item) => (
-                            <NativeSelectOption key={item} value={item}>
-                              {ALERT_CATEGORY_LABELS[item]}
-                            </NativeSelectOption>
-                          ))}
-                        </NativeSelect>
-                      </Field>
-                    </div>
-                  ) : null}
-                  <Field>
-                    <FieldLabel htmlFor={`q-${index}-gender`}>Exibir só se sexo (opcional)</FieldLabel>
-                    <Input
-                      id={`q-${index}-gender`}
-                      placeholder="F"
-                      {...form.register(`questions.${index}.showWhenGender`)}
-                    />
-                  </Field>
+            <div className="grid gap-3">
+              {questions.fields.map((field, index) => (
+                <div key={field.id} data-question={index}>
+                  <AnamnesisQuestionCard
+                    form={form}
+                    index={index}
+                    total={questions.fields.length}
+                    active={activeIndex === index}
+                    onActivate={() => setActiveIndex(index)}
+                    onMove={(direction) => {
+                      const target = index + direction;
+                      questions.move(index, target);
+                      setActiveIndex(target);
+                    }}
+                    onDuplicate={() => {
+                      const { id: _id, ...copy } = form.getValues(`questions.${index}`);
+                      questions.insert(
+                        index + 1,
+                        newAnamnesisQuestion({ ...copy, label: `${copy.label} (cópia)` }),
+                      );
+                      setActiveIndex(index + 1);
+                    }}
+                    onRemove={() => {
+                      questions.remove(index);
+                      setActiveIndex(null);
+                    }}
+                  />
                 </div>
-              );
-            })}
+              ))}
+            </div>
 
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                questions.append({
-                  ...EMPTY_ANAMNESIS_QUESTION,
-                  id: `pergunta_${questions.fields.length + 1}`,
-                })
-              }
+              className="h-11 cursor-pointer border-dashed bg-card"
+              onClick={() => addQuestion()}
             >
+              <PlusIcon />
               Adicionar pergunta
             </Button>
+
+            {suggestions.length > 0 ? (
+              <div className="grid gap-2">
+                <p className="text-sm font-medium text-foreground">
+                  Perguntas prontas{' '}
+                  <span className="font-normal text-muted-foreground">
+                    — clique para adicionar (já vêm com o aviso certo)
+                  </span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.map((item) => (
+                    <Button
+                      key={item.chip}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer rounded-full bg-card"
+                      onClick={() => addQuestion(item.question, false)}
+                    >
+                      <PlusIcon />
+                      {item.chip}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             {form.formState.errors.questions?.message ? (
               <Alert variant="destructive">
@@ -227,12 +193,12 @@ export function AnamnesisFormFormDialog({ source, onClose }: AnamnesisFormFormDi
               </Alert>
             ) : null}
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+            <DialogFooter className="sticky bottom-0 -mx-4 -mb-4 border-t bg-background px-4 py-3 sm:-mx-4">
+              <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={create.isPending}>
-                {create.isPending ? 'Salvando…' : 'Publicar versão'}
+              <Button type="submit" className="cursor-pointer" disabled={create.isPending}>
+                {create.isPending ? 'Salvando…' : 'Salvar modelo'}
               </Button>
             </DialogFooter>
           </form>

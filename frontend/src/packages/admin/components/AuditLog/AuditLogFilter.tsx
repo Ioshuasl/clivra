@@ -4,6 +4,8 @@ import { AUDIT_ACTION_FILTERS } from '@/packages/admin/enum/AuditLog/AuditAction
 import type { AuditLogFilterProps } from '@/packages/admin/types/AuditLog/AuditLogFilterTypes';
 import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToRange } from '@/shared/helpers/DateIso';
 
 export function AuditLogFilter({
   patientSearch,
@@ -70,20 +72,16 @@ export function AuditLogFilter({
           </NativeSelectOption>
         ))}
       </NativeSelect>
-      <Input
-        type="date"
-        aria-label="De"
-        className="w-40"
-        value={from}
-        onChange={(event) => onFromChange(event.target.value)}
-      />
-      <Input
-        type="date"
-        aria-label="Até"
-        className="w-40"
-        value={to}
-        onChange={(event) => onToChange(event.target.value)}
-      />
+      <DatePicker
+              mode="range"
+              aria-label="Período"
+              className="w-72"
+              value={isoToRange(from, to)}
+              onChange={(range) => {
+                onFromChange(dateToIso(range?.from));
+                onToChange(dateToIso(range?.to));
+              }}
+            />
     </div>
   );
 }

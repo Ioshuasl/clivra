@@ -42,7 +42,6 @@ export function AppShell({ children, inboxBadgeCount = 0 }: AppShellProps) {
         <div className="flex h-svh w-full min-w-0 overflow-hidden bg-background">
           <AppSidebar
             clinicName={clinicQuery.data?.name}
-            chairsEnabled={clinicQuery.data?.chairsEnabled === true}
             inboxBadgeCount={inboxBadgeCount}
           />
           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

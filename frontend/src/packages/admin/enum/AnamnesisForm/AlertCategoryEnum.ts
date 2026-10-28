@@ -4,7 +4,7 @@ export type AlertCategory = (typeof ALERT_CATEGORIES)[number];
 
 export const ALERT_CATEGORY_LABELS: Record<AlertCategory, string> = {
   ALLERGY: 'Alergia',
-  CONDITION: 'Condição',
-  MEDICATION: 'Medicação',
+  CONDITION: 'Problema de saúde',
+  MEDICATION: 'Medicamento',
   OTHER: 'Outro',
 };

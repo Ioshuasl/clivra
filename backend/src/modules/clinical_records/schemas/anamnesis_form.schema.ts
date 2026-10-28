@@ -40,3 +40,15 @@ export const anamnesisFormCreateSchema = z
   .strict();
 
 export type AnamnesisFormCreateSchema = z.infer<typeof anamnesisFormCreateSchema>;
+
+export const anamnesisFormAssignmentParamSchema = z.object({ professionalId: z.string().uuid() });
+
+export const anamnesisFormAssignmentSetSchema = z
+  .object({ formName: z.string().min(1).max(120).nullable() })
+  .strict();
+
+export type AnamnesisFormAssignmentSetSchema = z.infer<typeof anamnesisFormAssignmentSetSchema>;
+
+export const anamnesisFormResolveQuerySchema = z.object({
+  professionalId: z.string().uuid().optional(),
+});

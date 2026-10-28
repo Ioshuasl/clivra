@@ -1,11 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { CheckIcon, DownloadIcon, XIcon } from 'lucide-react';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
+import { SubscriptionToneBadge } from '@/packages/admin/components/Subscription/SubscriptionToneBadge';
 import {
   DATA_SUBJECT_REQUEST_STATUS_LABELS,
   DATA_SUBJECT_REQUEST_TERMINAL_STATUSES,
+  type DataSubjectRequestStatus,
 } from '@/packages/admin/enum/DataSubjectRequest/DataSubjectRequestStatusEnum';
 import { DATA_SUBJECT_REQUEST_TYPE_LABELS } from '@/packages/admin/enum/DataSubjectRequest/DataSubjectRequestTypeEnum';
+import type { SubscriptionPaymentTone } from '@/packages/admin/enum/Subscription/SubscriptionPaymentStatusEnum';
 import type { DataSubjectRequestTableProps } from '@/packages/admin/types/DataSubjectRequest/DataSubjectRequestTableTypes';
 import { Button } from '@/shared/ui/button';
 import {
@@ -16,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+
+const STATUS_TONES: Record<DataSubjectRequestStatus, SubscriptionPaymentTone> = {
+  RECEIVED: 'warning',
+  IN_PROGRESS: 'warning',
+  COMPLETED: 'success',
+  REJECTED: 'danger',
+};
 
 function formatWhen(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR');
@@ -42,7 +54,7 @@ export function DataSubjectRequestTable({
           <TableHead>Status</TableHead>
           <TableHead>Prazo</TableHead>
           <TableHead>Pacote</TableHead>
-          <TableHead />
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -65,18 +77,17 @@ export function DataSubjectRequestTable({
                 </Button>
               </TableCell>
               <TableCell>{DATA_SUBJECT_REQUEST_TYPE_LABELS[request.type]}</TableCell>
-              <TableCell>{DATA_SUBJECT_REQUEST_STATUS_LABELS[request.status]}</TableCell>
+              <TableCell>
+                <SubscriptionToneBadge tone={STATUS_TONES[request.status]}>
+                  {DATA_SUBJECT_REQUEST_STATUS_LABELS[request.status]}
+                </SubscriptionToneBadge>
+              </TableCell>
               <TableCell>{formatWhen(request.dueAt)}</TableCell>
               <TableCell>
                 {request.exportUrl ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    nativeButton={false}
-                    render={<a href={request.exportUrl} target="_blank" rel="noreferrer" />}
-                  >
-                    Baixar pacote
-                  </Button>
+                  <SettingsIconButton label="Baixar pacote" href={request.exportUrl}>
+                    <DownloadIcon strokeWidth={1.7} />
+                  </SettingsIconButton>
                 ) : request.type === 'ACCESS' || request.type === 'PORTABILITY' ? (
                   <span className="text-sm text-muted-foreground">Preparando pacote…</span>
                 ) : (
@@ -85,23 +96,17 @@ export function DataSubjectRequestTable({
               </TableCell>
               <TableCell>
                 {terminal ? null : (
-                  <div className="flex flex-wrap gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onComplete(request)}
-                    >
-                      Concluir
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
+                  <div className="flex justify-end gap-1">
+                    <SettingsIconButton label="Concluir solicitação" onClick={() => onComplete(request)}>
+                      <CheckIcon strokeWidth={1.7} />
+                    </SettingsIconButton>
+                    <SettingsIconButton
+                      label="Rejeitar solicitação"
+                      destructive
                       onClick={() => onReject(request)}
                     >
-                      Rejeitar
-                    </Button>
+                      <XIcon strokeWidth={1.7} />
+                    </SettingsIconButton>
                   </div>
                 )}
               </TableCell>

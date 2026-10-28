@@ -1,7 +1,9 @@
 'use client';
 
+import { PencilIcon } from 'lucide-react';
+import { SettingsActiveBadge } from '@/packages/admin/components/Settings/SettingsActiveBadge';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
 import type { ProcedureSummary } from '@/packages/admin/types/Procedure/ProcedureTypes';
-import { Button } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -31,11 +33,11 @@ export function ProcedureTable({ procedures, onEdit }: ProcedureTableProps) {
         <TableRow>
           <TableHead>Código</TableHead>
           <TableHead>Nome</TableHead>
-          <TableHead>Especialidade</TableHead>
+          <TableHead className="hidden 2xl:table-cell">Especialidade</TableHead>
           <TableHead>Duração</TableHead>
           <TableHead>Preço</TableHead>
-          <TableHead>Ativo</TableHead>
-          <TableHead />
+          <TableHead>Situação</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -43,14 +45,16 @@ export function ProcedureTable({ procedures, onEdit }: ProcedureTableProps) {
           <TableRow key={procedure.id}>
             <TableCell>{procedure.code}</TableCell>
             <TableCell>{procedure.name}</TableCell>
-            <TableCell>{procedure.specialty ?? '—'}</TableCell>
+            <TableCell className="hidden 2xl:table-cell">{procedure.specialty ?? '—'}</TableCell>
             <TableCell>{procedure.defaultMinutes} min</TableCell>
             <TableCell>{formatPrice(procedure.priceCents)}</TableCell>
-            <TableCell>{procedure.active ? 'Sim' : 'Não'}</TableCell>
             <TableCell>
-              <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(procedure)}>
-                Editar
-              </Button>
+              <SettingsActiveBadge active={procedure.active} />
+            </TableCell>
+            <TableCell className="text-right">
+              <SettingsIconButton label="Editar procedimento" onClick={() => onEdit(procedure)}>
+                <PencilIcon strokeWidth={1.7} />
+              </SettingsIconButton>
             </TableCell>
           </TableRow>
         ))}

@@ -21,6 +21,13 @@ export class AnamnesisFormNotFoundError extends AppError {
   }
 }
 
+export class ProfessionalNotFoundForFormError extends AppError {
+  constructor() {
+    super('NOT_FOUND', 'Profissional não encontrado.', 404);
+    this.name = 'ProfessionalNotFoundForFormError';
+  }
+}
+
 export class AnamnesisTokenNotFoundError extends AppError {
   constructor() {
     super('NOT_FOUND', 'Link inválido ou expirado.', 404);

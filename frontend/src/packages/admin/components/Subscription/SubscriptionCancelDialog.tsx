@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useSubscriptionCancelHook } from '@/packages/admin/hooks/Subscription/useSubscriptionCancelHook';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -59,11 +57,6 @@ export function SubscriptionCancelDialog({ scheduled = false, onClose }: Subscri
           />
         </div>
 
-        {cancel.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{adminErrorMessage(cancel.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         <AlertDialogFooter>
           <AlertDialogCancel className="cursor-pointer" disabled={cancel.isPending}>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import {
   useProcedureCreateFormHook,
   useProcedureUpdateFormHook,
@@ -14,7 +13,6 @@ import type {
 } from '@/packages/admin/schemas/Procedure/ProcedureSchema';
 import type { ProcedureFormDialogProps } from '@/packages/admin/types/Procedure/ProcedureFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -66,8 +64,6 @@ export function ProcedureFormDialog({ mode, procedure, onClose }: ProcedureFormD
   };
 
   const isPending = create.isPending || update.isPending;
-  const error = create.error ?? update.error;
-  const isError = create.isError || update.isError;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -126,11 +122,6 @@ export function ProcedureFormDialog({ mode, procedure, onClose }: ProcedureFormD
                   Requer face
                 </label>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
@@ -186,11 +177,6 @@ export function ProcedureFormDialog({ mode, procedure, onClose }: ProcedureFormD
                   Ativo
                 </label>
               </FieldGroup>
-              {isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{adminErrorMessage(error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar

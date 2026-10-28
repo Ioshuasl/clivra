@@ -16,6 +16,7 @@ export const adminQueryKeys = {
   invitations: ['invitations'] as const,
   onboarding: ['onboarding'] as const,
   anamnesisForms: ['anamnesis-forms'] as const,
+  anamnesisAssignments: ['anamnesis-forms', 'assignments'] as const,
   auditLogs: (query: AuditLogListQuery) => ['audit-logs', query] as const,
   auditLogPatients: (search: string) => ['audit-logs', 'patients', search] as const,
   dataSubjectRequests: (query: DataSubjectRequestListQuery) =>

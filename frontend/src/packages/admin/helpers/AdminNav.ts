@@ -10,22 +10,10 @@ import {
   MessageCircleIcon,
   SettingsIcon,
 } from 'lucide-react';
-import {
-  SETTINGS_NAV_ITEMS,
-  SETTINGS_PATH,
-  settingsHref,
-  type SettingsNavItem,
-} from '@/packages/admin/helpers/SettingsTabs';
+import { SETTINGS_NAV_ITEMS, SETTINGS_PATH } from '@/packages/admin/helpers/SettingsTabs';
 import { PRIMEIROS_PASSOS_PATH, ONBOARDING_LEGACY_PATH } from '@/packages/admin/enum/OnboardingStepEnum';
 
 export type AdminNavGroup = 'main' | 'settings';
-
-export type AdminNavChild = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  permission?: string;
-};
 
 export type AdminNavItem = {
   href: string;
@@ -33,19 +21,9 @@ export type AdminNavItem = {
   icon: LucideIcon;
   group: AdminNavGroup;
   permission?: string;
-  children?: AdminNavChild[];
   /** Hide from sidebar when onboarding/primeiros passos is completed. */
   hideWhenOnboardingComplete?: boolean;
 };
-
-function toNavChild(item: SettingsNavItem): AdminNavChild {
-  return {
-    href: settingsHref(item.id),
-    label: item.label,
-    icon: item.icon,
-    permission: item.permission,
-  };
-}
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: '/app', label: 'Início', icon: HomeIcon, group: 'main' },
@@ -91,7 +69,6 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Configurações',
     icon: SettingsIcon,
     group: 'settings',
-    children: SETTINGS_NAV_ITEMS.map(toNavChild),
   },
 ];
 
@@ -116,24 +93,20 @@ export function buildAdminBreadcrumbs(pathname: string): AdminBreadcrumb[] {
     ];
   }
 
-  for (const item of ADMIN_NAV_ITEMS) {
-    if (item.children?.length) {
-      const child = item.children.find(
-        (entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`),
-      );
-      if (child) {
-        return [
-          { label: 'Início', href: '/app' },
-          { label: item.label, href: item.href },
-          { label: child.label },
-        ];
-      }
-      if (pathname === item.href) {
-        return [{ label: 'Início', href: '/app' }, { label: item.label }];
-      }
-      continue;
+  if (pathname.startsWith(`${SETTINGS_PATH}/`)) {
+    const section = SETTINGS_NAV_ITEMS.find((entry) =>
+      pathname.startsWith(`${SETTINGS_PATH}/${entry.id}`),
+    );
+    if (section) {
+      return [
+        { label: 'Início', href: '/app' },
+        { label: 'Configurações', href: `${SETTINGS_PATH}/${section.id}` },
+        { label: section.label },
+      ];
     }
+  }
 
+  for (const item of ADMIN_NAV_ITEMS) {
     if (item.href === '/app') continue;
     if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
       if (pathname.startsWith('/app/relatorios/') && pathname !== '/app/relatorios') {
@@ -177,9 +150,5 @@ export function isAdminNavActive(pathname: string, href: string): boolean {
       pathname.startsWith(`${ONBOARDING_LEGACY_PATH}/`)
     );
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-export function isAdminNavChildActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }

@@ -11,7 +11,6 @@ import { useInvitationResendHook } from '@/packages/admin/hooks/Invitation/useIn
 import { useMemberListHook } from '@/packages/admin/hooks/Member/useMemberListHook';
 import type { MemberSummary } from '@/packages/admin/types/Member/MemberTypes';
 import { ClivraPageHeader, ClivraSurface } from '@/shared/layout/ClivraPage';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 
 const InvitationFormDialog = dynamic(
@@ -51,13 +50,6 @@ export function MemberIndex() {
         }
       />
 
-      {(resend.isError || revoke.isError) && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {adminErrorMessage(resend.error ?? revoke.error)}
-          </AlertDescription>
-        </Alert>
-      )}
 
       {loading ? (
         <ClivraSurface contentClassName="px-4 py-6">

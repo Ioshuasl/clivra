@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { PlusIcon } from 'lucide-react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useBusinessHoursFormHook } from '@/packages/admin/hooks/BusinessHours/useBusinessHoursFormHook';
 import { useBusinessHoursListHook } from '@/packages/admin/hooks/BusinessHours/useBusinessHoursListHook';
 import { useBusinessHoursReplaceHook } from '@/packages/admin/hooks/BusinessHours/useBusinessHoursReplaceHook';
@@ -14,7 +13,7 @@ import { ClivraSurface } from '@/shared/layout/ClivraPage';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
+import { TimePicker } from '@/shared/ui/time-picker';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 
 const WEEKDAYS = [
@@ -166,18 +165,30 @@ export function BusinessHoursForm() {
                 </Field>
                 <Field>
                   <FieldLabel>Início</FieldLabel>
-                  <Input
-                    type="time"
+                  <TimePicker
                     aria-label={`Início (horário ${index + 1})`}
-                    {...form.register(`slots.${index}.startsAt`)}
+                    aria-invalid={Boolean(form.formState.errors.slots?.message ?? form.formState.errors.slots?.[index]?.startsAt)}
+                    value={form.watch(`slots.${index}.startsAt`)}
+                    onChange={(next) =>
+                      form.setValue(`slots.${index}.startsAt`, next, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      })
+                    }
                   />
                 </Field>
                 <Field>
                   <FieldLabel>Fim</FieldLabel>
-                  <Input
-                    type="time"
+                  <TimePicker
                     aria-label={`Fim (horário ${index + 1})`}
-                    {...form.register(`slots.${index}.endsAt`)}
+                    aria-invalid={Boolean(form.formState.errors.slots?.message ?? form.formState.errors.slots?.[index]?.endsAt)}
+                    value={form.watch(`slots.${index}.endsAt`)}
+                    onChange={(next) =>
+                      form.setValue(`slots.${index}.endsAt`, next, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      })
+                    }
                   />
                 </Field>
                 <div className="flex items-end">
@@ -197,11 +208,6 @@ export function BusinessHoursForm() {
           </FieldGroup>
         )}
 
-        {replace.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{adminErrorMessage(replace.error)}</AlertDescription>
-          </Alert>
-        ) : null}
         {replace.isSuccess ? (
           <Alert>
             <AlertDescription>Horários atualizados.</AlertDescription>

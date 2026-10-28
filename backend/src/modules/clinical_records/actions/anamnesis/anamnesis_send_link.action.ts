@@ -8,7 +8,7 @@ import { getPublicClinicCatalog } from '../../../clinic/clinic_public.js';
 import { getWhatsappAccountStatus } from '../../../messaging/messaging_public.js';
 import { createPublicToken } from '../../../scheduling/scheduling_public.js';
 import { AnamnesisFormNotFoundError } from '../../models/errors/clinical_records.errors.js';
-import { GetActiveRepository } from '../../repositories/anamnesis_form/anamnesis_form_get_active.repository.js';
+import { ResolveRepository } from '../../repositories/anamnesis_form/anamnesis_form_resolve.repository.js';
 import type { PatientSnapshot } from '../../repositories/patient_snapshot/patient_snapshot_get.repository.js';
 import type { AnamnesisSendLinkSchema } from '../../schemas/anamnesis.schema.js';
 import type { AnamnesisSendLinkResult } from '../../types/anamnesis/anamnesis_send_link.types.js';
@@ -19,7 +19,7 @@ const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export class SendLinkAction {
   constructor(
     private readonly uow = new UnitOfWork(),
-    private readonly getActiveForm = new GetActiveRepository(),
+    private readonly resolveForm = new ResolveRepository(),
     private readonly email = getEmailProvider(),
   ) {}
 
@@ -28,7 +28,7 @@ export class SendLinkAction {
     patient: PatientSnapshot,
     sendLinkSchema: AnamnesisSendLinkSchema,
   ): Promise<AnamnesisSendLinkResult> {
-    const form = await this.getActiveForm.execute(ctx);
+    const form = await this.resolveForm.execute(ctx, sendLinkSchema.professionalId);
     if (!form) throw new AnamnesisFormNotFoundError();
 
     const catalog = await getPublicClinicCatalog(ctx);

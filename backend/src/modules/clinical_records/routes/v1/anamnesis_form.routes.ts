@@ -25,6 +25,31 @@ export function buildAnamnesisFormRoutes(): Router {
     asyncHandler(controller.list),
   );
 
+  router.get(
+    '/resolve',
+    asyncHandler(authenticateMiddleware),
+    tenantContextMiddleware,
+    authorizeAny('clinical_records.read', 'settings.read'),
+    asyncHandler(controller.resolve),
+  );
+
+  router.get(
+    '/assignments',
+    asyncHandler(authenticateMiddleware),
+    tenantContextMiddleware,
+    authorizeAny('clinical_records.read', 'settings.read'),
+    asyncHandler(controller.listAssignment),
+  );
+
+  router.put(
+    '/assignments/:professionalId',
+    asyncHandler(authenticateMiddleware),
+    tenantContextMiddleware,
+    asyncSubscriptionGuard(),
+    authorize('settings.write'),
+    asyncHandler(controller.setAssignmentFor),
+  );
+
   router.post(
     '/',
     asyncHandler(authenticateMiddleware),

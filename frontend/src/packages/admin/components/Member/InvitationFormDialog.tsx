@@ -1,13 +1,11 @@
 'use client';
 
 import { ROLE_LABELS, ROLES } from '@/packages/admin/enum/RoleEnum';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useInvitationCreateHook } from '@/packages/admin/hooks/Invitation/useInvitationCreateHook';
 import { useInvitationFormHook } from '@/packages/admin/hooks/Invitation/useInvitationFormHook';
 import type { InvitationCreateFormValues } from '@/packages/admin/schemas/Invitation/InvitationSchema';
 import type { InvitationFormDialogProps } from '@/packages/admin/types/Member/InvitationFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -60,11 +58,6 @@ export function InvitationFormDialog({ onClose }: InvitationFormDialogProps) {
                 <FieldError>{form.formState.errors.role?.message}</FieldError>
               </Field>
             </FieldGroup>
-            {create.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{adminErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

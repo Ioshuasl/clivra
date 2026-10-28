@@ -16,8 +16,9 @@ import { hasPermission } from '@/shared/auth/permissions';
 import { ClivraSurface } from '@/shared/layout/ClivraPage';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate, isoToRange } from '@/shared/helpers/DateIso';
 
 type ReportExportPanelProps = {
   defaultReport?: ExportableReport;
@@ -103,30 +104,25 @@ export function ReportExportPanel({
           )}
 
           {report === 'dashboard' ? (
-            <Input
-              type="date"
+            <DatePicker
               aria-label="Data do dashboard"
-              className="w-40"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
+              className="w-44"
+              clearable={false}
+              value={isoToDate(date)}
+              onChange={(next) => setDate(dateToIso(next))}
             />
           ) : (
-            <>
-              <Input
-                type="date"
-                aria-label="De"
-                className="w-40"
-                value={from}
-                onChange={(event) => setFrom(event.target.value)}
-              />
-              <Input
-                type="date"
-                aria-label="Até"
-                className="w-40"
-                value={to}
-                onChange={(event) => setTo(event.target.value)}
-              />
-            </>
+            <DatePicker
+              mode="range"
+              clearable={false}
+              aria-label="Período"
+              className="w-72"
+              value={isoToRange(from, to)}
+              onChange={(range) => {
+                setFrom(dateToIso(range?.from));
+                setTo(dateToIso(range?.to));
+              }}
+            />
           )}
 
           <Button
@@ -139,11 +135,6 @@ export function ReportExportPanel({
           </Button>
         </div>
 
-        {create.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{adminErrorMessage(create.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         {exportId ? (
           <Alert>

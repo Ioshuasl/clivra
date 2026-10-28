@@ -5,14 +5,12 @@ import {
   DATA_SUBJECT_REQUEST_TYPES,
   DATA_SUBJECT_REQUEST_TYPE_LABELS,
 } from '@/packages/admin/enum/DataSubjectRequest/DataSubjectRequestTypeEnum';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useAuditLogPatientListHook } from '@/packages/admin/hooks/AuditLog/useAuditLogPatientListHook';
 import { useDataSubjectRequestCreateHook } from '@/packages/admin/hooks/DataSubjectRequest/useDataSubjectRequestCreateHook';
 import { useDataSubjectRequestFormHook } from '@/packages/admin/hooks/DataSubjectRequest/useDataSubjectRequestFormHook';
 import type { DataSubjectRequestCreateFormValues } from '@/packages/admin/schemas/DataSubjectRequest/DataSubjectRequestSchema';
 import type { DataSubjectRequestFormDialogProps } from '@/packages/admin/types/DataSubjectRequest/DataSubjectRequestFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -98,11 +96,6 @@ export function DataSubjectRequestFormDialog({ onClose }: DataSubjectRequestForm
                 <Textarea id="dsr-notes" rows={3} {...form.register('notes')} />
               </Field>
             </FieldGroup>
-            {create.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{adminErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

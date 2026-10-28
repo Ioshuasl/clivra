@@ -1,4 +1,5 @@
 import { ApiClientError } from '@/shared/api/api-client';
+import { friendlyApiError } from '@/shared/helpers/FriendlyApiError';
 
 export function adminErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
@@ -23,10 +24,6 @@ export function adminErrorMessage(error: unknown): string {
     if (error.code === 'NOT_IMPLEMENTED') {
       return error.message || 'Exportação XLSX ainda não está disponível. Use CSV.';
     }
-    return error.message;
   }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return 'Não foi possível concluir a operação.';
+  return friendlyApiError(error);
 }

@@ -57,11 +57,6 @@ export function ProcedureIndex() {
           </AlertDescription>
         </Alert>
       ) : null}
-      {importCatalog.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{adminErrorMessage(importCatalog.error)}</AlertDescription>
-        </Alert>
-      ) : null}
 
       {proceduresQuery.isLoading ? (
         <ClivraSurface contentClassName="px-4 py-6">

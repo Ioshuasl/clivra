@@ -2,13 +2,11 @@
 
 import { useEffect } from 'react';
 import { ROLE_LABELS, ROLES } from '@/packages/admin/enum/RoleEnum';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useMemberFormHook } from '@/packages/admin/hooks/Member/useMemberFormHook';
 import { useMemberUpdateHook } from '@/packages/admin/hooks/Member/useMemberUpdateHook';
 import type { MemberUpdateFormValues } from '@/packages/admin/schemas/Member/MemberSchema';
 import type { MemberFormDialogProps } from '@/packages/admin/types/Member/MemberFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -72,11 +70,6 @@ export function MemberFormDialog({ member, onClose }: MemberFormDialogProps) {
                 Ativo
               </label>
             </FieldGroup>
-            {update.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{adminErrorMessage(update.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

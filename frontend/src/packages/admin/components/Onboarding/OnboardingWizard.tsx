@@ -342,11 +342,6 @@ export function OnboardingWizard() {
         </ul>
       </ClivraSurface>
 
-      {skip.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{adminErrorMessage(skip.error)}</AlertDescription>
-        </Alert>
-      ) : null}
     </div>
   );
 }

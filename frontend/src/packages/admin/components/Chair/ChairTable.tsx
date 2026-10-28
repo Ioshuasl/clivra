@@ -1,7 +1,9 @@
 'use client';
 
+import { PencilIcon } from 'lucide-react';
+import { SettingsActiveBadge } from '@/packages/admin/components/Settings/SettingsActiveBadge';
+import { SettingsIconButton } from '@/packages/admin/components/Settings/SettingsIconButton';
 import type { ChairSummary } from '@/packages/admin/types/Chair/ChairTypes';
-import { Button } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -27,8 +29,8 @@ export function ChairTable({ chairs, onEdit }: ChairTableProps) {
         <TableRow>
           <TableHead>Nome</TableHead>
           <TableHead>Cor</TableHead>
-          <TableHead>Ativa</TableHead>
-          <TableHead />
+          <TableHead>Situação</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -48,11 +50,13 @@ export function ChairTable({ chairs, onEdit }: ChairTableProps) {
                 '—'
               )}
             </TableCell>
-            <TableCell>{chair.active ? 'Sim' : 'Não'}</TableCell>
             <TableCell>
-              <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(chair)}>
-                Editar
-              </Button>
+              <SettingsActiveBadge active={chair.active} female />
+            </TableCell>
+            <TableCell className="text-right">
+              <SettingsIconButton label="Editar cadeira" onClick={() => onEdit(chair)}>
+                <PencilIcon strokeWidth={1.7} />
+              </SettingsIconButton>
             </TableCell>
           </TableRow>
         ))}

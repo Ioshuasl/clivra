@@ -1,12 +1,10 @@
 'use client';
 
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useDataSubjectRequestResolveFormHook } from '@/packages/admin/hooks/DataSubjectRequest/useDataSubjectRequestResolveFormHook';
 import { useDataSubjectRequestUpdateHook } from '@/packages/admin/hooks/DataSubjectRequest/useDataSubjectRequestUpdateHook';
 import type { DataSubjectRequestResolveFormValues } from '@/packages/admin/schemas/DataSubjectRequest/DataSubjectRequestSchema';
 import type { DataSubjectRequestResolveFormDialogProps } from '@/packages/admin/types/DataSubjectRequest/DataSubjectRequestResolveFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -55,11 +53,6 @@ export function DataSubjectRequestResolveFormDialog({
                 <FieldError>{form.formState.errors.resolution?.message}</FieldError>
               </Field>
             </FieldGroup>
-            {update.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{adminErrorMessage(update.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

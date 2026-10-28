@@ -11,7 +11,6 @@ import { useAuth } from '@/shared/auth/AuthProvider';
 import { hasPermission } from '@/shared/auth/permissions';
 import { ClivraPageHeader } from '@/shared/layout/ClivraPage';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
-import { Input } from '@/shared/ui/input';
 import {
   Table,
   TableBody,
@@ -20,6 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToRange } from '@/shared/helpers/DateIso';
 
 export function NoShowsIndex() {
   const searchParams = useSearchParams();
@@ -49,23 +50,17 @@ export function NoShowsIndex() {
       filters={
         <div className="flex flex-wrap items-end gap-3">
           <label className="grid gap-1 text-xs text-muted-foreground">
-            De
-            <Input
-              type="date"
-              aria-label="De"
-              className="w-40"
-              value={from}
-              onChange={(event) => setFrom(event.target.value)}
-            />
-          </label>
-          <label className="grid gap-1 text-xs text-muted-foreground">
-            Até
-            <Input
-              type="date"
-              aria-label="Até"
-              className="w-40"
-              value={to}
-              onChange={(event) => setTo(event.target.value)}
+            Período
+            <DatePicker
+              mode="range"
+              clearable={false}
+              aria-label="Período"
+              className="w-72"
+              value={isoToRange(from, to)}
+              onChange={(range) => {
+                setFrom(dateToIso(range?.from));
+                setTo(dateToIso(range?.to));
+              }}
             />
           </label>
         </div>

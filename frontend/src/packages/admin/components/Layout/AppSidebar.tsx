@@ -1,24 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDownIcon, PanelLeftIcon, XIcon, type LucideIcon } from 'lucide-react';
+import { PanelLeftIcon, XIcon, type LucideIcon } from 'lucide-react';
 import { useOnboardingGetHook } from '@/packages/admin/hooks/Onboarding/useOnboardingGetHook';
 import {
   ADMIN_NAV_ITEMS,
   isAdminNavActive,
-  isAdminNavChildActive,
-  type AdminNavChild,
   type AdminNavGroup,
-  type AdminNavItem,
 } from '@/packages/admin/helpers/AdminNav';
-import {
-  SETTINGS_SECTION,
-  isSettingsPath,
-  settingsHref,
-} from '@/packages/admin/helpers/SettingsTabs';
 import { useClivraShell } from '@/packages/admin/components/Layout/ClivraShellContext';
 import { CLIVRA } from '@/shared/brand/ClivraBrand';
 import { useAuth } from '@/shared/auth/AuthProvider';
@@ -35,7 +26,6 @@ const SIDEBAR_TAGLINE = 'Gestão completa para clínicas odontológicas.';
 
 type AppSidebarProps = {
   clinicName?: string;
-  chairsEnabled?: boolean;
   inboxBadgeCount?: number;
 };
 
@@ -46,7 +36,6 @@ function NavLink({
   active,
   badge,
   onNavigate,
-  nested,
 }: {
   href: string;
   label: string;
@@ -54,7 +43,6 @@ function NavLink({
   active: boolean;
   badge?: number;
   onNavigate?: () => void;
-  nested?: boolean;
 }) {
   return (
     <Link
@@ -62,8 +50,7 @@ function NavLink({
       prefetch={false}
       onClick={onNavigate}
       className={cn(
-        'group flex items-center gap-3 rounded-[10px] text-[13px] font-medium transition-colors',
-        nested ? 'px-3 py-2' : 'px-3 py-2',
+        'group flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13px] font-medium transition-colors',
         active
           ? 'bg-sidebar-accent text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
@@ -71,8 +58,7 @@ function NavLink({
     >
       <Icon
         className={cn(
-          'shrink-0 stroke-[1.5]',
-          nested ? 'size-3.5' : 'size-4',
+          'size-4 shrink-0 stroke-[1.5]',
           active ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground/70',
         )}
         aria-hidden
@@ -84,76 +70,6 @@ function NavLink({
         </span>
       ) : null}
     </Link>
-  );
-}
-
-function SettingsNavBranch({
-  item,
-  pathname,
-  items,
-  onNavigate,
-}: {
-  item: AdminNavItem;
-  pathname: string;
-  items: AdminNavChild[];
-  onNavigate?: () => void;
-}) {
-  const onSettings = isSettingsPath(pathname);
-  const [open, setOpen] = useState(onSettings);
-  const Icon = item.icon;
-  const parentActive = isAdminNavActive(pathname, item.href);
-
-  useEffect(() => {
-    if (onSettings) setOpen(true);
-  }, [onSettings]);
-
-  return (
-    <li>
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-        className={cn(
-          'group flex w-full cursor-pointer items-center gap-3 rounded-[10px] px-3 py-2 text-[13px] font-medium transition-colors',
-          parentActive
-            ? 'bg-sidebar-accent/70 text-sidebar-accent-foreground'
-            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-        )}
-      >
-        <Icon
-          className={cn(
-            'size-4 shrink-0 stroke-[1.5]',
-            parentActive ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground/70',
-          )}
-          aria-hidden
-        />
-        <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
-        <ChevronDownIcon
-          className={cn(
-            'size-4 shrink-0 text-sidebar-foreground/55 transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-          aria-hidden
-        />
-      </button>
-
-      {open ? (
-        <ul className="mt-1 ml-3 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
-          {items.map((child) => (
-            <li key={child.href}>
-              <NavLink
-                href={child.href}
-                label={child.label}
-                icon={child.icon}
-                active={isAdminNavChildActive(pathname, child.href)}
-                onNavigate={onNavigate}
-                nested
-              />
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </li>
   );
 }
 
@@ -202,13 +118,11 @@ function SidebarFooter() {
 
 function SidebarBody({
   clinicName,
-  chairsEnabled = false,
   inboxBadgeCount,
   onNavigate,
   showClose,
 }: {
   clinicName?: string;
-  chairsEnabled?: boolean;
   inboxBadgeCount: number;
   onNavigate?: () => void;
   showClose?: boolean;
@@ -216,7 +130,6 @@ function SidebarBody({
   const pathname = usePathname();
   const { me } = useAuth();
   const { setMobileOpen } = useClivraShell();
-  const chairsHref = settingsHref(SETTINGS_SECTION.CADEIRAS);
   const onboardingQuery = useOnboardingGetHook();
   const onboardingCompleted = Boolean(onboardingQuery.data?.completed);
 
@@ -255,24 +168,6 @@ function SidebarBody({
             <div key={group.id} className={cn(groupIndex > 0 && 'mt-1')}>
               <ul className="flex flex-col gap-0.5">
                 {items.map((item) => {
-                  const visibleChildren = (item.children ?? []).filter((child) => {
-                    if (child.permission && !hasPermission(me, child.permission)) return false;
-                    if (!chairsEnabled && child.href === chairsHref) return false;
-                    return true;
-                  });
-
-                  if (visibleChildren.length > 0) {
-                    return (
-                      <SettingsNavBranch
-                        key={item.href}
-                        item={item}
-                        pathname={pathname}
-                        items={visibleChildren}
-                        onNavigate={onNavigate}
-                      />
-                    );
-                  }
-
                   const showInboxBadge = item.href === '/app/inbox' && inboxBadgeCount > 0;
                   return (
                     <li key={item.href}>
@@ -299,11 +194,7 @@ function SidebarBody({
 }
 
 /** Sidebar Clivra — sempre expandida no desktop; drawer só no mobile. */
-export function AppSidebar({
-  clinicName,
-  chairsEnabled = false,
-  inboxBadgeCount = 0,
-}: AppSidebarProps) {
+export function AppSidebar({ clinicName, inboxBadgeCount = 0 }: AppSidebarProps) {
   const { mobileOpen, isMobile, setMobileOpen } = useClivraShell();
 
   if (isMobile) {
@@ -326,7 +217,6 @@ export function AppSidebar({
         >
           <SidebarBody
             clinicName={clinicName}
-            chairsEnabled={chairsEnabled}
             inboxBadgeCount={inboxBadgeCount}
             showClose
             onNavigate={() => setMobileOpen(false)}
@@ -340,7 +230,6 @@ export function AppSidebar({
     <aside className="sticky top-0 z-20 hidden h-svh w-[15.5rem] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
       <SidebarBody
         clinicName={clinicName}
-        chairsEnabled={chairsEnabled}
         inboxBadgeCount={inboxBadgeCount}
       />
     </aside>

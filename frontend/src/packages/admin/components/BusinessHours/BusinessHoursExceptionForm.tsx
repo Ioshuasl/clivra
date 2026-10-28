@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { adminErrorMessage } from '@/packages/admin/helpers/AdminErrorMessage';
 import { useBusinessHoursExceptionCreateHook } from '@/packages/admin/hooks/BusinessHours/useBusinessHoursExceptionCreateHook';
 import { useBusinessHoursExceptionFormHook } from '@/packages/admin/hooks/BusinessHours/useBusinessHoursExceptionFormHook';
 import { useClinicGetHook } from '@/packages/admin/hooks/Clinic/useClinicGetHook';
@@ -15,6 +14,9 @@ import { Checkbox } from '@/shared/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { TimePicker } from '@/shared/ui/time-picker';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 export function BusinessHoursExceptionForm() {
   const clinicQuery = useClinicGetHook();
@@ -85,7 +87,15 @@ export function BusinessHoursExceptionForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="exception-date">Data</FieldLabel>
-              <Input id="exception-date" type="date" {...form.register('date')} />
+              <DatePicker
+                id="exception-date"
+                clearable={false}
+                value={isoToDate(form.watch('date'))}
+                onChange={(next) =>
+                  form.setValue('date', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                }
+                aria-invalid={Boolean(form.formState.errors.date)}
+              />
               <FieldError>{form.formState.errors.date?.message}</FieldError>
             </Field>
 
@@ -121,12 +131,22 @@ export function BusinessHoursExceptionForm() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="exception-starts">Início</FieldLabel>
-                <Input id="exception-starts" type="time" {...form.register('startsAt')} />
+                <TimePicker
+                  id="exception-starts"
+                  value={form.watch('startsAt')}
+                  onChange={(next) => form.setValue('startsAt', next, { shouldValidate: true, shouldDirty: true })}
+                  aria-invalid={Boolean(form.formState.errors.startsAt)}
+                />
                 <FieldError>{form.formState.errors.startsAt?.message}</FieldError>
               </Field>
               <Field>
                 <FieldLabel htmlFor="exception-ends">Fim</FieldLabel>
-                <Input id="exception-ends" type="time" {...form.register('endsAt')} />
+                <TimePicker
+                  id="exception-ends"
+                  value={form.watch('endsAt')}
+                  onChange={(next) => form.setValue('endsAt', next, { shouldValidate: true, shouldDirty: true })}
+                  aria-invalid={Boolean(form.formState.errors.endsAt)}
+                />
                 <FieldError>{form.formState.errors.endsAt?.message}</FieldError>
               </Field>
             </div>
@@ -143,11 +163,6 @@ export function BusinessHoursExceptionForm() {
           </Field>
         </FieldGroup>
 
-        {create.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{adminErrorMessage(create.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         {lastConflicts !== null ? (
           lastConflicts.length === 0 ? (
