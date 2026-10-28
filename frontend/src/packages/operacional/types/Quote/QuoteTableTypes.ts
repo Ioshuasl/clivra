@@ -10,6 +10,11 @@ export type QuoteTableProps = {
   onDecide: (quote: QuoteSummary) => void;
   onDuplicate: (quote: QuoteSummary) => void;
   onPdf: (quote: QuoteSummary) => void;
+  /** Sem esta função a tabela não oferece contrato (ex.: lista geral). */
+  onContract?: (quote: QuoteSummary) => void;
+  /** Orçamentos que já têm contrato ativo. */
+  contractQuoteIds?: ReadonlySet<string>;
+  contractingId?: string | null;
   duplicatingId?: string | null;
   pdfLoadingId?: string | null;
 };

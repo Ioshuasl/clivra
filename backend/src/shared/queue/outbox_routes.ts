@@ -57,6 +57,8 @@ export const OUTBOX_ROUTES: Record<string, OutboxRouteTarget> = {
     queue: QUEUE.messaging,
     job: JOB.sendWhatsappMessage,
   },
+  'documents.signature_link_sent': { queue: QUEUE.messaging, job: JOB.sendWhatsappMessage },
+  'documents.signature_code_requested': { queue: QUEUE.messaging, job: JOB.sendWhatsappMessage },
   'treatments.quote_created': 'emit-only',
   'treatments.quote_sent': [
     { queue: QUEUE.platform, job: JOB.generateQuotePdf },

@@ -107,6 +107,8 @@ export type QuoteSendResult = {
   publicUrl?: string;
 };
 
+export type QuoteContractResult = { documentId: string; created: boolean };
+
 export type QuotePdfResult = {
   url: string;
   expiresIn: number;

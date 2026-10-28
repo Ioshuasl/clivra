@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { DocumentPanel } from '@/packages/operacional/components/Document/DocumentPanel';
 import { PatientConsentsPanel } from '@/packages/operacional/components/Patient/PatientConsentsPanel';
 import { PatientDadosFields } from '@/packages/operacional/components/Patient/PatientDadosFields';
 import {
@@ -269,7 +270,7 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
         </Alert>
       ) : null}
 
-      <Tabs value={tab} onValueChange={onTabChange} className="gap-4">
+      <Tabs value={tab} onValueChange={onTabChange} className="min-w-0 gap-4">
         <div className="overflow-x-auto border-b border-border">
           <TabsList variant="line" className="h-auto min-h-9 w-max justify-start rounded-none p-0">
             <TabsTrigger value="dados" className="cursor-pointer">
@@ -299,6 +300,9 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
                 Prontuário
               </TabsTrigger>
             </Can>
+            <TabsTrigger value="documentos" className="cursor-pointer">
+              Documentos
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -368,6 +372,10 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
                 />
               </TabsContent>
             </Can>
+
+            <TabsContent value="documentos" className="mt-0">
+              <DocumentPanel patientId={patientId} />
+            </TabsContent>
           </main>
 
           <PatientDetailAside

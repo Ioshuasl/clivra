@@ -2,6 +2,8 @@ import type { RequestContext } from '../../../../shared/domain/request_context.j
 import { UnitOfWork } from '../../../../shared/database/unit_of_work.js';
 import { createReceivableFromApprovedQuote } from '../../../billing/billing_public.js';
 import { getPublicClinicCatalog } from '../../../clinic/clinic_public.js';
+import { issueQuoteContract } from '../../../documents/documents_public.js';
+import { buildQuoteContractData } from '../../helpers/quote_contract_data.helper.js';
 import { digitsOnly, getPatientById, isMinor } from '../../../patients/patients_public.js';
 import { markPublicTokenUsed } from '../../../scheduling/scheduling_public.js';
 import {
@@ -63,6 +65,17 @@ export class DecideAction {
     private readonly uow = new UnitOfWork(),
   ) {}
 
+  /** Contrato automático: falha aqui nunca desfaz a aprovação (o botão manual cobre). */
+  private async issueContractIfEnabled(ctx: RequestContext, quoteId: string): Promise<void> {
+    try {
+      const approved = await this.get.execute(ctx, quoteId);
+      const contractData = approved ? buildQuoteContractData(approved) : null;
+      if (contractData) await issueQuoteContract(ctx, contractData, 'AUTO');
+    } catch (err) {
+      console.warn('[quotes] contrato automático não gerado', { quoteId, err });
+    }
+  }
+
   async execute(
     ctx: RequestContext,
     quoteId: string,
@@ -114,7 +127,7 @@ export class DecideAction {
     }
 
     try {
-      return await this.uow.run(ctx, async ({ tx, publish }) => {
+      const result = await this.uow.run(ctx, async ({ tx, publish }) => {
         if (quoteDecisionSchema.decision === 'REJECTED') {
           const reason = quoteDecisionSchema.reason?.trim() ?? '';
           if (reason.length < 10) throw new QuoteRejectReasonRequiredError();
@@ -223,6 +236,8 @@ export class DecideAction {
           },
         };
       });
+      if (result.status !== 'REJECTED') await this.issueContractIfEnabled(ctx, quote.id);
+      return result;
     } catch (err) {
       if (!isIdempotencyConflict(err)) throw err;
       const replay = await this.findIdempotency.execute(ctx, key);

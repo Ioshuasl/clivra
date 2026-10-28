@@ -20,6 +20,7 @@ import { SendService } from '../services/quote/quote_send.service.js';
 import { DuplicateService } from '../services/quote/quote_duplicate.service.js';
 import { GetPdfService } from '../services/quote/quote_pdf.service.js';
 import { DecideService } from '../services/quote/quote_decide.service.js';
+import { ContractService } from '../services/quote/quote_contract.service.js';
 
 function requireCtx(req: Request) {
   if (!req.ctx) {
@@ -40,7 +41,18 @@ export class QuoteController {
     private readonly quoteDuplicate = new DuplicateService(),
     private readonly quotePdf = new GetPdfService(),
     private readonly quoteDecide = new DecideService(),
+    private readonly quoteContract = new ContractService(),
   ) {}
+
+  contract = async (req: Request, res: Response): Promise<void> => {
+    const ctx = requireCtx(req);
+    const params = quoteIdParamSchema.safeParse(req.params);
+    if (!params.success) {
+      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, params.error);
+    }
+    const result = await this.quoteContract.execute(ctx, params.data.id);
+    res.status(result.created ? 201 : 200).json({ data: result });
+  };
 
   list = async (req: Request, res: Response): Promise<void> => {
     const ctx = requireCtx(req);

@@ -23,6 +23,7 @@ import {
   buildSubscriptionRouter,
 } from '../modules/subscription/subscription.module.js';
 import { buildPlatformRouter } from '../modules/platform/platform.module.js';
+import { buildDocumentsRouter, buildPublicDocumentsRouter } from '../modules/documents/documents.module.js';
 
 /** Monta rotas versionadas em `/api/v1`. Módulos de domínio entram aqui. */
 export function buildApiRouter(): Router {
@@ -32,6 +33,7 @@ export function buildApiRouter(): Router {
   api.use(buildClinicRouter());
   api.use(buildPatientsRouter());
   api.use(buildClinicalRecordsRouter());
+  api.use(buildDocumentsRouter());
   api.use(buildSchedulingRouter());
   api.use(buildMessagingRouter());
   api.use('/webhooks/whatsapp', buildWhatsappWebhookRouter());
@@ -44,5 +46,6 @@ export function buildApiRouter(): Router {
   api.use('/public', buildPublicRouter());
   api.use('/public', buildPublicAnamnesisRouter());
   api.use('/public', buildPublicQuotesRouter());
+  api.use('/public', buildPublicDocumentsRouter());
   return api;
 }

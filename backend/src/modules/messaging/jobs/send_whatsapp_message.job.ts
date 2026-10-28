@@ -139,8 +139,12 @@ export async function sendWhatsappMessageJob(payload: JobPayload): Promise<void>
     hora: formatHmInTz(startsAt, tenant.timezone),
     link: publicUrl,
     valor: str(payload.valor) ?? '',
+    codigo: str(payload.code) ?? '',
   };
   const body = renderTemplateBody(template.body, variables);
+  // Mensagem de autenticação (código): o histórico/caixa de entrada da clínica não pode guardar o código.
+  const storedBody =
+    template.category === 'AUTHENTICATION' ? body.replace(/\d{6}/g, '••••••') : body;
 
   try {
     const sent = await getMessagingProvider().sendTemplate({
@@ -162,7 +166,7 @@ export async function sendWhatsappMessageJob(payload: JobPayload): Promise<void>
       direction: 'OUTBOUND',
       type: 'TEMPLATE',
       templateId: template.id,
-      body,
+      body: storedBody,
       providerMessageId: sent.providerMessageId,
       status: 'SENT',
       billable: false,

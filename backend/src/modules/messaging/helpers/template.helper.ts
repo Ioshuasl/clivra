@@ -1,4 +1,4 @@
-const ALLOWED_VARS = new Set(['nome', 'clinica', 'data', 'hora', 'link', 'valor']);
+const ALLOWED_VARS = new Set(['nome', 'clinica', 'data', 'hora', 'link', 'valor', 'codigo']);
 
 export function renderTemplateBody(
   body: string,

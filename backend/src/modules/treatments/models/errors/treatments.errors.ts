@@ -144,6 +144,13 @@ export class QuoteNotDecidableError extends AppError {
   }
 }
 
+export class QuoteNotApprovedError extends AppError {
+  constructor() {
+    super('BUSINESS_RULE_VIOLATION', 'O contrato só é gerado para orçamento aprovado.', 422);
+    this.name = 'QuoteNotApprovedError';
+  }
+}
+
 export class IdempotencyKeyReusedError extends AppError {
   constructor() {
     super('IDEMPOTENCY_KEY_REUSED', 'Idempotency-Key já usada com outro payload.', 409);

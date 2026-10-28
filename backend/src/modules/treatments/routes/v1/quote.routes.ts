@@ -40,6 +40,7 @@ export function buildQuoteRoutes(): Router {
   router.post('/:id/send', ...writeStack, asyncHandler(controller.send));
   router.post('/:id/duplicate', ...writeStack, asyncHandler(controller.duplicate));
   router.post('/:id/decision', ...writeStack, asyncHandler(controller.decide));
+  router.post('/:id/contract', ...writeStack, asyncHandler(controller.contract));
   router.get('/:id/pdf', ...readStack, asyncHandler(controller.getPdf));
 
   return router;

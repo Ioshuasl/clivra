@@ -6,6 +6,7 @@ import {
   CopyPlusIcon,
   FileTextIcon,
   PencilIcon,
+  ScrollTextIcon,
   SendIcon,
 } from 'lucide-react';
 import {
@@ -126,10 +127,16 @@ function QuoteRowActions({
   onDecide,
   onDuplicate,
   onPdf,
+  onContract,
+  hasContract,
+  contractingId,
   duplicatingId,
   pdfLoadingId,
 }: {
   quote: QuoteSummary;
+  onContract?: (quote: QuoteSummary) => void;
+  hasContract: boolean;
+  contractingId?: string | null;
   onEdit: (quote: QuoteSummary) => void;
   onSend: (quote: QuoteSummary) => void;
   onDecide: (quote: QuoteSummary) => void;
@@ -156,6 +163,24 @@ function QuoteRowActions({
             <CheckCheckIcon strokeWidth={1.7} className="size-4" />
           </TextAction>
         </Can>
+      ) : null}
+      {onContract && (quote.status === 'APPROVED' || quote.status === 'PARTIALLY_APPROVED') ? (
+        hasContract ? (
+          <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-success">
+            <ScrollTextIcon className="size-3.5" strokeWidth={1.7} />
+            Contrato emitido
+          </span>
+        ) : (
+          <Can permission="quotes.write">
+            <TextAction
+              label="Gerar contrato"
+              disabled={contractingId === quote.id}
+              onClick={() => onContract(quote)}
+            >
+              <ScrollTextIcon strokeWidth={1.7} className="size-4" />
+            </TextAction>
+          </Can>
+        )
       ) : null}
       {QUOTE_DUPLICATE_STATUSES.includes(quote.status) ? (
         <Can permission="quotes.write">
@@ -191,6 +216,9 @@ export function QuoteTable({
   onDecide,
   onDuplicate,
   onPdf,
+  onContract,
+  contractQuoteIds,
+  contractingId,
   duplicatingId,
   pdfLoadingId,
 }: QuoteTableProps) {
@@ -285,6 +313,9 @@ export function QuoteTable({
                     onDecide={onDecide}
                     onDuplicate={onDuplicate}
                     onPdf={onPdf}
+                    onContract={onContract}
+                    hasContract={contractQuoteIds?.has(quote.id) ?? false}
+                    contractingId={contractingId}
                     duplicatingId={duplicatingId}
                     pdfLoadingId={pdfLoadingId}
                   />

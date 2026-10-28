@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { QuoteTable } from '@/packages/operacional/components/Quote/QuoteTable';
 import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
+import { useDocumentListHook } from '@/packages/operacional/hooks/Document/useDocumentListHook';
 import { usePatientGetHook } from '@/packages/operacional/hooks/Patient/usePatientGetHook';
+import { useQuoteContractCreateHook } from '@/packages/operacional/hooks/Quote/useQuoteContractCreateHook';
 import { useQuoteDuplicateHook } from '@/packages/operacional/hooks/Quote/useQuoteDuplicateHook';
 import { useQuoteListHook } from '@/packages/operacional/hooks/Quote/useQuoteListHook';
 import { useQuotePdfHook } from '@/packages/operacional/hooks/Quote/useQuotePdfHook';
@@ -54,6 +56,17 @@ export function PatientQuotesPanel({
   const listQuery = useQuoteListHook({ patientId });
   const duplicate = useQuoteDuplicateHook();
   const pdf = useQuotePdfHook();
+  const contract = useQuoteContractCreateHook();
+  const documents = useDocumentListHook(patientId);
+  const contractQuoteIds = useMemo(
+    () =>
+      new Set(
+        (documents.data ?? [])
+          .filter((document) => document.quoteId && document.status !== 'CANCELLED')
+          .map((document) => document.quoteId as string),
+      ),
+    [documents.data],
+  );
   const [internalOpen, setInternalOpen] = useState(false);
   const [formQuoteId, setFormQuoteId] = useState<string | undefined>();
   const [sendQuoteId, setSendQuoteId] = useState<string | null>(null);
@@ -108,11 +121,16 @@ export function PatientQuotesPanel({
           ) : null}
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        {duplicate.isError || pdf.isError ? (
+      <CardContent className="grid min-w-0 grid-cols-1 gap-4">
+        {contract.isError ? (
           <Alert variant="destructive">
+            <AlertDescription>{operacionalErrorMessage(contract.error)}</AlertDescription>
+          </Alert>
+        ) : null}
+        {contract.isSuccess && contract.data.created ? (
+          <Alert>
             <AlertDescription>
-              {operacionalErrorMessage(duplicate.error ?? pdf.error)}
+              Contrato gerado. Ele está na aba Documentos do paciente, pronto para imprimir ou assinar.
             </AlertDescription>
           </Alert>
         ) : null}
@@ -138,6 +156,9 @@ export function PatientQuotesPanel({
               window.open(result.url, '_blank', 'noopener,noreferrer');
             });
           }}
+          onContract={(quote) => contract.mutate(quote.id)}
+          contractQuoteIds={contractQuoteIds}
+          contractingId={contract.isPending ? contract.variables ?? null : null}
           duplicatingId={duplicate.isPending ? duplicate.variables ?? null : null}
         />
       </CardContent>

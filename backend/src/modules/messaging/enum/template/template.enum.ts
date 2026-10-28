@@ -8,6 +8,8 @@ export const TEMPLATE_KEYS = [
   'quote_sent',
   'payment_receipt',
   'payment_overdue',
+  'document_signature_request',
+  'document_signature_code',
 ] as const;
 
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
