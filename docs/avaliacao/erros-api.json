@@ -1,0 +1,56 @@
+[
+  {
+    "caso": "servidor-500",
+    "titulo": "Erro no servidor",
+    "texto": "Algo deu errado do nosso lado. Tente de novo em instantes — se continuar, avise o suporte.",
+    "ok": true
+  },
+  {
+    "caso": "sem-permissao-403",
+    "titulo": "Sem permissão",
+    "texto": "Permissão insuficiente para este recurso.",
+    "ok": true
+  },
+  {
+    "caso": "muitas-tentativas-429",
+    "titulo": "Calma, muitas tentativas",
+    "texto": "Muitas tentativas em pouco tempo. Aguarde um instante e tente de novo.",
+    "ok": true
+  },
+  {
+    "caso": "duplicado-409",
+    "titulo": "Não foi possível concluir",
+    "texto": "Já existe um paciente com este CPF.",
+    "ok": true
+  },
+  {
+    "caso": "validacao-em-ingles",
+    "titulo": "Confira os dados",
+    "texto": "Revise: Telefone é obrigatório; Nome precisa ter ao menos 3 caracteres.",
+    "ok": true
+  },
+  {
+    "caso": "mensagem-tecnica",
+    "titulo": "Confira os dados",
+    "texto": "Confira os dados informados e tente de novo.",
+    "ok": true
+  },
+  {
+    "caso": "sem-internet",
+    "titulo": "Sem conexão",
+    "texto": "Sem conexão com o servidor. Verifique sua internet e tente novamente — nada foi salvo.",
+    "ok": true
+  },
+  {
+    "caso": "html-do-proxy-502",
+    "titulo": "Erro no servidor",
+    "texto": "Algo deu errado do nosso lado. Tente de novo em instantes — se continuar, avise o suporte.",
+    "ok": true
+  },
+  {
+    "caso": "sessao-expirada-401",
+    "titulo": "Sessão expirada",
+    "texto": "Token de acesso inválido ou expirado.",
+    "ok": true
+  }
+]

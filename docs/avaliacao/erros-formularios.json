@@ -1,0 +1,134 @@
+[
+  {
+    "pagina": "/app/pacientes",
+    "abriu": "Novo paciente",
+    "campos_vermelhos": 2,
+    "mensagens_sob_campo": [
+      "Informe o nome completo",
+      "Telefone obrigatório"
+    ],
+    "alertas_ou_toast": [
+      "Informe o nome completo",
+      "Telefone obrigatório"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/agenda",
+    "abriu": "Novo agendamento",
+    "campos_vermelhos": 1,
+    "mensagens_sob_campo": [
+      "Selecione o paciente"
+    ],
+    "alertas_ou_toast": [
+      "Selecione o paciente"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/agenda",
+    "abriu": "Bloquear",
+    "campos_vermelhos": 1,
+    "mensagens_sob_campo": [
+      "Informe o motivo"
+    ],
+    "alertas_ou_toast": [
+      "Informe o motivo"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/orcamentos",
+    "abriu": "Novo orçamento",
+    "campos_vermelhos": 3,
+    "mensagens_sob_campo": [
+      "Selecione o paciente",
+      "Selecione o profissional",
+      "Selecione o procedimento"
+    ],
+    "alertas_ou_toast": [
+      "Selecione o paciente",
+      "Selecione o profissional",
+      "Selecione o procedimento"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/configuracoes/membros",
+    "abriu": "Convidar",
+    "campos_vermelhos": 1,
+    "mensagens_sob_campo": [
+      "Informe o e-mail"
+    ],
+    "alertas_ou_toast": [
+      "Informe o e-mail"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/configuracoes/procedimentos",
+    "abriu": "Novo procedimento",
+    "campos_vermelhos": 2,
+    "mensagens_sob_campo": [
+      "Código obrigatório",
+      "Nome obrigatório"
+    ],
+    "alertas_ou_toast": [
+      "Código obrigatório",
+      "Nome obrigatório"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/configuracoes/profissionais",
+    "abriu": "Novo profissional",
+    "campos_vermelhos": 1,
+    "mensagens_sob_campo": [
+      "Selecione um membro"
+    ],
+    "alertas_ou_toast": [
+      "Selecione um membro"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/configuracoes/horarios",
+    "abriu": "Adicionar slot",
+    "campos_vermelhos": 0,
+    "mensagens_sob_campo": [],
+    "alertas_ou_toast": [
+      "Não foi possível concluir\n\nIntervalos de horário se sobrepõem no mesmo dia."
+    ],
+    "texto_em_ingles": [],
+    "veredito": "ERRO SÓ NO ALERTA (sem borda no campo)"
+  },
+  {
+    "pagina": "/app/configuracoes/privacidade",
+    "abriu": "Nova solicitação",
+    "campos_vermelhos": 1,
+    "mensagens_sob_campo": [
+      "Selecione o paciente"
+    ],
+    "alertas_ou_toast": [
+      "Selecione o paciente"
+    ],
+    "texto_em_ingles": [],
+    "veredito": "OK"
+  },
+  {
+    "pagina": "/app/configuracoes/anamnese",
+    "abriu": "Nova versão",
+    "campos_vermelhos": 0,
+    "mensagens_sob_campo": [],
+    "alertas_ou_toast": [],
+    "texto_em_ingles": [],
+    "veredito": "FECHOU SEM VALIDAR (enviou vazio?)"
+  }
+]
