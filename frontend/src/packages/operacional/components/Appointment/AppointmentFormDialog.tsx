@@ -4,7 +4,6 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import {
   useAppointmentCreateHook,
   useAppointmentSeriesCreateHook,
@@ -14,7 +13,6 @@ import { usePatientListHook } from '@/packages/operacional/hooks/Patient/usePati
 import type { AppointmentCreateFormValues } from '@/packages/operacional/schemas/Appointment/AppointmentSchema';
 import type { AppointmentFormDialogProps } from '@/packages/operacional/types/Appointment/AppointmentFormDialogTypes';
 import { useSheetOpenState } from '@/shared/motion/useSheetOpenState';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import {
@@ -26,7 +24,9 @@ import {
   ComboboxList,
 } from '@/shared/ui/combobox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { TimePicker } from '@/shared/ui/time-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import {
   Sheet,
@@ -151,7 +151,6 @@ export function AppointmentFormDialog({
   };
 
   const pending = create.isPending || createSeries.isPending;
-  const error = create.error ?? createSeries.error;
   const professionalName =
     professionals.find((p) => p.id === (professionalId || form.watch('professionalId')))?.name ??
     null;
@@ -248,24 +247,23 @@ export function AppointmentFormDialog({
                 <FieldError>{form.formState.errors.patientId?.message}</FieldError>
               </Field>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] gap-3">
                 <Field>
                   <FieldLabel htmlFor="appt-date">Data</FieldLabel>
-                  <Input
+                  <DatePicker
                     id="appt-date"
-                    type="date"
-                    value={dateValue}
-                    onChange={(e) => applyWhen(e.target.value, timeValue, durationMinutes)}
+                    clearable={false}
+                    value={isoToDate(dateValue)}
+                    onChange={(next) => applyWhen(dateToIso(next), timeValue, durationMinutes)}
                   />
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="appt-time">Horário</FieldLabel>
-                  <Input
+                  <TimePicker
                     id="appt-time"
-                    type="time"
-                    step={300}
+                    step={15}
                     value={timeValue}
-                    onChange={(e) => applyWhen(dateValue, e.target.value, durationMinutes)}
+                    onChange={(next) => applyWhen(dateValue, next, durationMinutes)}
                   />
                 </Field>
                 <Field>
@@ -348,11 +346,6 @@ export function AppointmentFormDialog({
               </Field>
             </FieldGroup>
 
-            {error ? (
-              <Alert variant="destructive" className="mt-4" role="alert">
-                <AlertDescription>{operacionalErrorMessage(error)}</AlertDescription>
-              </Alert>
-            ) : null}
           </div>
 
           <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">

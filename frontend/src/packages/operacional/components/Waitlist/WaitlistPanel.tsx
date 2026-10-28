@@ -146,11 +146,6 @@ export function WaitlistPanel({ professionalId }: WaitlistPanelProps) {
             </ul>
           )}
 
-          {remove.isError ? (
-            <Alert variant="destructive" className="mt-3">
-              <AlertDescription>{operacionalErrorMessage(remove.error)}</AlertDescription>
-            </Alert>
-          ) : null}
         </CardContent>
       </Card>
 

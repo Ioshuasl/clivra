@@ -112,6 +112,14 @@ export type ChairOption = {
   active: boolean;
 };
 
-export type AgendaViewMode = 'day' | 'week';
+export type AgendaViewMode = 'day' | 'week' | 'month' | 'list';
+
+export type AgendaColumn = {
+  key: string;
+  label: string;
+  day: Date;
+  professionalId?: string;
+  color?: string | null;
+};
 
 export type AgendaResourceMode = 'professional' | 'chair';

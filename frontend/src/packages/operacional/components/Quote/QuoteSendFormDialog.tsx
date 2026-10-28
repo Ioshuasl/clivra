@@ -6,7 +6,6 @@ import {
   QUOTE_SEND_CHANNELS,
   QUOTE_SEND_CHANNEL_LABELS,
 } from '@/packages/operacional/enum/Quote/QuoteSendChannelEnum';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useQuoteSendFormHook } from '@/packages/operacional/hooks/Quote/useQuoteSendFormHook';
 import { useQuoteSendHook } from '@/packages/operacional/hooks/Quote/useQuoteSendHook';
 import type { QuoteSendFormValues } from '@/packages/operacional/schemas/Quote/QuoteSendSchema';
@@ -141,11 +140,6 @@ export function QuoteSendFormDialog({ quoteId, onClose }: QuoteSendFormDialogPro
                 </Field>
               </FieldGroup>
 
-              {send.isError ? (
-                <Alert variant="destructive" className="mt-4" role="alert">
-                  <AlertDescription>{operacionalErrorMessage(send.error)}</AlertDescription>
-                </Alert>
-              ) : null}
             </div>
 
             <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">

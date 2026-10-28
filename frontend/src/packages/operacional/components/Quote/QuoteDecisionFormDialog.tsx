@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { formatCents } from '@/packages/operacional/helpers/FormatCents';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useQuoteDecisionFormHook } from '@/packages/operacional/hooks/Quote/useQuoteDecisionFormHook';
 import { useQuoteDecisionHook } from '@/packages/operacional/hooks/Quote/useQuoteDecisionHook';
 import { useQuoteGetHook } from '@/packages/operacional/hooks/Quote/useQuoteGetHook';
@@ -28,6 +27,8 @@ import {
   SheetTitle,
 } from '@/shared/ui/sheet';
 import { Textarea } from '@/shared/ui/textarea';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 function formatDueDate(value: string): string {
   const [year, month, day] = value.split('-');
@@ -226,10 +227,14 @@ export function QuoteDecisionFormDialog({ quoteId, onClose }: QuoteDecisionFormD
                       </Field>
                       <Field data-invalid={Boolean(form.formState.errors.firstDueDate)}>
                         <FieldLabel htmlFor="quote-first-due">1º vencimento</FieldLabel>
-                        <Input
+                        <DatePicker
                           id="quote-first-due"
-                          type="date"
-                          {...form.register('firstDueDate')}
+                          clearable={false}
+                          value={isoToDate(form.watch('firstDueDate'))}
+                          onChange={(next) =>
+                            form.setValue('firstDueDate', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                          }
+                          aria-invalid={Boolean(form.formState.errors.firstDueDate)}
                         />
                         <FieldError>{form.formState.errors.firstDueDate?.message}</FieldError>
                       </Field>
@@ -262,11 +267,6 @@ export function QuoteDecisionFormDialog({ quoteId, onClose }: QuoteDecisionFormD
                 )}
               </FieldGroup>
 
-              {decide.isError ? (
-                <Alert variant="destructive" className="mt-4" role="alert">
-                  <AlertDescription>{operacionalErrorMessage(decide.error)}</AlertDescription>
-                </Alert>
-              ) : null}
             </div>
 
             <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">

@@ -157,13 +157,6 @@ export function QuoteIndex() {
           </div>
         ) : (
           <>
-            {duplicate.isError || pdf.isError ? (
-              <div className="border-b border-border/80 px-4 py-3">
-                <p className="text-sm text-destructive" role="alert">
-                  {operacionalErrorMessage(duplicate.error ?? pdf.error)}
-                </p>
-              </div>
-            ) : null}
             <QuoteTable
               quotes={listQuery.data?.items ?? []}
               patientNames={patientNames}

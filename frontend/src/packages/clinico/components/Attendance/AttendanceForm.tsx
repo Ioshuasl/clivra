@@ -62,6 +62,8 @@ export function AttendanceForm({ appointmentId }: AttendanceFormProps) {
   return (
     <div className="grid gap-6">
       <AttendanceHeader
+        appointment={appointment}
+        patient={patientQuery.data}
         patientName={patientName}
         age={age}
         anamnesisStale={recordQuery.data.anamnesisStale}
@@ -82,7 +84,7 @@ export function AttendanceForm({ appointmentId }: AttendanceFormProps) {
         </aside>
       </div>
 
-      <section className="grid gap-8">
+      <section className="grid gap-4">
         <ClinicalNoteHistory patientId={patientId} />
         <AttachmentPanel patientId={patientId} />
       </section>

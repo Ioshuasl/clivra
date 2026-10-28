@@ -13,6 +13,7 @@ function resourceKey(professionalId?: string, chairId?: string): string {
 export function useAppointmentListHook(input: {
   professionalId?: string;
   chairId?: string;
+  all?: boolean;
   from?: string;
   to?: string;
   enabled?: boolean;
@@ -21,7 +22,7 @@ export function useAppointmentListHook(input: {
   const chairId = input.chairId ?? '';
   const from = input.from ?? '';
   const to = input.to ?? '';
-  const key = resourceKey(professionalId, chairId);
+  const key = input.all ? 'all' : resourceKey(professionalId, chairId);
 
   return useQuery({
     queryKey: operacionalQueryKeys.appointments(key, from, to),

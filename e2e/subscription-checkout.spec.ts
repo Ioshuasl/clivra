@@ -242,7 +242,7 @@ test.describe('Assinatura — checkout e cobranças (owner)', () => {
     await expect(page.getByRole('link', { name: 'Assinar agora' })).toHaveCount(0);
     await expect(page.getByText('Primeira cobrança', { exact: true })).toBeVisible();
     // Cartão é automático: não há botão "Pagar" na fatura.
-    await expect(page.getByRole('button', { name: 'Pagar', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Pagar fatura', exact: true })).toHaveCount(0);
 
     await page.getByTestId('subscription-cancel-open').click();
     await expect(page.getByRole('heading', { name: 'Cancelar a cobrança agendada?' })).toBeVisible();

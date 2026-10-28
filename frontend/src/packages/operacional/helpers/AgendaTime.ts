@@ -5,6 +5,7 @@ import {
   format,
   parseISO,
   startOfDay,
+  startOfMonth,
   startOfWeek,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -78,4 +79,35 @@ export function hoursAxis(): Date[] {
 
 export function parseInstant(iso: string): Date {
   return parseISO(iso);
+}
+
+export function monthGridDays(anchor: Date): Date[] {
+  const start = startOfWeek(startOfMonth(anchor), { weekStartsOn: 1 });
+  return Array.from({ length: 42 }, (_, i) => addDays(start, i));
+}
+
+export function monthRange(anchor: Date): { from: Date; to: Date } {
+  const days = monthGridDays(anchor);
+  return { from: startOfDay(days[0]!), to: addDays(startOfDay(days[41]!), 1) };
+}
+
+export function capitalizeFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export function weekdayShort(date: Date): string {
+  return format(date, 'EEE', { locale: ptBR }).replace('.', '');
+}
+
+export function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? (parts.at(-1)?.[0] ?? '') : '')).toUpperCase();
+}
+
+/** Posição (px) do instante dentro da grade, ou null se fora do horário exibido. */
+export function offsetPxInGrid(instant: Date): number | null {
+  const minutes = minutesFromGridStart(instant);
+  const total = (AGENDA_TOKENS.dayEndHour - AGENDA_TOKENS.dayStartHour) * 60;
+  if (instant.getHours() < AGENDA_TOKENS.dayStartHour || minutes > total) return null;
+  return minutes * AGENDA_TOKENS.pxPerMinute;
 }

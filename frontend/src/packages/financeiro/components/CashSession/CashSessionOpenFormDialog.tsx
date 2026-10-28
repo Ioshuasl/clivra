@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef } from 'react';
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import { useCashSessionCreateHook } from '@/packages/financeiro/hooks/CashSession/useCashSessionCreateHook';
 import { useCashSessionOpenFormHook } from '@/packages/financeiro/hooks/CashSession/useCashSessionOpenFormHook';
 import {
@@ -10,7 +9,6 @@ import {
 } from '@/packages/financeiro/schemas/CashSession/CashSessionOpenSchema';
 import type { CashSessionOpenFormDialogProps } from '@/packages/financeiro/types/CashSession/CashSessionOpenFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -60,11 +58,6 @@ export function CashSessionOpenFormDialog({
                 <FieldError>{form.formState.errors.openingReais?.message}</FieldError>
               </Field>
             </FieldGroup>
-            {create.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{financeiroErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

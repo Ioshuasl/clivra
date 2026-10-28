@@ -7,12 +7,10 @@ import {
   formatPhoneInputMask,
   formatPhoneMask,
 } from '@/packages/operacional/helpers/FormatPatientContact';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useGuardianCreateFormHook } from '@/packages/operacional/hooks/Patient/usePatientFormHook';
 import { usePatientGuardianCreateHook } from '@/packages/operacional/hooks/Patient/usePatientGuardianCreateHook';
 import type { GuardianCreateFormValues } from '@/packages/operacional/schemas/Patient/PatientSchema';
 import type { LegalGuardianSummary } from '@/packages/operacional/types/Patient/PatientTypes';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import {
@@ -135,11 +133,6 @@ export function PatientGuardiansPanel({ patientId, guardians }: PatientGuardians
               />
             </Field>
           </FieldGroup>
-          {create.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
-            </Alert>
-          ) : null}
           <Button type="submit" className="w-fit cursor-pointer" disabled={create.isPending}>
             {create.isPending ? 'Salvando…' : 'Adicionar'}
           </Button>

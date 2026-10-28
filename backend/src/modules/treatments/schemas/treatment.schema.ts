@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TOOTH_FACES } from '../enum/quote/tooth_face.enum.js';
 import { TREATMENT_PLAN_STATUSES } from '../enum/treatment_plan/treatment_plan_status.enum.js';
 
 export const treatmentPlanIdParamSchema = z.object({ id: z.string().uuid() });
@@ -53,3 +54,14 @@ export const treatmentItemCancelSchema = z
   .strict();
 
 export type TreatmentItemCancelSchema = z.infer<typeof treatmentItemCancelSchema>;
+
+export const treatmentItemCreateSchema = z
+  .object({
+    patientId: z.string().uuid(),
+    procedureId: z.string().uuid(),
+    toothCode: z.string().min(2).max(3).optional().nullable(),
+    face: z.enum(TOOTH_FACES).optional().nullable(),
+  })
+  .strict();
+
+export type TreatmentItemCreateSchema = z.infer<typeof treatmentItemCreateSchema>;

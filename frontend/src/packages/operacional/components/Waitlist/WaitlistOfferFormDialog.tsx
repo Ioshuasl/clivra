@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo } from 'react';
 import { addDays } from 'date-fns';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useAppointmentListHook } from '@/packages/operacional/hooks/Appointment/useAppointmentListHook';
 import { useWaitlistOfferFormHook } from '@/packages/operacional/hooks/Waitlist/useWaitlistFormHook';
 import { useWaitlistOfferHook } from '@/packages/operacional/hooks/Waitlist/useWaitlistOfferHook';
 import type { WaitlistOfferFormValues } from '@/packages/operacional/schemas/Waitlist/WaitlistSchema';
 import type { WaitlistOfferFormDialogProps } from '@/packages/operacional/types/Waitlist/WaitlistFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -99,11 +97,6 @@ export function WaitlistOfferFormDialog({
               </p>
             ) : null}
 
-            {offer.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{operacionalErrorMessage(offer.error)}</AlertDescription>
-              </Alert>
-            ) : null}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

@@ -5,7 +5,6 @@ import {
   SEND_LINK_CHANNELS,
   SEND_LINK_CHANNEL_LABELS,
 } from '@/packages/operacional/enum/Anamnesis/SendLinkChannelEnum';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useAnamnesisSendLinkFormHook } from '@/packages/operacional/hooks/Anamnesis/useAnamnesisSendLinkFormHook';
 import { useAnamnesisSendLinkHook } from '@/packages/operacional/hooks/Anamnesis/useAnamnesisSendLinkHook';
 import type { AnamnesisSendLinkFormValues } from '@/packages/operacional/schemas/Anamnesis/AnamnesisSendLinkSchema';
@@ -105,11 +104,6 @@ export function AnamnesisSendLinkFormDialog({
                   </NativeSelect>
                 </Field>
               </FieldGroup>
-              {sendLink.isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{operacionalErrorMessage(sendLink.error)}</AlertDescription>
-                </Alert>
-              ) : null}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar

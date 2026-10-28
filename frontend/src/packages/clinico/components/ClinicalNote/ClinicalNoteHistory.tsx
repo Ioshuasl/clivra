@@ -38,12 +38,17 @@ export function ClinicalNoteHistory({ patientId }: ClinicalNoteHistoryProps) {
 
   const items = notesQuery.data?.items ?? [];
   if (items.length === 0) {
-    return <p className="text-sm text-muted-foreground">Nenhuma evolução assinada.</p>;
+    return (
+      <div className="grid gap-1 rounded-lg border bg-card p-4">
+        <h2 className="text-base font-semibold">Histórico de evoluções</h2>
+        <p className="text-sm text-muted-foreground">Nenhuma evolução assinada ainda.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid gap-3">
-      <h2 className="text-sm font-medium">Histórico de evoluções</h2>
+    <div className="grid gap-3 rounded-lg border bg-card p-4">
+      <h2 className="text-base font-semibold">Histórico de evoluções</h2>
       <ul className="grid gap-3">
         {items.map((note) => (
           <li key={note.id} className="grid gap-2 rounded-md border p-3 text-sm">

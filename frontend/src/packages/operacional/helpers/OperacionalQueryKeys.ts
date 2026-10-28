@@ -18,4 +18,8 @@ export const operacionalQueryKeys = {
   quote: (id: string) => ['quote', id] as const,
   patientFinance: (patientId: string) => ['patient-finance', patientId] as const,
   patientCredit: (patientId: string) => ['patient-credit', patientId] as const,
+  documentTemplates: ['document-templates'] as const,
+  documentCertificate: ['document-certificate'] as const,
+  documentSetting: ['document-setting'] as const,
+  patientDocuments: (patientId: string) => ['patient-documents', patientId] as const,
 };

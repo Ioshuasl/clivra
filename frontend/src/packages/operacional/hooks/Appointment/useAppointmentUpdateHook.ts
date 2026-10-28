@@ -11,13 +11,16 @@ import type {
 export function useAppointmentUpdateHook(listKey: {
   professionalId?: string;
   chairId?: string;
+  all?: boolean;
   from: string;
   to: string;
 }) {
   const queryClient = useQueryClient();
-  const resourceKey = listKey.professionalId
-    ? `p:${listKey.professionalId}`
-    : `c:${listKey.chairId ?? ''}`;
+  const resourceKey = listKey.all
+    ? 'all'
+    : listKey.professionalId
+      ? `p:${listKey.professionalId}`
+      : `c:${listKey.chairId ?? ''}`;
   const key = operacionalQueryKeys.appointments(resourceKey, listKey.from, listKey.to);
 
   return useMutation({

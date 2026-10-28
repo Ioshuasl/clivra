@@ -19,6 +19,8 @@ export class ApiClientError extends Error {
 type RequestOptions = RequestInit & {
   tenantId?: string;
   skipAuth?: boolean;
+  /** Interno: já renovamos a sessão e repetimos esta chamada uma vez. */
+  retried?: boolean;
 };
 
 type Envelope<T> = {
@@ -35,7 +37,7 @@ class ApiClient {
   }
 
   async requestEnvelope<T>(path: string, init: RequestOptions = {}): Promise<Envelope<T>> {
-    const { tenantId, skipAuth, headers, ...rest } = init;
+    const { tenantId, skipAuth, retried, headers, ...rest } = init;
     const activeTenant = tenantId ?? tokenStore.getTenantId();
     const token = skipAuth ? null : tokenStore.getAccessToken();
 
@@ -62,12 +64,12 @@ class ApiClient {
       );
     }
 
-    if (res.status === 401 && !skipAuth && !path.startsWith('/auth/refresh')) {
+    if (res.status === 401 && !skipAuth && !retried && !path.startsWith('/auth/refresh')) {
       const refreshed = await (this.refreshing ??= this.refresh().finally(() => {
         this.refreshing = null;
       }));
       if (refreshed) {
-        return this.requestEnvelope<T>(path, init);
+        return this.requestEnvelope<T>(path, { ...init, retried: true });
       }
     }
 

@@ -18,6 +18,14 @@ import { Checkbox } from '@/shared/ui/checkbox';
 import { FieldLabel } from '@/shared/ui/field';
 import { cn } from '@/shared/helpers/utils';
 
+const TreatmentItemCreateFormDialog = dynamic(
+  () =>
+    import('@/packages/clinico/components/TreatmentPlan/TreatmentItemCreateFormDialog').then(
+      (m) => m.TreatmentItemCreateFormDialog,
+    ),
+  { ssr: false },
+);
+
 const TreatmentExecuteFormDialog = dynamic(
   () =>
     import('@/packages/clinico/components/TreatmentPlan/TreatmentExecuteFormDialog').then(
@@ -33,6 +41,7 @@ export function TreatmentPlanPanel({ patientId, appointmentId }: TreatmentPlanPa
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [executeOpen, setExecuteOpen] = useState(false);
   const [signed, setSigned] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const plan = planQuery.data;
   const pendingItems = useMemo(
@@ -86,8 +95,18 @@ export function TreatmentPlanPanel({ patientId, appointmentId }: TreatmentPlanPa
               </AlertDescription>
             </Alert>
           ) : null}
-          <p className="text-sm text-muted-foreground">Nenhum plano ativo.</p>
+          <p className="text-sm text-muted-foreground">
+            Este paciente ainda não tem plano de tratamento.
+          </p>
+          <Can permission="clinical_records.write">
+            <Button type="button" onClick={() => setAddOpen(true)}>
+              Adicionar procedimento ao plano
+            </Button>
+          </Can>
         </CardContent>
+        {addOpen ? (
+          <TreatmentItemCreateFormDialog patientId={patientId} onClose={() => setAddOpen(false)} />
+        ) : null}
       </Card>
     );
   }
@@ -152,15 +171,29 @@ export function TreatmentPlanPanel({ patientId, appointmentId }: TreatmentPlanPa
         </ul>
 
         <Can permission="clinical_records.write">
+          <Button type="button" variant="outline" onClick={() => setAddOpen(true)}>
+            Adicionar procedimento
+          </Button>
           <Button
             type="button"
             disabled={selectedItems.length === 0}
             onClick={() => setExecuteOpen(true)}
           >
-            Executar
+            {selectedItems.length > 0
+              ? `Registrar ${selectedItems.length} como realizado${selectedItems.length > 1 ? 's' : ''}`
+              : 'Registrar como realizado'}
           </Button>
+          {pendingItems.length > 0 && selectedItems.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Marque os procedimentos feitos hoje para registrá-los.
+            </p>
+          ) : null}
         </Can>
       </CardContent>
+
+      {addOpen ? (
+        <TreatmentItemCreateFormDialog patientId={patientId} onClose={() => setAddOpen(false)} />
+      ) : null}
 
       {executeOpen && selectedItems.length > 0 ? (
         <TreatmentExecuteFormDialog

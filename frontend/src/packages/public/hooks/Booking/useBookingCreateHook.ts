@@ -8,6 +8,8 @@ export function useBookingCreateHook() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    // A própria tela mostra o erro junto ao formulário.
+    meta: { silent: true },
     mutationFn: BookingCreateService,
     onError: async (error) => {
       if (error instanceof ApiClientError && error.code === 'SLOT_UNAVAILABLE') {

@@ -10,7 +10,7 @@ description: >-
 
 ## Contexto
 
-**Um único repositório Git** na raiz do projeto (`saas-multi-tenant-prontuario-odontologico`).
+**Um único repositório Git** na raiz do projeto (`clivra`).
 
 Não há multi-repo `app`/`api` separados. Paths de código: `backend/`, `frontend/`, `docs/`, `.cursor/`.
 

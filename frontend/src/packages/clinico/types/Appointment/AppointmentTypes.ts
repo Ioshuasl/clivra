@@ -1,3 +1,8 @@
+export type AppointmentStatusInput = {
+  status: string;
+  reason?: string | null;
+};
+
 export type AttendanceAppointment = {
   id: string;
   patientId: string;

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { AuthCard } from '@/packages/public/components/Auth/AuthCard';
-import { authErrorMessage } from '@/packages/public/helpers/AuthErrorMessage';
 import { useInvitationAcceptFormHook } from '@/packages/public/hooks/Invitation/useInvitationAcceptFormHook';
 import { useInvitationAcceptHook } from '@/packages/public/hooks/Invitation/useInvitationAcceptHook';
 import type { InvitationAcceptFormValues } from '@/packages/public/schemas/Invitation/InvitationSchema';
@@ -63,11 +62,6 @@ export function InvitationAcceptForm({ token }: InvitationAcceptFormProps) {
           </Field>
         </FieldGroup>
 
-        {accept.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{authErrorMessage(accept.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         <Button type="submit" disabled={accept.isPending}>
           {accept.isPending ? 'Entrando…' : 'Aceitar e entrar'}

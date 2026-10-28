@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { clinicoErrorMessage } from '@/packages/clinico/helpers/ClinicoErrorMessage';
 import { useClinicalNoteAmendFormHook } from '@/packages/clinico/hooks/ClinicalNote/useClinicalNoteAmendFormHook';
 import { useClinicalNoteAmendHook } from '@/packages/clinico/hooks/ClinicalNote/useClinicalNoteAmendHook';
 import type { ClinicalNoteAmendFormValues } from '@/packages/clinico/schemas/ClinicalNote/ClinicalNoteSchema';
 import type { ClinicalNoteAmendFormDialogProps } from '@/packages/clinico/types/ClinicalNote/ClinicalNoteAmendFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -65,11 +63,6 @@ export function ClinicalNoteAmendFormDialog({
                 <FieldError>{form.formState.errors.reason?.message}</FieldError>
               </Field>
             </FieldGroup>
-            {amend.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{clinicoErrorMessage(amend.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

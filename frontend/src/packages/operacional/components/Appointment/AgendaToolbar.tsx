@@ -1,7 +1,9 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, SlidersHorizontalIcon } from 'lucide-react';
 import {
+  AGENDA_ALL_PROFESSIONALS,
   SLOT_MINUTES_OPTIONS,
   type SlotMinutes,
 } from '@/packages/operacional/helpers/AgendaNotionTokens';
@@ -11,6 +13,7 @@ import type {
   ChairOption,
   ProfessionalOption,
 } from '@/packages/operacional/types/Appointment/AppointmentTypes';
+import { cn } from '@/shared/helpers/utils';
 import { Button } from '@/shared/ui/button';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 
@@ -33,9 +36,18 @@ type AgendaToolbarProps = {
   chairId: string;
   onChairId: (id: string) => void;
   onBlock: () => void;
+  blockDisabled?: boolean;
+  allowAllProfessionals?: boolean;
   waitlistOpen?: boolean;
   onWaitlistToggle?: () => void;
 };
+
+const VIEW_OPTIONS: Array<{ mode: AgendaViewMode; label: string }> = [
+  { mode: 'day', label: 'Dia' },
+  { mode: 'week', label: 'Semana' },
+  { mode: 'month', label: 'Mês' },
+  { mode: 'list', label: 'Lista' },
+];
 
 export function AgendaToolbar({
   viewMode,
@@ -56,31 +68,28 @@ export function AgendaToolbar({
   chairId,
   onChairId,
   onBlock,
+  blockDisabled = false,
+  allowAllProfessionals = false,
   waitlistOpen = false,
   onWaitlistToggle,
 }: AgendaToolbarProps) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const timeGrid = viewMode === 'day' || viewMode === 'week';
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-0.5">
-        <Button
-          type="button"
-          size="sm"
-          variant={viewMode === 'day' ? 'secondary' : 'ghost'}
-          className="cursor-pointer"
-          onClick={() => onViewMode('day')}
-        >
-          Dia
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={viewMode === 'week' ? 'secondary' : 'ghost'}
-          className="cursor-pointer"
-          onClick={() => onViewMode('week')}
-        >
-          Semana
-        </Button>
-      </div>
+      <NativeSelect
+        aria-label="Tipo de calendário"
+        value={viewMode}
+        onChange={(e) => onViewMode(e.target.value as AgendaViewMode)}
+        className="h-8 w-full sm:w-32"
+      >
+        {VIEW_OPTIONS.map((option) => (
+          <NativeSelectOption key={option.mode} value={option.mode}>
+            {option.label}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
 
       <div className="flex items-center gap-1">
         <Button
@@ -112,9 +121,7 @@ export function AgendaToolbar({
         >
           <ChevronRightIcon />
         </Button>
-        <span className="min-w-36 px-2 text-sm font-medium capitalize text-foreground">
-          {anchorLabel}
-        </span>
+        <span className="min-w-36 px-2 text-sm font-medium text-foreground">{anchorLabel}</span>
       </div>
 
       {chairsEnabled ? (
@@ -145,9 +152,14 @@ export function AgendaToolbar({
           aria-label="Profissional"
           value={professionalId}
           onChange={(e) => onProfessionalId(e.target.value)}
-          className="h-8 w-44"
+          className="h-8 w-full sm:w-44"
         >
           <NativeSelectOption value="">Profissional…</NativeSelectOption>
+          {allowAllProfessionals ? (
+            <NativeSelectOption value={AGENDA_ALL_PROFESSIONALS}>
+              Toda a equipe
+            </NativeSelectOption>
+          ) : null}
           {professionals.map((p) => (
             <NativeSelectOption key={p.id} value={p.id}>
               {p.name}
@@ -159,7 +171,7 @@ export function AgendaToolbar({
           aria-label="Cadeira"
           value={chairId}
           onChange={(e) => onChairId(e.target.value)}
-          className="h-8 w-44"
+          className="h-8 w-full sm:w-44"
         >
           <NativeSelectOption value="">Cadeira…</NativeSelectOption>
           {chairs.map((c) => (
@@ -170,40 +182,63 @@ export function AgendaToolbar({
         </NativeSelect>
       )}
 
-      <NativeSelect
-        aria-label="Duração do slot"
-        value={String(slotMinutes)}
-        onChange={(e) => onSlotMinutes(Number(e.target.value) as SlotMinutes)}
-        className="h-8 w-28"
-      >
-        {SLOT_MINUTES_OPTIONS.map((m) => (
-          <NativeSelectOption key={m} value={String(m)}>
-            {m} min
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
-
       <Button
         type="button"
         size="sm"
         variant="outline"
-        className="cursor-pointer"
-        onClick={onBlock}
+        className="cursor-pointer md:hidden"
+        aria-expanded={moreOpen}
+        onClick={() => setMoreOpen((open) => !open)}
       >
-        Bloquear
+        <SlidersHorizontalIcon />
+        Mais
       </Button>
-      {onWaitlistToggle ? (
+
+      <div
+        className={cn(
+          'w-full flex-wrap items-center gap-2 md:contents',
+          moreOpen ? 'flex' : 'hidden md:contents',
+        )}
+      >
+        {timeGrid ? (
+          <NativeSelect
+            aria-label="Duração do slot"
+            value={String(slotMinutes)}
+            onChange={(e) => onSlotMinutes(Number(e.target.value) as SlotMinutes)}
+            className="h-8 w-28"
+          >
+            {SLOT_MINUTES_OPTIONS.map((m) => (
+              <NativeSelectOption key={m} value={String(m)}>
+                {m} min
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        ) : null}
+
         <Button
           type="button"
           size="sm"
-          variant={waitlistOpen ? 'secondary' : 'outline'}
+          variant="outline"
           className="cursor-pointer"
-          aria-pressed={waitlistOpen}
-          onClick={onWaitlistToggle}
+          disabled={blockDisabled}
+          title={blockDisabled ? 'Escolha um profissional para bloquear horário' : undefined}
+          onClick={onBlock}
         >
-          Fila de espera
+          Bloquear
         </Button>
-      ) : null}
+        {onWaitlistToggle ? (
+          <Button
+            type="button"
+            size="sm"
+            variant={waitlistOpen ? 'secondary' : 'outline'}
+            className="cursor-pointer"
+            aria-pressed={waitlistOpen}
+            onClick={onWaitlistToggle}
+          >
+            Fila de espera
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { ApiClientError } from '@/shared/api/api-client';
+import { friendlyApiError } from '@/shared/helpers/FriendlyApiError';
 
 export function messagingErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
@@ -12,8 +13,6 @@ export function messagingErrorMessage(error: unknown): string {
     if (error.code === 'PLAN_LIMIT_EXCEEDED' || error.code === 'SUBSCRIPTION_REQUIRED') {
       return error.message || 'Assinatura inativa. A inbox está somente leitura.';
     }
-    return error.message;
   }
-  if (error instanceof Error) return error.message;
-  return 'Não foi possível concluir a operação.';
+  return friendlyApiError(error);
 }

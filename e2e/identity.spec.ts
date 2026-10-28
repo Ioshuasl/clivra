@@ -9,8 +9,8 @@ test.describe('Identity (E1)', () => {
     await page.getByLabel('E-mail').fill('nao-existe@example.com');
     await page.getByLabel('Senha', { exact: true }).fill('senha-errada');
     await page.getByRole('button', { name: 'Entrar' }).click();
-    // Evita o announcer do Next (`#__next-route-announcer__` também é role=alert).
-    await expect(page.locator('[data-slot="alert"]')).toBeVisible();
+    // Falha da API vira aviso (toast) em português.
+    await expect(page.locator('[data-slot="toast-description"]').first()).toBeVisible();
     await expect(page).toHaveURL(/\/login/);
   });
 

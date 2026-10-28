@@ -5,6 +5,8 @@ import { WaitlistAcceptCreateService } from '@/packages/public/services/Waitlist
 
 export function useWaitlistAcceptCreateHook() {
   return useMutation({
+    // A própria tela mostra o erro junto ao formulário.
+    meta: { silent: true },
     mutationFn: WaitlistAcceptCreateService,
   });
 }

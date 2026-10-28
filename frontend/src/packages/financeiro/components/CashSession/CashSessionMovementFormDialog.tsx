@@ -1,6 +1,5 @@
 'use client';
 
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import {
   CASH_MOVEMENT_KIND_LABELS,
   CASH_MOVEMENT_KINDS,
@@ -17,7 +16,6 @@ import {
 } from '@/packages/financeiro/schemas/CashSession/CashSessionMovementSchema';
 import type { CashSessionMovementFormDialogProps } from '@/packages/financeiro/types/CashSession/CashSessionMovementFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -106,11 +104,6 @@ export function CashSessionMovementFormDialog({
                 <FieldError>{form.formState.errors.reason?.message}</FieldError>
               </Field>
             </FieldGroup>
-            {create.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{financeiroErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

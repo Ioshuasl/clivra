@@ -3,7 +3,6 @@
 import { useMemo, useRef } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { PAYMENT_METHOD_LABELS } from '@/packages/financeiro/enum/Payment/PaymentMethodEnum';
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import { centsToReaisInput, formatCents } from '@/packages/financeiro/helpers/FormatCents';
 import { useCashSessionCloseFormHook } from '@/packages/financeiro/hooks/CashSession/useCashSessionCloseFormHook';
 import { useCashSessionCloseHook } from '@/packages/financeiro/hooks/CashSession/useCashSessionCloseHook';
@@ -118,11 +117,6 @@ export function CashSessionCloseFormDialog({ session, onClose }: CashSessionClos
               <FieldError>{form.formState.errors.differenceReason?.message}</FieldError>
             </Field>
 
-            {close.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{financeiroErrorMessage(close.error)}</AlertDescription>
-              </Alert>
-            ) : null}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

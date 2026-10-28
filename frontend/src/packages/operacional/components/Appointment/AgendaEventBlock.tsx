@@ -8,6 +8,7 @@ import {
 import { AGENDA_TOKENS } from '@/packages/operacional/helpers/AgendaNotionTokens';
 import {
   formatHour,
+  initials,
   minutesFromGridStart,
   parseInstant,
   snapMinutes,
@@ -104,13 +105,20 @@ export function AgendaEventBlock({
     }
   };
 
+  const patientName = appointment.patient?.name ?? 'Paciente';
+  const detail = appointment.procedure?.name ?? meta.label;
+  const timeRange = `${formatHour(start)}–${formatHour(end)}`;
+  const roomy = height >= 52;
+
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${appointment.patient?.name ?? 'Paciente'} — ${meta.label}`}
+      aria-label={`${patientName} — ${meta.label}`}
+      title={`${patientName}
+${timeRange} · ${detail} · ${meta.label}`}
       className={cn(
-        'absolute inset-x-1 z-10 cursor-grab overflow-hidden rounded-md border px-1.5 py-1 text-left shadow-none active:cursor-grabbing',
+        'absolute inset-x-1 z-10 cursor-grab overflow-hidden rounded-md border py-1 pl-2.5 pr-1.5 text-left shadow-none active:cursor-grabbing',
         meta.bg,
         meta.text,
         meta.border,
@@ -129,15 +137,25 @@ export function AgendaEventBlock({
         }
       }}
     >
-      <p className="truncate text-[11px] font-semibold leading-tight">
-        {appointment.patient?.name ?? 'Paciente'}
-      </p>
-      <p className="truncate text-[10px] opacity-90">
-        {formatHour(start)}–{formatHour(end)} · {meta.label}
-        {showProfessional && appointment.professional?.name
-          ? ` · ${appointment.professional.name}`
-          : ''}
-      </p>
+      <span aria-hidden className={cn('absolute inset-y-0 left-0 w-1', meta.dot)} />
+      <div className="flex items-center gap-1">
+        <span
+          aria-hidden
+          className="flex size-4 shrink-0 items-center justify-center rounded-full bg-background/70 text-[8px] font-semibold"
+        >
+          {initials(patientName)}
+        </span>
+        <p className="truncate text-[11px] font-semibold leading-tight">{patientName}</p>
+      </div>
+      <p className="mt-0.5 truncate text-[10px] opacity-90">{timeRange}</p>
+      {roomy ? (
+        <p className="truncate text-[10px] opacity-90">
+          {detail}
+          {showProfessional && appointment.professional?.name
+            ? ` · ${appointment.professional.name}`
+            : ''}
+        </p>
+      ) : null}
       <button
         type="button"
         aria-label="Redimensionar duração"

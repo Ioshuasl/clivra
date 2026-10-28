@@ -5,6 +5,9 @@ export const clinicoQueryKeys = {
   odontogramRoot: (patientId: string) => ['clinico-odontogram', patientId] as const,
   odontogram: (patientId: string, dentition: string) =>
     ['clinico-odontogram', patientId, dentition] as const,
+  anamnesis: (patientId: string) => ['clinico-anamnesis', patientId] as const,
+  anamnesisForm: (professionalId?: string) => ['clinico-anamnesis-form', professionalId ?? 'default'] as const,
+  procedures: ['clinico-procedures'] as const,
   notes: (patientId: string) => ['clinico-notes', patientId] as const,
   attachments: (patientId: string) => ['clinico-attachments', patientId] as const,
   treatmentPlans: (patientId: string) => ['clinico-treatment-plans', patientId] as const,

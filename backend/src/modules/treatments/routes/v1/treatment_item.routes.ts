@@ -23,6 +23,7 @@ const clinicalWriteStack: RequestHandler[] = [
 export function buildTreatmentItemRoutes(): Router {
   const router = Router();
   const controller = new TreatmentItemController();
+  router.post('/', ...clinicalWriteStack, asyncHandler(controller.create));
   router.post('/execute', ...clinicalWriteStack, asyncHandler(controller.executeMany));
   router.post('/:id/execute', ...clinicalWriteStack, asyncHandler(controller.execute));
   router.post('/:id/cancel', ...clinicalWriteStack, asyncHandler(controller.cancel));

@@ -21,6 +21,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Textarea } from '@/shared/ui/textarea';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 export function QuoteDecisionForm({ token }: QuoteDecisionFormProps) {
   const getQuery = useQuoteGetHook(token);
@@ -185,10 +187,14 @@ export function QuoteDecisionForm({ token }: QuoteDecisionFormProps) {
               </Field>
               <Field data-invalid={Boolean(form.formState.errors.firstDueDate)}>
                 <FieldLabel htmlFor="public-quote-first-due">1º vencimento</FieldLabel>
-                <Input
+                <DatePicker
                   id="public-quote-first-due"
-                  type="date"
-                  {...form.register('firstDueDate')}
+                  clearable={false}
+                  value={isoToDate(form.watch('firstDueDate'))}
+                  onChange={(next) =>
+                    form.setValue('firstDueDate', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                  }
+                  aria-invalid={Boolean(form.formState.errors.firstDueDate)}
                 />
                 <FieldError>{form.formState.errors.firstDueDate?.message}</FieldError>
               </Field>

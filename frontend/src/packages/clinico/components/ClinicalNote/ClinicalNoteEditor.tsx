@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ClinicalNoteSignConfirmDialog } from '@/packages/clinico/components/ClinicalNote/ClinicalNoteSignConfirmDialog';
 import { CLINICAL_NOTE_TEMPLATES } from '@/packages/clinico/helpers/ClinicalNoteTemplates';
 import {
   clearClinicalNoteDraft,
   readClinicalNoteDraft,
   writeClinicalNoteDraft,
 } from '@/packages/clinico/helpers/ClinicalNoteDraft';
-import { clinicoErrorMessage } from '@/packages/clinico/helpers/ClinicoErrorMessage';
 import { useClinicalNoteCreateHook } from '@/packages/clinico/hooks/ClinicalNote/useClinicalNoteCreateHook';
 import { useClinicalNoteFormHook } from '@/packages/clinico/hooks/ClinicalNote/useClinicalNoteFormHook';
 import type { ClinicalNoteCreateFormValues } from '@/packages/clinico/schemas/ClinicalNote/ClinicalNoteSchema';
@@ -28,20 +28,23 @@ export function ClinicalNoteEditor({ patientId, appointmentId }: ClinicalNoteEdi
   const form = useClinicalNoteFormHook(draft);
   const create = useClinicalNoteCreateHook(patientId, appointmentId);
   const [signed, setSigned] = useState(false);
+  const [toSign, setToSign] = useState<ClinicalNoteCreateFormValues | null>(null);
   const content = form.watch('content') ?? '';
 
   useEffect(() => {
     writeClinicalNoteDraft(appointmentId, content);
   }, [appointmentId, content]);
 
-  const onSave = async (values: ClinicalNoteCreateFormValues) => {
+  const onSave = async () => {
+    if (!toSign) return;
     await create.mutateAsync({
       patientId,
       appointmentId,
-      content: values.content,
+      content: toSign.content,
     });
     clearClinicalNoteDraft(appointmentId);
     form.reset({ content: '' });
+    setToSign(null);
     setSigned(true);
   };
 
@@ -81,26 +84,38 @@ export function ClinicalNoteEditor({ patientId, appointmentId }: ClinicalNoteEdi
         <form
           className="grid gap-3"
           onSubmit={(event) => {
-            void form.handleSubmit(onSave)(event);
+            void form.handleSubmit((values) => setToSign(values))(event);
           }}
         >
           <Field data-invalid={Boolean(form.formState.errors.content)}>
-            <FieldLabel htmlFor="clinical-note-content">Texto da evolução</FieldLabel>
-            <Textarea id="clinical-note-content" rows={8} {...form.register('content')} />
-            <p className="text-xs text-muted-foreground">{content.trim().length} caracteres · rascunho local</p>
+            <FieldLabel htmlFor="clinical-note-content">O que foi feito neste atendimento?</FieldLabel>
+            <Textarea
+              id="clinical-note-content"
+              rows={8}
+              placeholder="Escolha um modelo acima ou escreva livremente. Você poderá revisar antes de assinar."
+              {...form.register('content')}
+            />
+            <p className="text-xs text-muted-foreground">
+              {content.trim().length} caracteres · rascunho salvo automaticamente neste computador
+            </p>
             <FieldError>{form.formState.errors.content?.message}</FieldError>
           </Field>
-          {create.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{clinicoErrorMessage(create.error)}</AlertDescription>
-            </Alert>
-          ) : null}
           <Can permission="clinical_records.write">
             <Button type="submit" disabled={create.isPending}>
-              {create.isPending ? 'Assinando…' : 'Salvar e assinar'}
+              Revisar e assinar
             </Button>
           </Can>
         </form>
+        {toSign ? (
+          <ClinicalNoteSignConfirmDialog
+            content={toSign.content}
+            isPending={create.isPending}
+            onConfirm={() => {
+              void onSave();
+            }}
+            onClose={() => setToSign(null)}
+          />
+        ) : null}
       </CardContent>
     </Card>
   );

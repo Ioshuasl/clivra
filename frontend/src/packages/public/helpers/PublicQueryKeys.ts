@@ -5,4 +5,5 @@ export const publicQueryKeys = {
   confirm: (token: string) => ['public-booking-confirm', token] as const,
   anamnesis: (token: string) => ['public-anamnesis', token] as const,
   quote: (token: string) => ['public-quote', token] as const,
+  documentSignature: (token: string) => ['public-document-signature', token] as const,
 };

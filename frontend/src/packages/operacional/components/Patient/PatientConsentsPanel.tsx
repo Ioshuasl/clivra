@@ -6,12 +6,10 @@ import {
   CONSENT_TYPE_LABELS,
   CONSENT_TYPES,
 } from '@/packages/operacional/enum/Patient/ConsentEnum';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { usePatientConsentCreateHook } from '@/packages/operacional/hooks/Patient/usePatientConsentCreateHook';
 import { useConsentCreateFormHook } from '@/packages/operacional/hooks/Patient/usePatientFormHook';
 import type { ConsentCreateFormValues } from '@/packages/operacional/schemas/Patient/PatientSchema';
 import type { ConsentSummary } from '@/packages/operacional/types/Patient/PatientTypes';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import {
@@ -162,11 +160,6 @@ export function PatientConsentsPanel({ patientId, consents }: PatientConsentsPan
               <FieldError>{form.formState.errors.documentVersion?.message}</FieldError>
             </Field>
           </FieldGroup>
-          {create.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
-            </Alert>
-          ) : null}
           <Button type="submit" className="w-fit cursor-pointer" disabled={create.isPending}>
             {create.isPending ? 'Salvando…' : 'Registrar'}
           </Button>

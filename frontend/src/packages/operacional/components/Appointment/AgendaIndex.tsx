@@ -2,15 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { addDays, format } from 'date-fns';
+import { addDays, addMonths, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { LinkIcon } from 'lucide-react';
 import { AgendaGrid } from '@/packages/operacional/components/Appointment/AgendaGrid';
+import { AgendaListView } from '@/packages/operacional/components/Appointment/AgendaListView';
+import { AgendaMonthGrid } from '@/packages/operacional/components/Appointment/AgendaMonthGrid';
 import { AgendaToolbar } from '@/packages/operacional/components/Appointment/AgendaToolbar';
-import { APPOINTMENT_STATUS_META } from '@/packages/operacional/enum/Appointment/AppointmentStatusEnum';
-import type { SlotMinutes } from '@/packages/operacional/helpers/AgendaNotionTokens';
 import {
+  APPOINTMENT_STATUS_META,
+  type AppointmentStatus,
+} from '@/packages/operacional/enum/Appointment/AppointmentStatusEnum';
+import {
+  AGENDA_ALL_PROFESSIONALS,
+  type SlotMinutes,
+} from '@/packages/operacional/helpers/AgendaNotionTokens';
+import {
+  capitalizeFirst,
+  dayLabel,
   dayRange,
+  monthGridDays,
+  monthRange,
   rangeIso,
   snapMinutes,
   toYmd,
@@ -24,6 +36,7 @@ import { useAgendaProfessionalListHook } from '@/packages/operacional/hooks/Appo
 import { useAppointmentListHook } from '@/packages/operacional/hooks/Appointment/useAppointmentListHook';
 import { useAppointmentUpdateHook } from '@/packages/operacional/hooks/Appointment/useAppointmentUpdateHook';
 import type {
+  AgendaColumn,
   AgendaResourceMode,
   AgendaViewMode,
   AppointmentSummary,
@@ -95,6 +108,15 @@ function defaultCreateSlot(anchor: Date, slotMinutes: SlotMinutes): {
   return { startsAt: start.toISOString(), endsAt: end.toISOString() };
 }
 
+const LEGEND_STATUSES = [
+  'REQUESTED',
+  'SCHEDULED',
+  'CONFIRMED',
+  'IN_SERVICE',
+  'COMPLETED',
+  'NO_SHOW',
+] as const satisfies readonly AppointmentStatus[];
+
 export function AgendaIndex() {
   const { tenant } = useAuth();
   const [viewMode, setViewMode] = useState<AgendaViewMode>('week');
@@ -118,6 +140,10 @@ export function AgendaIndex() {
   const [blockOpen, setBlockOpen] = useState(false);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
+  // Faltas ficam escondidas por padrão (poluem o dia); a legenda reativa.
+  const [hiddenStatuses, setHiddenStatuses] = useState<ReadonlySet<string>>(
+    () => new Set(['NO_SHOW']),
+  );
 
   const clinicSettingsQuery = useAgendaClinicSettingsHook();
   const chairsEnabled = clinicSettingsQuery.data?.chairsEnabled === true;
@@ -147,28 +173,41 @@ export function AgendaIndex() {
     }
   }, [chairs, chairId, chairsEnabled]);
 
-  const days = useMemo(
-    () => (viewMode === 'week' ? weekDays(anchor) : [anchor]),
-    [viewMode, anchor],
-  );
+  const days = useMemo(() => {
+    if (viewMode === 'day') return [anchor];
+    if (viewMode === 'month') return monthGridDays(anchor);
+    return weekDays(anchor);
+  }, [viewMode, anchor]);
 
-  const { from, to } = useMemo(
-    () => (viewMode === 'week' ? weekRange(anchor) : dayRange(anchor)),
-    [viewMode, anchor],
-  );
+  const { from, to } = useMemo(() => {
+    if (viewMode === 'day') return dayRange(anchor);
+    if (viewMode === 'month') return monthRange(anchor);
+    return weekRange(anchor);
+  }, [viewMode, anchor]);
   const { from: fromIso, to: toIso } = rangeIso(from, to);
 
   const effectiveResourceMode: AgendaResourceMode =
     chairsEnabled && resourceMode === 'chair' ? 'chair' : 'professional';
+  // A semana mistura dias numa só grade: exige um profissional (Todos = 1º da lista).
+  const allowAll = effectiveResourceMode === 'professional' && viewMode !== 'week';
+  const isAll = allowAll && professionalId === AGENDA_ALL_PROFESSIONALS;
+  const resolvedProfessionalId =
+    professionalId === AGENDA_ALL_PROFESSIONALS && !isAll
+      ? (professionals[0]?.id ?? '')
+      : professionalId;
   const activeProfessionalId =
-    effectiveResourceMode === 'professional' ? professionalId : undefined;
+    effectiveResourceMode === 'professional' && !isAll ? resolvedProfessionalId : undefined;
   const activeChairId = effectiveResourceMode === 'chair' ? chairId : undefined;
   const resourceReady =
-    effectiveResourceMode === 'professional' ? Boolean(professionalId) : Boolean(chairId);
+    isAll ||
+    (effectiveResourceMode === 'professional'
+      ? Boolean(resolvedProfessionalId)
+      : Boolean(chairId));
 
   const listQuery = useAppointmentListHook({
     professionalId: activeProfessionalId,
     chairId: activeChairId,
+    all: isAll,
     from: fromIso,
     to: toIso,
     enabled: resourceReady,
@@ -177,18 +216,51 @@ export function AgendaIndex() {
   const update = useAppointmentUpdateHook({
     professionalId: activeProfessionalId,
     chairId: activeChairId,
+    all: isAll,
     from: fromIso,
     to: toIso,
   });
 
-  const appointments = (listQuery.data ?? []).filter(
-    (a) => a.status !== 'CANCELLED' && a.status !== 'NO_SHOW',
-  );
+  const rangeAppointments = (listQuery.data ?? []).filter((a) => a.status !== 'CANCELLED');
+  const appointments = rangeAppointments.filter((a) => !hiddenStatuses.has(a.status));
+  const statusCount = (status: string) =>
+    rangeAppointments.filter((a) => a.status === status).length;
+  const toggleStatus = (status: string) =>
+    setHiddenStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) next.delete(status);
+      else next.add(status);
+      return next;
+    });
 
-  const anchorLabel =
-    viewMode === 'week'
-      ? `${format(days[0]!, 'd MMM', { locale: ptBR })} – ${format(days[6]!, 'd MMM yyyy', { locale: ptBR })}`
-      : format(anchor, "EEEE, d 'de' MMMM", { locale: ptBR });
+  const columns: AgendaColumn[] =
+    isAll && viewMode === 'day'
+      ? professionals
+          .filter((p) => p.active)
+          .map((p) => ({
+            key: p.id,
+            label: p.name,
+            day: anchor,
+            professionalId: p.id,
+            color: p.color,
+          }))
+      : days.map((day) => ({ key: toYmd(day), label: dayLabel(day), day }));
+
+  const anchorLabel = (() => {
+    if (viewMode === 'day') {
+      return capitalizeFirst(format(anchor, "EEEE, d 'de' MMMM", { locale: ptBR }));
+    }
+    if (viewMode === 'month') {
+      return capitalizeFirst(format(anchor, "MMMM 'de' yyyy", { locale: ptBR }));
+    }
+    return `${format(days[0]!, 'd MMM', { locale: ptBR })} – ${format(days[6]!, 'd MMM yyyy', { locale: ptBR })}`;
+  })();
+
+  const shift = (direction: 1 | -1) =>
+    setAnchor((d) => {
+      if (viewMode === 'month') return addMonths(d, direction);
+      return addDays(d, (viewMode === 'day' ? 1 : 7) * direction);
+    });
 
   const onMoveOrResize = async (input: {
     appointmentId: string;
@@ -229,11 +301,12 @@ export function AgendaIndex() {
       ? 'Cadastre um profissional para visualizar a agenda.'
       : 'Cadastre uma cadeira para visualizar a agenda.';
 
-  const openCreate = (startsAt?: Date, endsAt?: Date) => {
+  const openCreate = (startsAt?: Date, endsAt?: Date, slotProfessionalId?: string) => {
     if (startsAt && endsAt) {
       setCreateSlot({
         startsAt: startsAt.toISOString(),
         endsAt: endsAt.toISOString(),
+        professionalId: slotProfessionalId,
       });
       return;
     }
@@ -262,7 +335,7 @@ export function AgendaIndex() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
+      <div className="flex shrink-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Agenda</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -271,18 +344,19 @@ export function AgendaIndex() {
               : 'Consultas do dia e da semana por profissional.'}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             type="button"
             variant="outline"
             className="cursor-pointer"
             disabled={!tenantSlug}
+            aria-label="Copiar link público"
             onClick={() => {
               void onCopyPublicBookingLink();
             }}
           >
             <LinkIcon />
-            Copiar link público
+            <span className="hidden sm:inline">Copiar link público</span>
           </Button>
           <Button
             type="button"
@@ -307,8 +381,8 @@ export function AgendaIndex() {
             viewMode={viewMode}
             onViewMode={setViewMode}
             anchorLabel={anchorLabel}
-            onPrev={() => setAnchor((d) => addDays(d, viewMode === 'week' ? -7 : -1))}
-            onNext={() => setAnchor((d) => addDays(d, viewMode === 'week' ? 7 : 1))}
+            onPrev={() => shift(-1)}
+            onNext={() => shift(1)}
             onToday={() => setAnchor(new Date())}
             slotMinutes={slotMinutes}
             onSlotMinutes={setSlotMinutes}
@@ -316,7 +390,9 @@ export function AgendaIndex() {
             onResourceMode={setResourceMode}
             chairsEnabled={chairsEnabled}
             professionals={professionals}
-            professionalId={professionalId}
+            professionalId={isAll ? AGENDA_ALL_PROFESSIONALS : resolvedProfessionalId}
+            allowAllProfessionals={allowAll}
+            blockDisabled={isAll}
             onProfessionalId={setProfessionalId}
             chairs={chairs}
             chairId={chairId}
@@ -336,17 +412,40 @@ export function AgendaIndex() {
               <AlertDescription>{operacionalErrorMessage(listQuery.error)}</AlertDescription>
             </Alert>
           ) : (
-            <AgendaGrid
-              days={days}
-              appointments={appointments}
-              slotMinutes={slotMinutes}
-              showProfessional={effectiveResourceMode === 'chair'}
-              onSlotClick={(startsAt, endsAt) => openCreate(startsAt, endsAt)}
-              onOpenAppointment={setSelected}
-              onMoveOrResize={(input) => {
-                void onMoveOrResize(input);
-              }}
-            />
+            <>
+              {viewMode === 'month' ? (
+                <AgendaMonthGrid
+                  days={days}
+                  anchor={anchor}
+                  appointments={appointments}
+                  showProfessional={isAll}
+                  onOpenDay={(day) => {
+                    setAnchor(day);
+                    setViewMode('day');
+                  }}
+                  onOpenAppointment={setSelected}
+                />
+              ) : viewMode === 'list' ? (
+                <AgendaListView
+                  appointments={appointments}
+                  showProfessional={isAll}
+                  onOpenAppointment={setSelected}
+                />
+              ) : (
+                <AgendaGrid
+                  columns={columns}
+                  appointments={appointments}
+                  slotMinutes={slotMinutes}
+                  scrollKey={`${viewMode}-${toYmd(anchor)}-${isAll}`}
+                  showProfessional={effectiveResourceMode === 'chair'}
+                  onSlotClick={openCreate}
+                  onOpenAppointment={setSelected}
+                  onMoveOrResize={(input) => {
+                    void onMoveOrResize(input);
+                  }}
+                />
+              )}
+            </>
           )}
 
           {moveError ? (
@@ -356,31 +455,40 @@ export function AgendaIndex() {
           ) : null}
         </CardContent>
         <CardFooter className="shrink-0 flex-wrap gap-2 border-border">
-          {(['REQUESTED', 'SCHEDULED', 'CONFIRMED', 'IN_SERVICE', 'NO_SHOW'] as const).map(
-            (status) => {
-              const meta = APPOINTMENT_STATUS_META[status];
-              return (
+          {LEGEND_STATUSES.map((status) => {
+            const meta = APPOINTMENT_STATUS_META[status];
+            const hidden = hiddenStatuses.has(status);
+            return (
+              <button
+                key={status}
+                type="button"
+                aria-pressed={!hidden}
+                title={hidden ? `Mostrar ${meta.label}` : `Ocultar ${meta.label}`}
+                className="cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-ring"
+                onClick={() => toggleStatus(status)}
+              >
                 <Badge
-                  key={status}
                   variant="outline"
                   className={cn(
                     meta.bg,
                     meta.text,
                     meta.border,
                     status === 'REQUESTED' && 'border-dashed',
+                    hidden && 'opacity-40 line-through',
                   )}
                 >
-                  {meta.label}
+                  <span aria-hidden className={cn('size-1.5 rounded-full', meta.dot)} />
+                  {meta.label} · {statusCount(status)}
                 </Badge>
-              );
-            },
-          )}
+              </button>
+            );
+          })}
         </CardFooter>
       </Card>
 
       {waitlistOpen ? (
         <div className="flex max-h-[min(38%,22rem)] min-h-0 shrink-0 flex-col overflow-hidden">
-          <WaitlistPanel professionalId={professionalId || undefined} />
+          <WaitlistPanel professionalId={activeProfessionalId || undefined} />
         </div>
       ) : null}
 
@@ -389,7 +497,7 @@ export function AgendaIndex() {
           open
           professionalId={
             createSlot.professionalId ??
-            (effectiveResourceMode === 'professional' ? professionalId : professionals[0]?.id)
+            (activeProfessionalId ?? professionals[0]?.id)
           }
           chairId={effectiveResourceMode === 'chair' ? chairId : undefined}
           professionals={professionals}
@@ -422,7 +530,7 @@ export function AgendaIndex() {
       {blockOpen ? (
         <ScheduleBlockFormDialog
           open
-          professionalId={effectiveResourceMode === 'professional' ? professionalId : null}
+          professionalId={activeProfessionalId ?? null}
           chairId={effectiveResourceMode === 'chair' ? chairId : null}
           startsAt={blockDefaults.startsAt}
           endsAt={blockDefaults.endsAt}

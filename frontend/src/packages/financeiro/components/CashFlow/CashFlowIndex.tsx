@@ -12,7 +12,6 @@ import { financeiroErrorMessage } from '@/packages/financeiro/helpers/Financeiro
 import { formatCents } from '@/packages/financeiro/helpers/FormatCents';
 import { useCashFlowGetHook } from '@/packages/financeiro/hooks/Report/useCashFlowGetHook';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
-import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import {
   Table,
@@ -22,6 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToRange } from '@/shared/helpers/DateIso';
 
 function ymd(date: Date): string {
   const year = date.getFullYear();
@@ -63,20 +64,17 @@ function CashFlowIndexBody() {
       <h1 className="text-xl font-semibold">Fluxo de caixa</h1>
 
       <div className="flex flex-wrap gap-3">
-        <Input
-          type="date"
-          aria-label="De"
-          className="w-40"
-          value={from}
-          onChange={(event) => setFrom(event.target.value)}
-        />
-        <Input
-          type="date"
-          aria-label="Até"
-          className="w-40"
-          value={to}
-          onChange={(event) => setTo(event.target.value)}
-        />
+        <DatePicker
+              mode="range"
+              clearable={false}
+              aria-label="Período"
+              className="w-72"
+              value={isoToRange(from, to)}
+              onChange={(range) => {
+                setFrom(dateToIso(range?.from));
+                setTo(dateToIso(range?.to));
+              }}
+            />
         <NativeSelect
           aria-label="Regime"
           className="w-64"

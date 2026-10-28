@@ -3,11 +3,13 @@ import { AppError } from '../../../shared/middlewares/error_handler.middleware.j
 import {
   treatmentItemBatchExecuteSchema,
   treatmentItemCancelSchema,
+  treatmentItemCreateSchema,
   treatmentItemExecuteSchema,
   treatmentItemIdParamSchema,
 } from '../schemas/treatment.schema.js';
 import { ExecuteService } from '../services/treatment_item/treatment_item_execute.service.js';
 import { ExecuteBatchService } from '../services/treatment_item/treatment_item_execute_batch.service.js';
+import { CreateService } from '../services/treatment_item/treatment_item_create.service.js';
 import { CancelService } from '../services/treatment_item/treatment_item_cancel.service.js';
 
 function requireCtx(req: Request) {
@@ -22,7 +24,18 @@ export class TreatmentItemController {
     private readonly executeOne = new ExecuteService(),
     private readonly executeBatch = new ExecuteBatchService(),
     private readonly cancelItem = new CancelService(),
+    private readonly createItem = new CreateService(),
   ) {}
+
+  create = async (req: Request, res: Response): Promise<void> => {
+    const ctx = requireCtx(req);
+    const parsed = treatmentItemCreateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new AppError('VALIDATION_ERROR', 'Dados inválidos.', 400, parsed.error);
+    }
+    const result = await this.createItem.execute(ctx, parsed.data);
+    res.status(201).json({ data: result });
+  };
 
   execute = async (req: Request, res: Response): Promise<void> => {
     const ctx = requireCtx(req);

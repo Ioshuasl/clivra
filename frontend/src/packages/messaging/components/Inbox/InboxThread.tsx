@@ -6,13 +6,11 @@ import {
   CONVERSATION_STATUS_LABELS,
   type ConversationStatus,
 } from '@/packages/messaging/enum/Conversation/ConversationStatusEnum';
-import { messagingErrorMessage } from '@/packages/messaging/helpers/MessagingErrorMessage';
 import { useMessageSendHook } from '@/packages/messaging/hooks/Message/useMessageSendHook';
 import type { ConversationSummary } from '@/packages/messaging/types/Conversation/ConversationTypes';
 import type { InboxMessage } from '@/packages/messaging/types/Message/MessageTypes';
 import { Can } from '@/shared/auth/Can';
 import { cn } from '@/shared/helpers/utils';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { ScrollArea } from '@/shared/ui/scroll-area';
@@ -202,11 +200,6 @@ export function InboxThread({
       </ScrollArea>
 
       <div className="shrink-0 border-t border-border bg-card p-3">
-        {send.error ? (
-          <Alert variant="destructive" className="mb-2" role="alert">
-            <AlertDescription>{messagingErrorMessage(send.error)}</AlertDescription>
-          </Alert>
-        ) : null}
         <Can
           permission="messaging.write"
           fallback={

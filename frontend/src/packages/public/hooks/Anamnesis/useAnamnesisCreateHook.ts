@@ -5,6 +5,8 @@ import { AnamnesisCreateService } from '@/packages/public/services/Anamnesis/Ana
 
 export function useAnamnesisCreateHook() {
   return useMutation({
+    // A própria tela mostra o erro junto ao formulário.
+    meta: { silent: true },
     mutationFn: AnamnesisCreateService,
   });
 }

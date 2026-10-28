@@ -5,7 +5,6 @@ import {
   PAYMENT_METHOD_LABELS,
   PAYMENT_METHODS,
 } from '@/packages/financeiro/enum/Payment/PaymentMethodEnum';
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import { formatCents } from '@/packages/financeiro/helpers/FormatCents';
 import { usePayablePayFormHook } from '@/packages/financeiro/hooks/Payable/usePayablePayFormHook';
 import { usePayablePayHook } from '@/packages/financeiro/hooks/Payable/usePayablePayHook';
@@ -15,7 +14,6 @@ import {
 } from '@/packages/financeiro/schemas/Payable/PayablePaySchema';
 import type { PayablePayFormDialogProps } from '@/packages/financeiro/types/Payable/PayableFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -74,11 +72,6 @@ export function PayablePayFormDialog({ payable, onClose }: PayablePayFormDialogP
                 </NativeSelect>
               </Field>
             </FieldGroup>
-            {pay.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{financeiroErrorMessage(pay.error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

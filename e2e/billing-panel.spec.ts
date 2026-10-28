@@ -28,7 +28,8 @@ ownerTest.describe('Painel financeiro — pagar (owner)', () => {
       await page.locator('#payable-amount').fill('1200,00');
       const due = new Date();
       due.setDate(due.getDate() + 3);
-      await page.locator('#payable-due').fill(due.toISOString().slice(0, 10));
+      await page.locator('#payable-due').fill(due.toLocaleDateString('pt-BR'));
+      await page.locator('#payable-due').blur();
       await page.getByRole('button', { name: 'Salvar' }).click();
 
       // A conta nova entra em "Movimentações" como saída em aberto.

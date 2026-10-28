@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import { centsToReaisInput } from '@/packages/financeiro/helpers/FormatCents';
 import { useFinancialCategoryListHook } from '@/packages/financeiro/hooks/FinancialCategory/useFinancialCategoryListHook';
 import { usePayableCreateHook } from '@/packages/financeiro/hooks/Payable/usePayableCreateHook';
@@ -14,7 +13,6 @@ import {
 } from '@/packages/financeiro/schemas/Payable/PayableSchema';
 import type { PayableFormDialogProps } from '@/packages/financeiro/types/Payable/PayableFormDialogTypes';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import {
@@ -27,6 +25,8 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 export function PayableFormDialog({ unitId, payable, onClose }: PayableFormDialogProps) {
   const categories = useFinancialCategoryListHook('EXPENSE');
@@ -58,7 +58,6 @@ export function PayableFormDialog({ unitId, payable, onClose }: PayableFormDialo
   };
 
   const pending = create.isPending || update.isPending;
-  const error = create.error ?? update.error;
 
   return (
     <Dialog open onOpenChange={(next) => !next && onClose()}>
@@ -105,7 +104,15 @@ export function PayableFormDialog({ unitId, payable, onClose }: PayableFormDialo
                 </Field>
                 <Field data-invalid={Boolean(form.formState.errors.dueDate)}>
                   <FieldLabel htmlFor="payable-due">Vencimento</FieldLabel>
-                  <Input id="payable-due" type="date" {...form.register('dueDate')} />
+                  <DatePicker
+                    id="payable-due"
+                    clearable={false}
+                    value={isoToDate(form.watch('dueDate'))}
+                    onChange={(next) =>
+                      form.setValue('dueDate', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                    }
+                    aria-invalid={Boolean(form.formState.errors.dueDate)}
+                  />
                   <FieldError>{form.formState.errors.dueDate?.message}</FieldError>
                 </Field>
               </div>
@@ -126,15 +133,18 @@ export function PayableFormDialog({ unitId, payable, onClose }: PayableFormDialo
               {form.watch('monthly') ? (
                 <Field>
                   <FieldLabel htmlFor="payable-until">Até (opcional)</FieldLabel>
-                  <Input id="payable-until" type="date" {...form.register('until')} />
+                  <DatePicker
+                    id="payable-until"
+                    clearable={true}
+                    value={isoToDate(form.watch('until'))}
+                    onChange={(next) =>
+                      form.setValue('until', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                    }
+                    aria-invalid={Boolean(form.formState.errors.until)}
+                  />
                 </Field>
               ) : null}
             </FieldGroup>
-            {error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{financeiroErrorMessage(error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

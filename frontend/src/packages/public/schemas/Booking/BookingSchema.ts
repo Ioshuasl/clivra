@@ -7,7 +7,7 @@ export const BookingIdentitySchema = z.object({
     .min(10, 'Informe um telefone válido')
     .max(20)
     .refine((value) => value.replace(/\D/g, '').length >= 10, 'Informe um telefone válido'),
-  email: z.string().email('E-mail inválido'),
+  email: z.string().min(1, 'Informe o e-mail').email('Esse e-mail parece incompleto. Ex.: nome@clinica.com'),
   patientNote: z.string().max(500, 'Máximo 500 caracteres').optional(),
   consentDataProcessing: z
     .boolean()

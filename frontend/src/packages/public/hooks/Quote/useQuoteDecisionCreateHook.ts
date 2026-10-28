@@ -5,6 +5,8 @@ import { QuoteDecisionCreateService } from '@/packages/public/services/Quote/Quo
 
 export function useQuoteDecisionCreateHook() {
   return useMutation({
+    // A própria tela mostra o erro junto ao formulário.
+    meta: { silent: true },
     mutationFn: QuoteDecisionCreateService,
   });
 }

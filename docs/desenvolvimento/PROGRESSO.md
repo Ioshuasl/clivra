@@ -1075,7 +1075,7 @@ Append-only. Entradas mais recentes no topo.
 - `eslint.config.mjs` (flat) com `typescript-eslint` recommendedTypeChecked
 - `pnpm lint` real em backend/frontend/contracts (sem stub)
 - Push `main`; CI Quality falhou na 1ª tentativa (Prisma client); corrigido com `prisma generate` no typecheck/CI
-- **CI verde:** [run 31531294140](https://github.com/Ioshuasl/saas-multi-tenant-prontuario-odontologico/actions/runs/31531294140) — Quality + Integration success
+- **CI verde:** [run 31531294140](https://github.com/Ioshuasl/clivra/actions/runs/31531294140) — Quality + Integration success
 
 ### Validação
 

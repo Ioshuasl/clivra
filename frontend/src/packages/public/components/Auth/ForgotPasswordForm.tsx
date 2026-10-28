@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { AuthCard } from '@/packages/public/components/Auth/AuthCard';
-import { authErrorMessage } from '@/packages/public/helpers/AuthErrorMessage';
 import { useAuthForgotPasswordFormHook } from '@/packages/public/hooks/Auth/useAuthForgotPasswordFormHook';
 import { useAuthForgotPasswordHook } from '@/packages/public/hooks/Auth/useAuthForgotPasswordHook';
 import type { AuthForgotPasswordFormValues } from '@/packages/public/schemas/Auth/AuthSchema';
@@ -54,11 +53,6 @@ export function ForgotPasswordForm() {
             </Field>
           </FieldGroup>
 
-          {forgot.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{authErrorMessage(forgot.error)}</AlertDescription>
-            </Alert>
-          ) : null}
 
           <Button type="submit" disabled={forgot.isPending}>
             {forgot.isPending ? 'Enviando…' : 'Enviar link'}

@@ -7,7 +7,7 @@ import {
   type ToothCondition,
 } from '@/packages/clinico/enum/Odontogram/ToothConditionEnum';
 import { TOOTH_FACES, TOOTH_FACE_LABELS, type ToothFace } from '@/packages/clinico/enum/Odontogram/ToothFaceEnum';
-import { clinicoErrorMessage } from '@/packages/clinico/helpers/ClinicoErrorMessage';
+import { toothName } from '@/packages/clinico/helpers/ToothName';
 import { useOdontogramToothFormHook } from '@/packages/clinico/hooks/Odontogram/useOdontogramToothFormHook';
 import { useOdontogramUpdateHook } from '@/packages/clinico/hooks/Odontogram/useOdontogramUpdateHook';
 import type { OdontogramToothFormValues } from '@/packages/clinico/schemas/Odontogram/OdontogramSchema';
@@ -15,7 +15,6 @@ import type { OdontogramToothFormDialogProps } from '@/packages/clinico/types/Od
 import { Can } from '@/shared/auth/Can';
 import { ApiClientError } from '@/shared/api/api-client';
 import { MotionDialogBody } from '@/shared/motion/MotionDialogBody';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -108,6 +107,9 @@ export function OdontogramToothFormDialog({
               Dente {toothCode}
               {initialFace ? ` · ${TOOTH_FACE_LABELS[initialFace]}` : ''}
             </DialogTitle>
+            {toothName(toothCode) ? (
+              <p className="text-sm text-muted-foreground">{toothName(toothCode)}</p>
+            ) : null}
           </DialogHeader>
           <form
             className="grid gap-4"
@@ -170,8 +172,13 @@ export function OdontogramToothFormDialog({
                 <Textarea id="tooth-notes" rows={2} {...form.register('notes')} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="tooth-justification">Justificativa (conflito)</FieldLabel>
-                <Textarea id="tooth-justification" rows={2} {...form.register('justification')} />
+                <FieldLabel htmlFor="tooth-justification">Motivo da alteração (se mudar algo já registrado)</FieldLabel>
+                <Textarea
+                  id="tooth-justification"
+                  rows={2}
+                  placeholder="Ex.: dente restaurado hoje"
+                  {...form.register('justification')}
+                />
               </Field>
             </FieldGroup>
 
@@ -192,11 +199,6 @@ export function OdontogramToothFormDialog({
               <p className="text-xs text-muted-foreground">Sem histórico neste dente.</p>
             )}
 
-            {update.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{clinicoErrorMessage(update.error)}</AlertDescription>
-              </Alert>
-            ) : null}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

@@ -5,6 +5,8 @@ import { BookingVerifyService } from '@/packages/public/services/Booking/Booking
 
 export function useBookingVerifyHook() {
   return useMutation({
+    // A própria tela mostra o erro junto ao formulário.
+    meta: { silent: true },
     mutationFn: BookingVerifyService,
   });
 }

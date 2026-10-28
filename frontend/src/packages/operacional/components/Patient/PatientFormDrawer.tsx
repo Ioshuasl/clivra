@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PatientDadosFields } from '@/packages/operacional/components/Patient/PatientDadosFields';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { usePatientCheckDuplicateHook } from '@/packages/operacional/hooks/Patient/usePatientCheckDuplicateHook';
 import { usePatientCreateHook } from '@/packages/operacional/hooks/Patient/usePatientCreateHook';
 import { usePatientCreateFormHook } from '@/packages/operacional/hooks/Patient/usePatientFormHook';
@@ -154,11 +153,6 @@ export function PatientFormDrawer({ open, onClose, onCreated }: PatientFormDrawe
               </Alert>
             ) : null}
 
-            {create.isError && !cpfBlock ? (
-              <Alert variant="destructive">
-                <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
           </div>
 
           <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">

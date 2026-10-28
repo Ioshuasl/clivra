@@ -53,7 +53,7 @@ test.describe('Patients (E3)', () => {
     await page.context().setOffline(true);
     try {
       await page.getByRole('button', { name: 'Criar paciente' }).click();
-      await expect(page.getByText(/Sem conexão com o servidor/)).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-slot="toast-description"]').first()).toContainText('Sem conexão com o servidor', { timeout: 10_000 });
       await expect(page.getByRole('button', { name: 'Criar paciente' })).toBeEnabled();
     } finally {
       await page.context().setOffline(false);

@@ -1,4 +1,5 @@
 import { ApiClientError } from '@/shared/api/api-client';
+import { friendlyApiError } from '@/shared/helpers/FriendlyApiError';
 
 export function publicErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
@@ -9,10 +10,8 @@ export function publicErrorMessage(error: unknown): string {
     if (error.code === 'RATE_LIMITED') {
       return error.message || 'Muitas tentativas. Tente novamente em instantes.';
     }
-    return error.message;
   }
-  if (error instanceof Error) return error.message;
-  return 'Não foi possível concluir a operação.';
+  return friendlyApiError(error);
 }
 
 export function suggestedSlotsFromError(error: unknown): string[] {

@@ -8,7 +8,6 @@ import {
   centsToReaisInput,
   formatCents,
 } from '@/packages/operacional/helpers/FormatCents';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useAgendaProfessionalListHook } from '@/packages/operacional/hooks/Appointment/useAgendaProfessionalListHook';
 import { usePatientListHook } from '@/packages/operacional/hooks/Patient/usePatientListHook';
 import { useQuoteCreateHook } from '@/packages/operacional/hooks/Quote/useQuoteCreateHook';
@@ -34,7 +33,6 @@ import type { QuoteFormDialogProps } from '@/packages/operacional/types/Quote/Qu
 import type { QuoteProcedureOption } from '@/packages/operacional/types/Quote/QuoteTypes';
 import { useAuth } from '@/shared/auth/AuthProvider';
 import { useSheetOpenState } from '@/shared/motion/useSheetOpenState';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import {
   Combobox,
@@ -56,6 +54,8 @@ import {
   SheetTitle,
 } from '@/shared/ui/sheet';
 import { Textarea } from '@/shared/ui/textarea';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 const emptyItem: QuoteCreateFormValues['items'][number] = {
   procedureId: '',
@@ -233,7 +233,15 @@ function QuoteCreateForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="quote-valid-until">Validade</FieldLabel>
-              <Input id="quote-valid-until" type="date" {...form.register('validUntil')} />
+              <DatePicker
+                id="quote-valid-until"
+                clearable={true}
+                value={isoToDate(form.watch('validUntil'))}
+                onChange={(next) =>
+                  form.setValue('validUntil', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                }
+                aria-invalid={Boolean(form.formState.errors.validUntil)}
+              />
             </Field>
             <Field data-invalid={Boolean(form.formState.errors.discountReais)}>
               <FieldLabel htmlFor="quote-discount">Desconto (R$)</FieldLabel>
@@ -390,11 +398,6 @@ function QuoteCreateForm({
           ) : null}
         </div>
 
-        {create.isError ? (
-          <Alert variant="destructive" className="mt-4" role="alert">
-            <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
-          </Alert>
-        ) : null}
       </div>
 
       <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">
@@ -455,7 +458,6 @@ function QuoteEditForm({ quoteId, onClose }: { quoteId: string; onClose: () => v
   const addProcedureId = itemForm.watch('procedureId');
   const addProcedure = procedureById.get(addProcedureId);
   const pending = update.isPending;
-  const error = update.error ?? addItem.error ?? removeItem.error;
 
   return (
     <form
@@ -486,7 +488,15 @@ function QuoteEditForm({ quoteId, onClose }: { quoteId: string; onClose: () => v
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel htmlFor="quote-edit-valid">Validade</FieldLabel>
-                  <Input id="quote-edit-valid" type="date" {...form.register('validUntil')} />
+                  <DatePicker
+                    id="quote-edit-valid"
+                    clearable={true}
+                    value={isoToDate(form.watch('validUntil'))}
+                    onChange={(next) =>
+                      form.setValue('validUntil', dateToIso(next), { shouldValidate: true, shouldDirty: true })
+                    }
+                    aria-invalid={Boolean(form.formState.errors.validUntil)}
+                  />
                 </Field>
                 <Field data-invalid={Boolean(form.formState.errors.discountReais)}>
                   <FieldLabel htmlFor="quote-edit-discount">Desconto (R$)</FieldLabel>
@@ -639,11 +649,6 @@ function QuoteEditForm({ quoteId, onClose }: { quoteId: string; onClose: () => v
               </Button>
             </div>
 
-            {error ? (
-              <Alert variant="destructive" className="mt-4" role="alert">
-                <AlertDescription>{operacionalErrorMessage(error)}</AlertDescription>
-              </Alert>
-            ) : null}
           </>
         )}
       </div>

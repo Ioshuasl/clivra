@@ -1,4 +1,5 @@
 import { ApiClientError } from '@/shared/api/api-client';
+import { friendlyApiError } from '@/shared/helpers/FriendlyApiError';
 
 export function clinicoErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
@@ -9,8 +10,6 @@ export function clinicoErrorMessage(error: unknown): string {
     if (error.code === 'TOOTH_STATE_CONFLICT') {
       return 'Conflito no odontograma. Informe uma justificativa (mín. 10 caracteres).';
     }
-    return error.message;
   }
-  if (error instanceof Error) return error.message;
-  return 'Não foi possível concluir a operação.';
+  return friendlyApiError(error);
 }

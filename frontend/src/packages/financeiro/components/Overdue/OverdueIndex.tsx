@@ -59,11 +59,6 @@ export function OverdueIndex() {
         description="Parcelas vencidas por faixa de atraso — cobre direto pelo WhatsApp."
       />
 
-      {charge.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{financeiroErrorMessage(charge.error)}</AlertDescription>
-        </Alert>
-      ) : null}
       {lastSent ? (
         <Alert>
           <AlertDescription>Cobrança enviada via {lastSent}.</AlertDescription>

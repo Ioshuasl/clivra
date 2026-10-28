@@ -32,13 +32,14 @@ test.describe('Agenda (E4a)', () => {
   test('visão dia/semana por profissional (cadeira desligada por padrão)', async ({ page }) => {
     await page.goto('/app/agenda');
     await expect(page.getByRole('heading', { name: 'Agenda' })).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole('button', { name: 'Dia' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Semana' })).toBeVisible();
+    const viewSelect = page.getByLabel('Tipo de calendário');
+    await expect(viewSelect).toBeVisible();
+    await expect(viewSelect).toHaveValue('week');
     await expect(page.getByLabel('Profissional')).toBeVisible();
     // Sem "agenda por cadeira" ligada na clínica, o alternador Profissional/Cadeira não aparece.
     await expect(page.getByRole('button', { name: 'Cadeira' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Dia' }).click();
+    await page.getByLabel('Tipo de calendário').selectOption('day');
     await expect(page.getByRole('gridcell').first()).toBeVisible();
   });
 
@@ -62,7 +63,7 @@ test.describe('Agenda (E4a)', () => {
 
     // Dia + manhã no expediente (grade 7–20; clínica seed 8–18). Semana+fração alta
     // abria slot perto/após 18h → "Horário fora do expediente".
-    await page.getByRole('button', { name: 'Dia' }).click();
+    await page.getByLabel('Tipo de calendário').selectOption('day');
     // Depois dos feriados fictícios do seed (que ficam nas próximas 3 semanas).
     const daysAhead = 30 + (Date.now() % 21);
     for (let i = 0; i < daysAhead; i += 1) {
@@ -156,10 +157,13 @@ test.describe('Agenda (E4a)', () => {
     await page.getByPlaceholder('Buscar paciente…').fill('Maria');
     await page.getByRole('option', { name: new RegExp(SEED_PATIENT) }).first().click();
 
-    await page.locator('#appt-date').fill(ymd);
+    const br = ymd.split('-').reverse().join('/');
+    await page.locator('#appt-date').fill(br);
+    await page.locator('#appt-date').blur();
     await page.locator('#appt-time').fill(time);
+    await page.locator('#appt-time').blur();
     await page.locator('#appt-duration').selectOption('45');
-    await expect(page.locator('#appt-date')).toHaveValue(ymd);
+    await expect(page.locator('#appt-date')).toHaveValue(br);
     await expect(page.locator('#appt-time')).toHaveValue(time);
     await expect(page.locator('#appt-duration')).toHaveValue('45');
 

@@ -3,13 +3,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthCard } from '@/packages/public/components/Auth/AuthCard';
-import { authErrorMessage } from '@/packages/public/helpers/AuthErrorMessage';
 import { useAuthSignupFormHook } from '@/packages/public/hooks/Auth/useAuthSignupFormHook';
 import { useAuthSignupHook } from '@/packages/public/hooks/Auth/useAuthSignupHook';
 import type { AuthSignupFormValues } from '@/packages/public/schemas/Auth/AuthSchema';
 import { CLIVRA } from '@/shared/brand/ClivraBrand';
 import { markOnboardingSuggest } from '@/shared/helpers/onboarding-suggest-flag';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
@@ -65,11 +63,6 @@ export function SignupForm() {
           </Field>
         </FieldGroup>
 
-        {signup.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{authErrorMessage(signup.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         <Button type="submit" disabled={signup.isPending}>
           {signup.isPending ? 'Criando…' : 'Criar conta'}

@@ -65,10 +65,9 @@ export async function signupClinic(
   return { email, clinicName };
 }
 
-/** Expande o grupo "Configurações" da barra lateral (itens ficam recolhidos por padrão). */
+/** Abre a tela de Configurações (lateral com as seções) a partir de qualquer página do app. */
 export async function openSettingsNav(page: Page): Promise<void> {
-  const group = page.getByRole('button', { name: 'Configurações' }).first();
-  if ((await group.getAttribute('aria-expanded').catch(() => null)) !== 'true') {
-    await group.click();
-  }
+  if (page.url().includes('/app/configuracoes')) return;
+  await page.getByRole('link', { name: 'Configurações', exact: true }).first().click();
+  await page.waitForURL(/\/app\/configuracoes\//);
 }

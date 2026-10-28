@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { clinicoErrorMessage } from '@/packages/clinico/helpers/ClinicoErrorMessage';
 import { useTreatmentExecuteFormHook } from '@/packages/clinico/hooks/TreatmentPlan/useTreatmentExecuteFormHook';
 import { useTreatmentItemExecuteBatchHook } from '@/packages/clinico/hooks/TreatmentPlan/useTreatmentItemExecuteBatchHook';
 import { useTreatmentItemExecuteHook } from '@/packages/clinico/hooks/TreatmentPlan/useTreatmentItemExecuteHook';
@@ -48,7 +47,6 @@ export function TreatmentExecuteFormDialog({
   }, [items, form]);
 
   const pending = executeOne.isPending || executeMany.isPending;
-  const error = executeOne.error ?? executeMany.error;
 
   const onSave = async (values: TreatmentExecuteFormValues) => {
     if (items.length === 1 && items[0]) {
@@ -91,11 +89,6 @@ export function TreatmentExecuteFormDialog({
               <Textarea id="treatment-execute-note" rows={6} {...form.register('note')} />
               <FieldError>{form.formState.errors.note?.message}</FieldError>
             </Field>
-            {error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{clinicoErrorMessage(error)}</AlertDescription>
-              </Alert>
-            ) : null}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

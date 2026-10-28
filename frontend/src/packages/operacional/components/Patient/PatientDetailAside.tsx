@@ -23,7 +23,8 @@ export type PatientDetailTab =
   | 'timeline'
   | 'orcamentos'
   | 'financeiro'
-  | 'prontuario';
+  | 'prontuario'
+  | 'documentos';
 
 type PatientDetailAsideProps = {
   tab: PatientDetailTab;

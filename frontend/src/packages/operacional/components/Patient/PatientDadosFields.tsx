@@ -17,6 +17,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import { Textarea } from '@/shared/ui/textarea';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { dateToIso, isoToDate } from '@/shared/helpers/DateIso';
 
 type PatientDadosFieldsProps<T extends PatientCreateFormValues> = {
   form: UseFormReturn<T>;
@@ -130,10 +132,15 @@ export function PatientDadosFields<T extends PatientCreateFormValues>({
         </Field>
         <Field>
           <FieldLabel htmlFor={`${idPrefix}-birth`}>Nascimento</FieldLabel>
-          <Input
+          <DatePicker
             id={`${idPrefix}-birth`}
-            type="date"
-            {...form.register('birthDate' as Path<T>)}
+            clearable={true}
+            maxDate={new Date()}
+            value={isoToDate(String(form.watch('birthDate' as Path<T>) ?? ''))}
+            onChange={(next) =>
+              form.setValue('birthDate' as Path<T>, dateToIso(next) as never, { shouldValidate: true, shouldDirty: true })
+            }
+            aria-invalid={Boolean(form.formState.errors['birthDate' as never])}
           />
         </Field>
       </div>

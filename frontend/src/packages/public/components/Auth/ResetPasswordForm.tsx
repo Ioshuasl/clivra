@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthCard } from '@/packages/public/components/Auth/AuthCard';
-import { authErrorMessage } from '@/packages/public/helpers/AuthErrorMessage';
 import { useAuthResetPasswordFormHook } from '@/packages/public/hooks/Auth/useAuthResetPasswordFormHook';
 import { useAuthResetPasswordHook } from '@/packages/public/hooks/Auth/useAuthResetPasswordHook';
 import type { AuthResetPasswordFormValues } from '@/packages/public/schemas/Auth/AuthSchema';
@@ -62,11 +61,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           </Field>
         </FieldGroup>
 
-        {reset.isError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{authErrorMessage(reset.error)}</AlertDescription>
-          </Alert>
-        ) : null}
 
         <Button type="submit" disabled={reset.isPending}>
           {reset.isPending ? 'Salvando…' : 'Salvar senha'}

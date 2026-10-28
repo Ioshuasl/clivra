@@ -55,13 +55,17 @@ ownerTest.describe('Anamnese (ficha + público)', () => {
     await ownerExpect(page.getByText('Dor no dente 26').first()).toBeVisible();
   });
 
-  ownerTest('admin lista Anamnese Geral v1', async ({ page }) => {
+  ownerTest('admin vê o formulário em uso e abre o editor', async ({ page }) => {
     await page.goto('/app/configuracoes/anamnese');
-    await ownerExpect(page.getByRole('heading', { name: 'Anamnese' })).toBeVisible();
-    await ownerExpect(page.getByText('Anamnese Geral')).toBeVisible();
-    await ownerExpect(page.getByText('v1')).toBeVisible();
-    await page.getByRole('button', { name: 'Nova versão' }).click();
-    await ownerExpect(page.getByRole('heading', { name: 'Nova versão da anamnese' })).toBeVisible();
+    await ownerExpect(page.getByRole('heading', { name: 'Anamnese', level: 1 })).toBeVisible();
+    // Versões acumulam entre execuções — basta a ficha e as perguntas do seed existirem.
+    await ownerExpect(page.getByText('Anamnese Geral').first()).toBeVisible();
+    await ownerExpect(page.getByText('Queixa principal').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Editar formulário' }).click();
+    await ownerExpect(
+      page.getByRole('heading', { name: 'Editar formulário de anamnese' }),
+    ).toBeVisible();
+    await ownerExpect(page.getByRole('button', { name: 'Adicionar pergunta' })).toBeVisible();
     await page.getByRole('button', { name: 'Cancelar' }).click();
   });
 });

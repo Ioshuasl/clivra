@@ -7,7 +7,6 @@ import {
   PAYMENT_METHODS,
   PAYMENT_METHOD_LABELS,
 } from '@/packages/financeiro/enum/Payment/PaymentMethodEnum';
-import { financeiroErrorMessage } from '@/packages/financeiro/helpers/FinanceiroErrorMessage';
 import { centsToReaisInput, formatCents } from '@/packages/financeiro/helpers/FormatCents';
 import { usePatientCreditGetHook } from '@/packages/financeiro/hooks/Credit/usePatientCreditGetHook';
 import { usePaymentCreateHook } from '@/packages/financeiro/hooks/Payment/usePaymentCreateHook';
@@ -121,13 +120,6 @@ export function PaymentFormDialog({ installment, patientName, onClose }: Payment
                   </Button>
                 </Field>
               ) : null}
-              {(receipt.isError || send.isError) && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    {financeiroErrorMessage(receipt.error ?? send.error)}
-                  </AlertDescription>
-                </Alert>
-              )}
               <DialogFooter className="flex-wrap gap-2">
                 <Button
                   type="button"
@@ -240,11 +232,6 @@ export function PaymentFormDialog({ installment, patientName, onClose }: Payment
                 </Field>
               </FieldGroup>
 
-              {create.isError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{financeiroErrorMessage(create.error)}</AlertDescription>
-                </Alert>
-              ) : null}
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>

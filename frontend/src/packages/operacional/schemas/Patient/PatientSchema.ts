@@ -20,7 +20,7 @@ export const PatientCreateSchema = z.object({
   sex: z.string().max(40).optional().nullable(),
   phonePrimary: z.string().min(8, 'Telefone obrigatório').max(30),
   phoneSecondary: z.string().max(30).optional().nullable(),
-  email: z.union([z.string().email('E-mail inválido'), z.literal('')]).optional().nullable(),
+  email: z.union([z.string().email('Esse e-mail parece incompleto. Ex.: nome@clinica.com'), z.literal('')]).optional().nullable(),
   notes: z.string().max(4000).optional().nullable(),
 });
 
@@ -39,7 +39,7 @@ export const PatientUpdateSchema = z.object({
   sex: z.string().max(40).optional().nullable(),
   phonePrimary: z.string().min(8, 'Telefone obrigatório').max(30),
   phoneSecondary: z.string().max(30).optional().nullable(),
-  email: z.union([z.string().email('E-mail inválido'), z.literal('')]).optional().nullable(),
+  email: z.union([z.string().email('Esse e-mail parece incompleto. Ex.: nome@clinica.com'), z.literal('')]).optional().nullable(),
   notes: z.string().max(4000).optional().nullable(),
   active: z.boolean(),
 });
@@ -51,7 +51,7 @@ export const GuardianCreateSchema = z.object({
   cpf: z.string().max(14).optional().nullable(),
   relationship: z.string().max(80).optional().nullable(),
   phone: z.string().min(8, 'Telefone obrigatório').max(30).optional().nullable(),
-  email: z.union([z.string().email('E-mail inválido'), z.literal('')]).optional().nullable(),
+  email: z.union([z.string().email('Esse e-mail parece incompleto. Ex.: nome@clinica.com'), z.literal('')]).optional().nullable(),
 });
 
 export type GuardianCreateFormValues = z.infer<typeof GuardianCreateSchema>;

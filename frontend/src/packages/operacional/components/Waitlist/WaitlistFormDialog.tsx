@@ -3,7 +3,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { WAITLIST_WEEKDAYS } from '@/packages/operacional/enum/Waitlist/WaitlistStatusEnum';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { useAgendaProfessionalListHook } from '@/packages/operacional/hooks/Appointment/useAgendaProfessionalListHook';
 import { usePatientListHook } from '@/packages/operacional/hooks/Patient/usePatientListHook';
 import { useProcedureListHook } from '@/packages/operacional/hooks/Procedure/useProcedureListHook';
@@ -12,7 +11,6 @@ import { useWaitlistCreateFormHook } from '@/packages/operacional/hooks/Waitlist
 import type { WaitlistCreateFormValues } from '@/packages/operacional/schemas/Waitlist/WaitlistSchema';
 import type { WaitlistFormDialogProps } from '@/packages/operacional/types/Waitlist/WaitlistFormDialogTypes';
 import { useSheetOpenState } from '@/shared/motion/useSheetOpenState';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import {
@@ -24,7 +22,7 @@ import {
   ComboboxList,
 } from '@/shared/ui/combobox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
+import { TimePicker } from '@/shared/ui/time-picker';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import {
   Sheet,
@@ -238,23 +236,32 @@ export function WaitlistFormDialog({ open, professionalId, onClose }: WaitlistFo
                   </Field>
                   <Field data-invalid={Boolean(form.formState.errors.from)}>
                     <FieldLabel htmlFor="waitlist-from">De</FieldLabel>
-                    <Input id="waitlist-from" type="time" {...form.register('from')} />
+                    <TimePicker
+                      id="waitlist-from"
+                      value={form.watch('from') ?? ''}
+                      onChange={(next) =>
+                        form.setValue('from', next, { shouldValidate: true, shouldDirty: true })
+                      }
+                      aria-invalid={Boolean(form.formState.errors.from)}
+                    />
                     <FieldError>{form.formState.errors.from?.message}</FieldError>
                   </Field>
                   <Field data-invalid={Boolean(form.formState.errors.to)}>
                     <FieldLabel htmlFor="waitlist-to">Até</FieldLabel>
-                    <Input id="waitlist-to" type="time" {...form.register('to')} />
+                    <TimePicker
+                      id="waitlist-to"
+                      value={form.watch('to') ?? ''}
+                      onChange={(next) =>
+                        form.setValue('to', next, { shouldValidate: true, shouldDirty: true })
+                      }
+                      aria-invalid={Boolean(form.formState.errors.to)}
+                    />
                     <FieldError>{form.formState.errors.to?.message}</FieldError>
                   </Field>
                 </div>
               ) : null}
             </FieldGroup>
 
-            {create.isError ? (
-              <Alert variant="destructive" className="mt-4">
-                <AlertDescription>{operacionalErrorMessage(create.error)}</AlertDescription>
-              </Alert>
-            ) : null}
           </div>
 
           <SheetFooter className="border-t border-border px-4 py-3 sm:flex-row sm:justify-end">

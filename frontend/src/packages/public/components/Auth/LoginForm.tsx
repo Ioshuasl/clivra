@@ -12,13 +12,11 @@ import {
   UserPlusIcon,
 } from 'lucide-react';
 import { AuthBrandPanel } from '@/packages/public/components/Auth/AuthBrandPanel';
-import { authErrorMessage } from '@/packages/public/helpers/AuthErrorMessage';
 import { useAuthLoginFormHook } from '@/packages/public/hooks/Auth/useAuthLoginFormHook';
 import { useAuthLoginHook } from '@/packages/public/hooks/Auth/useAuthLoginHook';
 import type { AuthLoginFormValues } from '@/packages/public/schemas/Auth/AuthSchema';
 import { ClivraLogo } from '@/shared/brand/ClivraLogo';
 import { cn } from '@/shared/helpers/utils';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
@@ -198,11 +196,6 @@ export function LoginForm() {
               </Link>
             </div>
 
-            {login.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>{authErrorMessage(login.error)}</AlertDescription>
-              </Alert>
-            ) : null}
 
             <Button
               type="submit"

@@ -9,7 +9,6 @@ import {
   type AppointmentStatus,
   type SeriesDeleteScope,
 } from '@/packages/operacional/enum/Appointment/AppointmentStatusEnum';
-import { operacionalErrorMessage } from '@/packages/operacional/helpers/OperacionalErrorMessage';
 import { formatHour, parseInstant } from '@/packages/operacional/helpers/AgendaTime';
 import {
   useAppointmentDeleteHook,
@@ -21,7 +20,6 @@ import { useAuth } from '@/shared/auth/AuthProvider';
 import { hasPermission } from '@/shared/auth/permissions';
 import { useSheetOpenState } from '@/shared/motion/useSheetOpenState';
 import { cn } from '@/shared/helpers/utils';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible';
@@ -99,7 +97,6 @@ export function AppointmentDetailsDialog({
 
   const pending =
     statusMutation.isPending || deleteMutation.isPending || seriesDelete.isPending;
-  const error = statusMutation.error ?? deleteMutation.error ?? seriesDelete.error;
 
   const statusKey = appointment ? asStatus(appointment.status) : 'SCHEDULED';
   const statusMeta = APPOINTMENT_STATUS_META[statusKey];
@@ -479,11 +476,6 @@ export function AppointmentDetailsDialog({
               </Collapsible>
             ) : null}
 
-            {error ? (
-              <Alert variant="destructive" role="alert">
-                <AlertDescription>{operacionalErrorMessage(error)}</AlertDescription>
-              </Alert>
-            ) : null}
           </div>
         </div>
 

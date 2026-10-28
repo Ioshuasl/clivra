@@ -4,22 +4,24 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AttachmentCompare } from '@/packages/clinico/components/Attachment/AttachmentCompare';
 import {
-  ATTACHMENT_CATEGORIES,
   ATTACHMENT_CATEGORY_LABELS,
   type AttachmentCategory,
 } from '@/packages/clinico/enum/Attachment/AttachmentCategoryEnum';
-import { ATTACHMENT_MIME_ALLOWLIST } from '@/packages/clinico/helpers/AttachmentChecksum';
 import { clinicoErrorMessage } from '@/packages/clinico/helpers/ClinicoErrorMessage';
 import { useAttachmentDownloadHook } from '@/packages/clinico/hooks/Attachment/useAttachmentDownloadHook';
 import { useAttachmentListHook } from '@/packages/clinico/hooks/Attachment/useAttachmentListHook';
-import { useAttachmentUploadHook } from '@/packages/clinico/hooks/Attachment/useAttachmentUploadHook';
 import type { AttachmentSummary } from '@/packages/clinico/types/Attachment/AttachmentTypes';
 import { Can } from '@/shared/auth/Can';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
-import { Field, FieldLabel } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
-import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+
+const AttachmentUploadFormDialog = dynamic(
+  () =>
+    import('@/packages/clinico/components/Attachment/AttachmentUploadFormDialog').then(
+      (m) => m.AttachmentUploadFormDialog,
+    ),
+  { ssr: false },
+);
 
 const AttachmentDeleteFormDialog = dynamic(
   () =>
@@ -35,15 +37,10 @@ type AttachmentPanelProps = {
 
 export function AttachmentPanel({ patientId }: AttachmentPanelProps) {
   const listQuery = useAttachmentListHook(patientId);
-  const upload = useAttachmentUploadHook(patientId);
   const download = useAttachmentDownloadHook();
-  const [category, setCategory] = useState<AttachmentCategory>('PHOTO_INTRAORAL');
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
   const [deleting, setDeleting] = useState<AttachmentSummary | null>(null);
-
-  const onUpload = async (file: File | undefined) => {
-    if (!file) return;
-    await upload.mutateAsync({ file, category });
-  };
 
   const onDownload = async (attachmentId: string) => {
     const result = await download.mutateAsync(attachmentId);
@@ -53,51 +50,19 @@ export function AttachmentPanel({ patientId }: AttachmentPanelProps) {
   const items = listQuery.data ?? [];
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 rounded-lg border bg-card p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-sm font-medium">Anexos</h2>
-        <Can permission="clinical_records.read">
-          <div className="flex flex-wrap items-end gap-2">
-            <Field>
-              <FieldLabel htmlFor="attachment-category">Categoria</FieldLabel>
-              <NativeSelect
-                id="attachment-category"
-                value={category}
-                onChange={(event) => setCategory(event.target.value as AttachmentCategory)}
-              >
-                {ATTACHMENT_CATEGORIES.map((item) => (
-                  <NativeSelectOption key={item} value={item}>
-                    {ATTACHMENT_CATEGORY_LABELS[item]}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="attachment-file">Arquivo</FieldLabel>
-              <Input
-                id="attachment-file"
-                type="file"
-                accept={ATTACHMENT_MIME_ALLOWLIST.join(',')}
-                disabled={upload.isPending}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  void onUpload(file);
-                  event.target.value = '';
-                }}
-              />
-            </Field>
-          </div>
+        <h2 className="text-base font-semibold">Anexos (radiografias, fotos e documentos)</h2>
+        <Can permission="clinical_records.write">
+          <Button type="button" onClick={() => setUploadOpen(true)}>
+            Enviar anexo
+          </Button>
         </Can>
       </div>
 
-      {upload.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>{clinicoErrorMessage(upload.error)}</AlertDescription>
-        </Alert>
-      ) : null}
-      {upload.isSuccess ? (
+      {uploaded ? (
         <Alert>
-          <AlertDescription>Anexo enviado.</AlertDescription>
+          <AlertDescription>Anexo enviado com sucesso.</AlertDescription>
         </Alert>
       ) : null}
 
@@ -144,6 +109,14 @@ export function AttachmentPanel({ patientId }: AttachmentPanelProps) {
       )}
 
       <AttachmentCompare attachments={items} />
+
+      {uploadOpen ? (
+        <AttachmentUploadFormDialog
+          patientId={patientId}
+          onClose={() => setUploadOpen(false)}
+          onUploaded={() => setUploaded(true)}
+        />
+      ) : null}
 
       {deleting ? (
         <AttachmentDeleteFormDialog attachment={deleting} onClose={() => setDeleting(null)} />
